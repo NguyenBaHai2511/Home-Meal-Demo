@@ -30,7 +30,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Zap,
-  Truck
+  Truck,
+  Sparkles,
+  PenTool,
+  ListPlus
 } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
 
@@ -48,6 +51,12 @@ export const MealPlannerPage: React.FC = () => {
   const { dishes, cooks, draftOrder, updateDraftOrder, submitDraftOrder, navigateTo } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<DishCategory | 'all'>('all');
+  const [customDishName, setCustomDishName] = useState('');
+  const [customDishCategory, setCustomDishCategory] = useState<DishCategory>('meat');
+  const [customDishNotes, setCustomDishNotes] = useState('');
+  const [customDishPortion, setCustomDishPortion] = useState('');
+  const [bulkInputText, setBulkInputText] = useState('');
+  const [showBulkInput, setShowBulkInput] = useState(false);
   const [newExcludedIngredient, setNewExcludedIngredient] = useState('');
   const [newAllergy, setNewAllergy] = useState('');
 
@@ -99,6 +108,115 @@ export const MealPlannerPage: React.FC = () => {
     } else {
       updateDraftOrder({ items: [...selectedItems, { dish, quantity: 1 }] });
     }
+  };
+
+  const estimateCustomDishCost = (category: DishCategory) => {
+    if (category === 'seafood' || category === 'banquet') return 120000;
+    if (category === 'meat' || category === 'fish') return 85000;
+    if (category === 'soup') return 45000;
+    if (category === 'vegetable') return 30000;
+    if (category === 'dessert') return 35000;
+    return 40000;
+  };
+
+  const addCustomDish = (nameValue: string, category: DishCategory, notes = '', portion = '') => {
+    const name = nameValue.trim().slice(0, 120);
+    if (!name) {
+      alert('Vui lòng nhập tên món ăn bạn muốn.');
+      return;
+    }
+    if (selectedItems.length >= 20) {
+      alert('Mỗi đơn hàng có thể gồm tối đa 20 món.');
+      return;
+    }
+
+    const complexity: Dish['complexity'] = category === 'banquet' || category === 'seafood'
+      ? 'complex'
+      : category === 'soup' || category === 'vegetable' || category === 'vegetarian' || category === 'tofu'
+        ? 'simple'
+        : 'moderate';
+    const dish: Dish = {
+      id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      name,
+      vietnameseName: name,
+      category,
+      description: notes.trim() || 'Món ăn do khách yêu cầu nấu theo khẩu vị riêng',
+      suggestedPortion: portion.trim().slice(0, 100) || `${guestCount} người ăn`,
+      complexity,
+      estimatedCost: estimateCustomDishCost(category),
+      prepTimeMinutes: 30,
+      dietaryTags: ['Nấu theo yêu cầu'],
+      ingredients: [],
+      imageUrl: '',
+    };
+    updateDraftOrder({ items: [...selectedItems, { dish, quantity: 1, specialNotes: notes.trim() || undefined }] });
+  };
+
+  const handleAddCustomDish = (presetName?: string, presetCategory?: DishCategory) => {
+    const name = presetName || customDishName;
+    const category = presetCategory || customDishCategory;
+    if (!name.trim()) {
+      alert('Vui lòng nhập tên món ăn bạn muốn.');
+      return;
+    }
+    addCustomDish(name, category, presetName ? '' : customDishNotes, presetName ? '' : customDishPortion);
+    if (!presetName) {
+      setCustomDishName('');
+      setCustomDishNotes('');
+      setCustomDishPortion('');
+    }
+  };
+
+  const handleAddBulkDishes = () => {
+    const names = bulkInputText
+      .split('\n')
+      .map((line) => line.trim().replace(/^[-*•\d.)\s]+/, '').trim())
+      .filter(Boolean);
+    if (names.length === 0) {
+      alert('Vui lòng nhập ít nhất một tên món ăn.');
+      return;
+    }
+    const remaining = 20 - selectedItems.length;
+    if (remaining <= 0) {
+      alert('Mỗi đơn hàng có thể gồm tối đa 20 món.');
+      return;
+    }
+    const acceptedNames = names.slice(0, remaining);
+    const newItems = acceptedNames.map((name, index) => {
+      const lower = name.toLocaleLowerCase('vi-VN');
+      let category: DishCategory = 'meat';
+      if (/(tôm|mực|cua|ghẹ|hải sản)/.test(lower)) category = 'seafood';
+      else if (/(cá|lươn)/.test(lower)) category = 'fish';
+      else if (/(canh|súp|cháo|lẩu)/.test(lower)) category = 'soup';
+      else if (/(rau|cải|xào|luộc|gỏi)/.test(lower)) category = 'vegetable';
+      else if (/(đậu hũ|đậu phụ|món chay)/.test(lower)) category = 'vegetarian';
+      else if (/(chè|trái cây|tráng miệng|bánh)/.test(lower)) category = 'dessert';
+
+      const complexity: Dish['complexity'] = category === 'seafood'
+        ? 'complex'
+        : category === 'soup' || category === 'vegetable' || category === 'vegetarian'
+          ? 'simple'
+          : 'moderate';
+      const dish: Dish = {
+        id: `bulk_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
+        name: name.slice(0, 120),
+        vietnameseName: name.slice(0, 120),
+        category,
+        description: 'Món ăn yêu cầu theo thực đơn gia đình',
+        suggestedPortion: `${guestCount} người ăn`,
+        complexity,
+        estimatedCost: estimateCustomDishCost(category),
+        prepTimeMinutes: 30,
+        dietaryTags: ['Nấu theo yêu cầu'],
+        ingredients: [],
+        imageUrl: '',
+      };
+      return { dish, quantity: 1 };
+    });
+    updateDraftOrder({ items: [...selectedItems, ...newItems] });
+    if (acceptedNames.length < names.length) alert(`Đã thêm ${acceptedNames.length} món. Đơn hàng tối đa 20 món.`);
+    setBulkInputText('');
+    setShowBulkInput(false);
   };
 
   const handleUpdateQuantity = (dishId: string, delta: number) => {
@@ -384,6 +502,147 @@ export const MealPlannerPage: React.FC = () => {
       {/* STEP 2: CHỌN MÓN ĂN */}
       {currentStep === 2 && (
         <div className="space-y-6">
+          <section className="bg-white rounded-2xl p-6 border border-[#B8E4D3] shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5ECE7] pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <PenTool className="w-4 h-4 text-[#285E56]" />
+                  <h2 className="font-bold text-[#263B35]">Thêm món theo yêu cầu</h2>
+                </div>
+                <p className="mt-1 text-xs text-[#738078]">Nhập món ngoài thực đơn hoặc chọn món gợi ý. Đầu bếp sẽ chuẩn bị theo ghi chú khẩu vị của bạn.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBulkInput((open) => !open)}
+                className="text-xs font-semibold text-[#285E56] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <ListPlus className="w-3.5 h-3.5" />
+                {showBulkInput ? 'Đóng nhập nhanh' : 'Nhập nhanh nhiều món'}
+              </button>
+            </div>
+
+            {showBulkInput && (
+              <div className="p-4 bg-[#E7F5EF] rounded-xl border border-[#B8E4D3] space-y-3">
+                <label className="block text-xs font-bold text-[#285E56]" htmlFor="bulk-dishes">Mỗi dòng một món ăn:</label>
+                <textarea
+                  id="bulk-dishes"
+                  rows={4}
+                  maxLength={2000}
+                  value={bulkInputText}
+                  onChange={(event) => setBulkInputText(event.target.value)}
+                  placeholder={'Thịt kho trứng\nCanh chua cá\nRau muống xào tỏi'}
+                  className="w-full p-3 bg-white border border-[#B8E4D3] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-[11px] text-[#738078]">Tối đa 20 món trong một đơn.</span>
+                  <button type="button" onClick={handleAddBulkDishes} className="px-4 py-2 bg-[#285E56] text-white text-xs font-bold rounded-lg hover:bg-[#1f4b44]">
+                    Thêm danh sách món
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+              <label className="md:col-span-5 block text-xs font-semibold text-[#263B35]">
+                Tên món ăn <span className="text-rose-600">*</span>
+                <input
+                  type="text"
+                  maxLength={120}
+                  value={customDishName}
+                  onChange={(event) => setCustomDishName(event.target.value)}
+                  onKeyDown={(event) => event.key === 'Enter' && (event.preventDefault(), handleAddCustomDish())}
+                  placeholder="Ví dụ: Sườn ram mặn, canh cải nấu tôm..."
+                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+              </label>
+              <label className="md:col-span-3 block text-xs font-semibold text-[#263B35]">
+                Phân loại
+                <select value={customDishCategory} onChange={(event) => setCustomDishCategory(event.target.value as DishCategory)} className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm">
+                  <option value="meat">Món thịt</option>
+                  <option value="fish">Món cá</option>
+                  <option value="seafood">Hải sản</option>
+                  <option value="soup">Canh / súp</option>
+                  <option value="vegetable">Rau củ</option>
+                  <option value="tofu">Đậu hũ / trứng</option>
+                  <option value="vegetarian">Món chay</option>
+                  <option value="dessert">Tráng miệng</option>
+                  <option value="banquet">Món tiệc / cỗ</option>
+                </select>
+              </label>
+              <label className="md:col-span-4 block text-xs font-semibold text-[#263B35]">
+                Định lượng (tùy chọn)
+                <input
+                  type="text"
+                  maxLength={100}
+                  value={customDishPortion}
+                  onChange={(event) => setCustomDishPortion(event.target.value)}
+                  placeholder={`Mặc định: ${guestCount} người ăn`}
+                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm"
+                />
+              </label>
+              <label className="md:col-span-8 block text-xs font-semibold text-[#263B35]">
+                Ghi chú cách nấu (tùy chọn)
+                <input
+                  type="text"
+                  maxLength={300}
+                  value={customDishNotes}
+                  onChange={(event) => setCustomDishNotes(event.target.value)}
+                  onKeyDown={(event) => event.key === 'Enter' && (event.preventDefault(), handleAddCustomDish())}
+                  placeholder="Ví dụ: ít cay, kho mềm, không dùng bột ngọt..."
+                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm"
+                />
+              </label>
+              <div className="md:col-span-4 flex items-end">
+                <button type="button" onClick={() => handleAddCustomDish()} className="w-full py-2.5 px-4 bg-[#285E56] hover:bg-[#1f4b44] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+                  <Plus className="w-4 h-4" /> Thêm món vào thực đơn
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#E5ECE7]">
+              <div className="flex items-center gap-1.5 text-xs text-[#738078] mb-2 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-[#F2AD72]" /> Gợi ý món ăn gia đình:
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: 'Thịt kho trứng nước dừa', category: 'meat' as DishCategory },
+                  { name: 'Sườn non ram mặn', category: 'meat' as DishCategory },
+                  { name: 'Cá lóc kho tộ', category: 'fish' as DishCategory },
+                  { name: 'Canh chua cá lóc', category: 'soup' as DishCategory },
+                  { name: 'Canh cua rau đay', category: 'soup' as DishCategory },
+                  { name: 'Rau muống xào tỏi', category: 'vegetable' as DishCategory },
+                  { name: 'Đậu hũ sốt cà', category: 'vegetarian' as DishCategory },
+                  { name: 'Tôm rim thịt ba chỉ', category: 'seafood' as DishCategory },
+                ].map((item) => (
+                  <button key={item.name} type="button" onClick={() => handleAddCustomDish(item.name, item.category)} className="px-2.5 py-1 bg-stone-100 hover:bg-[#E7F5EF] text-stone-700 hover:text-[#285E56] rounded-lg text-xs font-medium border border-stone-200 hover:border-[#B8E4D3]">
+                    + {item.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedItems.some((item) => /^(custom|bulk)_/.test(item.dish.id)) && (
+              <div className="space-y-2 border-t border-[#E5ECE7] pt-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-[#263B35]">Món theo yêu cầu đã thêm</h3>
+                  <span className="text-xs text-[#738078]">{selectedItems.filter((item) => /^(custom|bulk)_/.test(item.dish.id)).length} món</span>
+                </div>
+                {selectedItems.filter((item) => /^(custom|bulk)_/.test(item.dish.id)).map((item) => (
+                  <div key={item.dish.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E5ECE7] bg-[#FFFDF7] p-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#263B35]">{item.dish.name}</p>
+                      <p className="text-xs text-[#738078]">Ước tính nguyên liệu: {formatVND(item.dish.estimatedCost)} · {item.dish.suggestedPortion}</p>
+                      {item.specialNotes && <p className="mt-1 text-xs text-[#738078]">Ghi chú: {item.specialNotes}</p>}
+                    </div>
+                    <button type="button" onClick={() => handleRemoveDish(item.dish.id)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">
+                      <Trash2 className="h-3.5 w-3.5" /> Xóa
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
           <div className="bg-white rounded-2xl p-6 border border-[#E5ECE7] shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <div>

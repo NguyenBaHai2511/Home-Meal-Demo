@@ -261,7 +261,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const draft = draftOrderRef.current;
       const response = await fetch(apiUrl('resource=orders&action=create'), {
         method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draft: { ...draft, items: (draft.items || []).map((item) => ({ ...item, dish: { id: item.dish.id } })) } }),
+        body: JSON.stringify({ draft: { ...draft, items: (draft.items || []).map((item) => ({
+          ...item,
+          dish: /^(custom|bulk)_/.test(item.dish.id) ? item.dish : { id: item.dish.id },
+        })) } }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Không tạo được đơn hàng.');

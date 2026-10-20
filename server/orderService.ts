@@ -1,6 +1,6 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
-import type { BudgetChangeRequest, Order, OrderItem, OrderStatus, Quotation, ShoppingEvidenceItem, UserProfile } from '../src/types/index.js';
+import type { BudgetChangeRequest, Dish, DishCategory, DishComplexity, Order, OrderItem, OrderStatus, Quotation, ShoppingEvidenceItem, UserProfile } from '../src/types/index.js';
 import { MOCK_COOKS, MOCK_DISHES } from '../src/data/mockData.js';
 import { calculateLaborFee } from '../src/utils/pricing.js';
 import { canCookTransition, canReadOrder } from './orderPolicy.js';
@@ -65,10 +65,52 @@ function appendStatus(order: Order, status: OrderStatus, note: string) {
   order.statusHistory = [...(order.statusHistory || []), { status, timestamp: new Date().toISOString(), note: string(note, 500) }];
 }
 
+const dishCategories: DishCategory[] = ['meat', 'fish', 'seafood', 'vegetable', 'soup', 'tofu', 'vegetarian', 'dessert', 'banquet'];
+
+function customDish(value: Record<string, unknown>, id: string): Dish | undefined {
+  if (!/^(custom|bulk)_[a-zA-Z0-9_-]{1,76}$/.test(id)) return undefined;
+  const name = string(value.name, 120);
+  const category = string(value.category, 20) as DishCategory;
+  if (!name || !dishCategories.includes(category)) return undefined;
+
+  const complexity: DishComplexity = category === 'seafood' || category === 'banquet'
+    ? 'complex'
+    : category === 'soup' || category === 'vegetable' || category === 'vegetarian' || category === 'tofu'
+      ? 'simple'
+      : 'moderate';
+  const estimatedCosts: Record<DishCategory, number> = {
+    meat: 85000,
+    fish: 85000,
+    seafood: 120000,
+    vegetable: 30000,
+    soup: 45000,
+    tofu: 40000,
+    vegetarian: 40000,
+    dessert: 35000,
+    banquet: 120000,
+  };
+
+  return {
+    id,
+    name,
+    vietnameseName: name,
+    category,
+    description: string(value.description, 300) || 'Món ăn do khách yêu cầu nấu theo khẩu vị riêng',
+    suggestedPortion: string(value.suggestedPortion, 100) || 'Theo số khách trong đơn',
+    complexity,
+    estimatedCost: estimatedCosts[category],
+    prepTimeMinutes: 30,
+    dietaryTags: ['Nấu theo yêu cầu'],
+    ingredients: [],
+    imageUrl: '',
+  };
+}
+
 function catalogItem(raw: unknown): OrderItem {
   const value = object(raw);
   const requestedDish = object(value.dish);
-  const dish = MOCK_DISHES.find((candidate) => candidate.id === string(requestedDish.id, 100));
+  const dishId = string(requestedDish.id, 100);
+  const dish = MOCK_DISHES.find((candidate) => candidate.id === dishId) || customDish(requestedDish, dishId);
   if (!dish) throw new OrderError('One or more selected dishes are unavailable.');
   const quantity = number(value.quantity);
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 30) throw new OrderError('Each dish quantity must be between 1 and 30.');

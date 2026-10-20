@@ -167,7 +167,7 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
           <div className="flex items-center justify-between pb-2 border-b border-[#E5ECE7]">
             <h3 className="font-bold text-base text-[#263B35] flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-[#285E56] text-white flex items-center justify-center text-xs">B</span>
-              <span>Chi phí dịch vụ & Tiền công nấu ăn</span>
+              <span>Chi phí công đầu bếp đến nhà nấu ăn</span>
             </h3>
           </div>
 
@@ -181,7 +181,7 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
 
             {order.deliveryFee > 0 && (
               <div className="flex justify-between py-1 border-b border-[#E5ECE7]/60">
-                <span className="text-[#263B35]">Phí giao đồ ăn bảo quản nóng tận nơi:</span>
+                <span className="text-[#263B35]">Phí giao theo đơn đã đặt trước đây:</span>
                 <span className="font-semibold text-[#263B35]">{formatVND(order.deliveryFee)}</span>
               </div>
             )}

@@ -30,7 +30,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Zap,
-  Truck,
   Sparkles,
   PenTool,
   ListPlus
@@ -38,11 +37,11 @@ import {
 import { ImageWithFallback } from '../common/ImageWithFallback';
 
 const STEPS = [
-  'Thời gian & Địa chỉ giao',
-  'Chọn món ăn',
+  'Thời gian & Địa chỉ nhà bạn',
+  'Điền món ăn yêu cầu',
   'Nguyên liệu & Kiêng khem',
   'Ngân sách đi chợ',
-  'Tính công nấu & Phí giao',
+  'Tính công đầu bếp tại gia',
   'Chọn đầu bếp',
   'Xác nhận đơn',
 ];
@@ -50,15 +49,17 @@ const STEPS = [
 export const MealPlannerPage: React.FC = () => {
   const { dishes, cooks, draftOrder, updateDraftOrder, submitDraftOrder, navigateTo } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<DishCategory | 'all'>('all');
+  const [newExcludedIngredient, setNewExcludedIngredient] = useState('');
+  const [newAllergy, setNewAllergy] = useState('');
+
+  // Custom dish input state
   const [customDishName, setCustomDishName] = useState('');
   const [customDishCategory, setCustomDishCategory] = useState<DishCategory>('meat');
   const [customDishNotes, setCustomDishNotes] = useState('');
   const [customDishPortion, setCustomDishPortion] = useState('');
+  const [customDishCost, setCustomDishCost] = useState('');
   const [bulkInputText, setBulkInputText] = useState('');
   const [showBulkInput, setShowBulkInput] = useState(false);
-  const [newExcludedIngredient, setNewExcludedIngredient] = useState('');
-  const [newAllergy, setNewAllergy] = useState('');
 
   // Validate date & time with 4-hour advance constraint
   const timeValidation = validateDeliveryDateTime(draftOrder.date, draftOrder.servingTime);
@@ -70,7 +71,7 @@ export const MealPlannerPage: React.FC = () => {
       updateDraftOrder({
         date: formatDateForInput(earliest),
         servingTime: formatTimeForInput(earliest),
-        serviceType: 'cook_and_deliver',
+        serviceType: 'cook_at_home',
       });
     }
   }, []);
@@ -93,128 +94,113 @@ export const MealPlannerPage: React.FC = () => {
     0
   );
 
-  // Calculate labor fee (always cook_and_deliver)
+  // Calculate labor fee for cooking at home
   const guestCount = draftOrder.guestCount || 4;
-  const feeCalc = calculateLaborFee(guestCount, selectedDishes, 'cook_and_deliver');
+  const feeCalc = calculateLaborFee(guestCount, selectedDishes, 'cook_at_home');
 
-  // Add / remove dish
-  const handleAddDish = (dish: Dish) => {
-    const existing = selectedItems.find((i) => i.dish.id === dish.id);
-    if (existing) {
-      const updated = selectedItems.map((i) =>
-        i.dish.id === dish.id ? { ...i, quantity: i.quantity + 1 } : i
-      );
-      updateDraftOrder({ items: updated });
-    } else {
-      updateDraftOrder({ items: [...selectedItems, { dish, quantity: 1 }] });
-    }
-  };
-
-  const estimateCustomDishCost = (category: DishCategory) => {
-    if (category === 'seafood' || category === 'banquet') return 120000;
-    if (category === 'meat' || category === 'fish') return 85000;
-    if (category === 'soup') return 45000;
-    if (category === 'vegetable') return 30000;
-    if (category === 'dessert') return 35000;
-    return 40000;
-  };
-
-  const addCustomDish = (nameValue: string, category: DishCategory, notes = '', portion = '') => {
-    const name = nameValue.trim().slice(0, 120);
+  // Add custom dish directly entered by user
+  const handleAddCustomDish = (presetName?: string, presetCat?: DishCategory) => {
+    const name = (presetName || customDishName).trim();
     if (!name) {
       alert('Vui lòng nhập tên món ăn bạn muốn.');
       return;
     }
-    if (selectedItems.length >= 20) {
-      alert('Mỗi đơn hàng có thể gồm tối đa 20 món.');
-      return;
+
+    const newDishId = `custom_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const cat = presetCat || customDishCategory;
+
+    let parsedCost = Number(customDishCost);
+    if (!parsedCost || parsedCost <= 0) {
+      if (cat === 'seafood') parsedCost = 120000;
+      else if (cat === 'meat' || cat === 'fish') parsedCost = 85000;
+      else if (cat === 'soup') parsedCost = 45000;
+      else if (cat === 'vegetable') parsedCost = 30000;
+      else if (cat === 'vegetarian') parsedCost = 40000;
+      else parsedCost = 65000;
     }
 
-    const complexity: Dish['complexity'] = category === 'banquet' || category === 'seafood'
-      ? 'complex'
-      : category === 'soup' || category === 'vegetable' || category === 'vegetarian' || category === 'tofu'
-        ? 'simple'
-        : 'moderate';
-    const dish: Dish = {
-      id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    const newDish: Dish = {
+      id: newDishId,
       name,
       vietnameseName: name,
-      category,
-      description: notes.trim() || 'Món ăn do khách yêu cầu nấu theo khẩu vị riêng',
-      suggestedPortion: portion.trim().slice(0, 100) || `${guestCount} người ăn`,
-      complexity,
-      estimatedCost: estimateCustomDishCost(category),
+      category: cat,
+      description: customDishNotes.trim() || 'Món ăn do khách yêu cầu nấu theo khẩu vị riêng',
+      suggestedPortion: customDishPortion.trim() || `${guestCount} người ăn`,
+      complexity: cat === 'banquet' || cat === 'seafood' ? 'complex' : cat === 'soup' || cat === 'vegetable' ? 'simple' : 'moderate',
+      estimatedCost: parsedCost,
       prepTimeMinutes: 30,
       dietaryTags: ['Nấu theo yêu cầu'],
       ingredients: [],
       imageUrl: '',
     };
-    updateDraftOrder({ items: [...selectedItems, { dish, quantity: 1, specialNotes: notes.trim() || undefined }] });
+
+    updateDraftOrder({
+      items: [
+        ...(draftOrder.items || []),
+        {
+          dish: newDish,
+          quantity: 1,
+          specialNotes: customDishNotes.trim() || undefined,
+        },
+      ],
+    });
+
+    setCustomDishName('');
+    setCustomDishNotes('');
+    setCustomDishCost('');
   };
 
-  const handleAddCustomDish = (presetName?: string, presetCategory?: DishCategory) => {
-    const name = presetName || customDishName;
-    const category = presetCategory || customDishCategory;
-    if (!name.trim()) {
-      alert('Vui lòng nhập tên món ăn bạn muốn.');
-      return;
-    }
-    addCustomDish(name, category, presetName ? '' : customDishNotes, presetName ? '' : customDishPortion);
-    if (!presetName) {
-      setCustomDishName('');
-      setCustomDishNotes('');
-      setCustomDishPortion('');
-    }
-  };
-
+  // Add multiple dishes from multiline input
   const handleAddBulkDishes = () => {
-    const names = bulkInputText
+    const lines = bulkInputText
       .split('\n')
-      .map((line) => line.trim().replace(/^[-*•\d.)\s]+/, '').trim())
-      .filter(Boolean);
-    if (names.length === 0) {
+      .map((l) => l.trim().replace(/^[-*•\d.)\s]+/, ''))
+      .filter((l) => l.length > 0);
+
+    if (lines.length === 0) {
       alert('Vui lòng nhập ít nhất một tên món ăn.');
       return;
     }
-    const remaining = 20 - selectedItems.length;
-    if (remaining <= 0) {
-      alert('Mỗi đơn hàng có thể gồm tối đa 20 món.');
-      return;
-    }
-    const acceptedNames = names.slice(0, remaining);
-    const newItems = acceptedNames.map((name, index) => {
-      const lower = name.toLocaleLowerCase('vi-VN');
-      let category: DishCategory = 'meat';
-      if (/(tôm|mực|cua|ghẹ|hải sản)/.test(lower)) category = 'seafood';
-      else if (/(cá|lươn)/.test(lower)) category = 'fish';
-      else if (/(canh|súp|cháo|lẩu)/.test(lower)) category = 'soup';
-      else if (/(rau|cải|xào|luộc|gỏi)/.test(lower)) category = 'vegetable';
-      else if (/(đậu hũ|đậu phụ|món chay)/.test(lower)) category = 'vegetarian';
-      else if (/(chè|trái cây|tráng miệng|bánh)/.test(lower)) category = 'dessert';
 
-      const complexity: Dish['complexity'] = category === 'seafood'
-        ? 'complex'
-        : category === 'soup' || category === 'vegetable' || category === 'vegetarian'
-          ? 'simple'
-          : 'moderate';
-      const dish: Dish = {
-        id: `bulk_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
-        name: name.slice(0, 120),
-        vietnameseName: name.slice(0, 120),
-        category,
+    const newItems = lines.map((dishName, idx) => {
+      const lower = dishName.toLowerCase();
+      let cat: DishCategory = 'meat';
+      let estCost = 80000;
+      if (lower.includes('canh') || lower.includes('súp') || lower.includes('cháo')) {
+        cat = 'soup';
+        estCost = 45000;
+      } else if (lower.includes('rau') || lower.includes('cải') || lower.includes('xào') || lower.includes('luộc')) {
+        cat = 'vegetable';
+        estCost = 30000;
+      } else if (lower.includes('cá ') || lower.includes('tôm') || lower.includes('mực') || lower.includes('hải sản') || lower.includes('cua')) {
+        cat = 'seafood';
+        estCost = 110000;
+      } else if (lower.includes('chè') || lower.includes('trái cây') || lower.includes('tráng miệng')) {
+        cat = 'dessert';
+        estCost = 35000;
+      }
+
+      const newDish: Dish = {
+        id: `bulk_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+        name: dishName,
+        vietnameseName: dishName,
+        category: cat,
         description: 'Món ăn yêu cầu theo thực đơn gia đình',
         suggestedPortion: `${guestCount} người ăn`,
-        complexity,
-        estimatedCost: estimateCustomDishCost(category),
+        complexity: cat === 'seafood' ? 'complex' : cat === 'soup' || cat === 'vegetable' ? 'simple' : 'moderate',
+        estimatedCost: estCost,
         prepTimeMinutes: 30,
         dietaryTags: ['Nấu theo yêu cầu'],
         ingredients: [],
         imageUrl: '',
       };
-      return { dish, quantity: 1 };
+      return { dish: newDish, quantity: 1 };
     });
-    updateDraftOrder({ items: [...selectedItems, ...newItems] });
-    if (acceptedNames.length < names.length) alert(`Đã thêm ${acceptedNames.length} món. Đơn hàng tối đa 20 món.`);
+
+    updateDraftOrder({
+      items: [...(draftOrder.items || []), ...newItems],
+    });
+
     setBulkInputText('');
     setShowBulkInput(false);
   };
@@ -235,6 +221,12 @@ export const MealPlannerPage: React.FC = () => {
   const handleRemoveDish = (dishId: string) => {
     const updated = selectedItems.filter((i) => i.dish.id !== dishId);
     updateDraftOrder({ items: updated });
+  };
+
+  const handleClearAllDishes = () => {
+    if (window.confirm('Bạn có chắc muốn xóa tất cả các món đã điền không?')) {
+      updateDraftOrder({ items: [] });
+    }
   };
 
   // Allergies & excluded ingredients
@@ -258,14 +250,14 @@ export const MealPlannerPage: React.FC = () => {
         return;
       }
       if (!draftOrder.customerAddress?.trim()) {
-        alert('Vui lòng nhập địa chỉ nhận món ăn để đầu bếp giao đến.');
+        alert('Vui lòng nhập địa chỉ nhà để đầu bếp đến nấu.');
         return;
       }
     }
     if (currentStep === 2) {
       // Step 2: Validate at least 1 dish
       if (selectedItems.length === 0) {
-        alert('Vui lòng chọn ít nhất 1 món ăn cho bữa cơm của bạn.');
+        alert('Vui lòng điền ít nhất 1 món ăn bạn muốn cho bữa cơm của bạn.');
         return;
       }
     }
@@ -292,11 +284,6 @@ export const MealPlannerPage: React.FC = () => {
     if (newOrderId) navigateTo(`/orders/${newOrderId}`);
   };
 
-  // Filtered dishes
-  const filteredDishes = selectedCategory === 'all'
-    ? dishes
-    : dishes.filter((d) => d.category === selectedCategory);
-
   const budget = draftOrder.estimatedGroceryBudget || 400000;
   const budgetDifference = budget - estimatedIngredientTotal;
 
@@ -313,8 +300,8 @@ export const MealPlannerPage: React.FC = () => {
                 Quy trình đặt nấu bữa ăn
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                <Truck className="w-3 h-3 text-emerald-600" />
-                Giao món nóng sốt tận nơi
+                <ChefHat className="w-3 h-3 text-emerald-600" />
+                Đầu bếp nấu tại nhà bạn
               </span>
             </div>
             <h1 className="text-2xl font-bold text-[#263B35]">
@@ -356,16 +343,16 @@ export const MealPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* STEP 1: THỜI GIAN, ĐỊA CHỈ & QUY MÔ (ĐÃ LOẠI BỎ BƯỚC CHỌN HÌNH THỨC NẤU TẠI NHÀ, ÉP BUỘC CHỌN TRƯỚC 4 TIẾNG) */}
+      {/* STEP 1: THỜI GIAN, ĐỊA CHỈ & QUY MÔ (ĐẦU BẾP ĐẾN TẬN NHÀ NẤU ĂN, BẮT BUỘC ĐẶT TRƯỚC 4 TIẾNG) */}
       {currentStep === 1 && (
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5ECE7] shadow-xs space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#E5ECE7]">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-[#263B35]">
-                Thời gian giao món & Địa chỉ nhận hàng
+                Thời gian phục vụ & Địa chỉ gian bếp nhà bạn
               </h2>
               <p className="text-xs sm:text-sm text-[#738078] mt-0.5">
-                Đầu bếp HomeMeal đi chợ tươi mới, nấu nướng tại gian bếp riêng đạt chuẩn vệ sinh và giao món nóng sốt đến tận nhà bạn.
+                Đầu bếp HomeMeal đến tận gian bếp nhà bạn nấu nóng hổi, đi chợ mua nguyên liệu tươi sống trong ngày, dọn mâm lên bàn và dọn dẹp sạch sẽ sau khi dùng bữa.
               </p>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shrink-0">
@@ -381,7 +368,7 @@ export const MealPlannerPage: React.FC = () => {
                 <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                 <div className="text-xs sm:text-sm space-y-1">
                   <p className="font-bold text-rose-800">
-                    ⚠️ Giờ giao không hợp lệ (Không được chọn cách giờ giao dưới 4 tiếng)
+                    ⚠️ Giờ phục vụ không hợp lệ (Không được chọn cách hiện tại dưới 4 tiếng)
                   </p>
                   <p className="text-rose-700">
                     {timeValidation.message}
@@ -404,7 +391,7 @@ export const MealPlannerPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>
-                  <strong>Thời gian hợp lệ:</strong> Giao món lúc <strong>{draftOrder.servingTime} ngày {draftOrder.date}</strong> (cách hiện tại {Math.floor(timeValidation.hoursUntilDelivery)} giờ {Math.round((timeValidation.hoursUntilDelivery - Math.floor(timeValidation.hoursUntilDelivery)) * 60)} phút - Đảm bảo đủ tối thiểu 4 tiếng để đầu bếp chuẩn bị chu đáo).
+                  <strong>Thời gian hợp lệ:</strong> Phục vụ lúc <strong>{draftOrder.servingTime} ngày {draftOrder.date}</strong> (cách hiện tại {Math.floor(timeValidation.hoursUntilDelivery)} giờ {Math.round((timeValidation.hoursUntilDelivery - Math.floor(timeValidation.hoursUntilDelivery)) * 60)} phút - Đầu bếp có đủ thời gian chuẩn bị & di chuyển tới nhà bạn).
                 </span>
               </div>
             </div>
@@ -413,7 +400,7 @@ export const MealPlannerPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label className="block text-xs font-semibold text-[#263B35] mb-1.5 flex items-center gap-1">
-                <Calendar className="w-4 h-4 text-[#285E56]" /> Ngày giao món:
+                <Calendar className="w-4 h-4 text-[#285E56]" /> Ngày đầu bếp tới nấu:
               </label>
               <input
                 type="date"
@@ -431,7 +418,7 @@ export const MealPlannerPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-[#263B35] mb-1.5 flex items-center gap-1">
-                <Clock className="w-4 h-4 text-[#285E56]" /> Giờ giao tới bàn ăn:
+                <Clock className="w-4 h-4 text-[#285E56]" /> Giờ ăn cơm mong muốn:
               </label>
               <input
                 type="time"
@@ -442,7 +429,7 @@ export const MealPlannerPage: React.FC = () => {
                 }`}
               />
               <p className="text-[11px] text-[#738078] mt-1">
-                * Phải sớm trước ít nhất 4 tiếng kể từ lúc đặt
+                * Đầu bếp sẽ đến sớm 1-2 tiếng trước giờ ăn để nấu trực tiếp
               </p>
             </div>
 
@@ -450,14 +437,23 @@ export const MealPlannerPage: React.FC = () => {
               <label className="block text-xs font-semibold text-[#263B35] mb-1.5 flex items-center gap-1">
                 <Users className="w-4 h-4 text-[#285E56]" /> Số lượng khách ăn:
               </label>
-              <input
-                type="number"
-                min={1}
-                max={100}
-                value={draftOrder.guestCount || 4}
-                onChange={(e) => updateDraftOrder({ guestCount: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] font-medium"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={draftOrder.guestCount || 4}
+                  onChange={(e) => updateDraftOrder({ guestCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                  placeholder="Nhập số người ăn..."
+                  className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] font-bold text-[#263B35]"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#738078] pointer-events-none">
+                  người ăn
+                </span>
+              </div>
+              <p className="text-[11px] text-[#738078] mt-1">
+                Tùy ý nhập số lượng người ăn cho bữa cơm của bạn
+              </p>
               {guestCount > 20 && (
                 <p className="text-[11px] text-amber-700 mt-1 font-medium">
                   * Quy mô trên 20 khách sẽ có cơ chế gửi bảng báo giá cụ thể từ đầu bếp.
@@ -467,7 +463,7 @@ export const MealPlannerPage: React.FC = () => {
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-[#263B35] mb-1.5 flex items-center gap-1">
-                <MapPin className="w-4 h-4 text-[#285E56]" /> Địa chỉ giao nhận món ăn:
+                <MapPin className="w-4 h-4 text-[#285E56]" /> Địa chỉ nhà bạn (Nơi đầu bếp đến nấu):
               </label>
               <input
                 type="text"
@@ -493,279 +489,333 @@ export const MealPlannerPage: React.FC = () => {
           <div className="p-4 bg-[#FFFDF7] rounded-xl border border-[#E5ECE7] text-xs text-[#738078] flex items-start gap-2">
             <Info className="w-4 h-4 text-[#285E56] shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold text-[#263B35]">Cam kết chất lượng giao nhận:</span> Món ăn sau khi nấu xong tại bếp riêng của đầu bếp sẽ được đóng hộp sinh học giữ nhiệt, niêm phong cẩn thận và giao nhanh qua thùng giữ nhiệt để đảm bảo giữ nguyên độ nóng, mùi thơm và hương vị khi đến tay gia đình bạn.
+              <span className="font-semibold text-[#263B35]">Cam kết phục vụ tại nhà:</span> Đầu bếp mang nguyên liệu tươi đến nhà bạn, nấu trực tiếp tại gian bếp, dọn mâm lên bàn và lau dọn sạch sẽ sau bữa ăn.
             </div>
           </div>
         </div>
       )}
 
-      {/* STEP 2: CHỌN MÓN ĂN */}
+      {/* STEP 2: ĐIỀN MÓN ĂN YÊU CẦU (KHÁCH TỰ ĐIỀN MÓN ĂN THEO Ý MUỐN) */}
       {currentStep === 2 && (
         <div className="space-y-6">
-          <section className="bg-white rounded-2xl p-6 border border-[#B8E4D3] shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5ECE7] pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <PenTool className="w-4 h-4 text-[#285E56]" />
-                  <h2 className="font-bold text-[#263B35]">Thêm món theo yêu cầu</h2>
-                </div>
-                <p className="mt-1 text-xs text-[#738078]">Nhập món ngoài thực đơn hoặc chọn món gợi ý. Đầu bếp sẽ chuẩn bị theo ghi chú khẩu vị của bạn.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowBulkInput((open) => !open)}
-                className="text-xs font-semibold text-[#285E56] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
-              >
-                <ListPlus className="w-3.5 h-3.5" />
-                {showBulkInput ? 'Đóng nhập nhanh' : 'Nhập nhanh nhiều món'}
-              </button>
-            </div>
-
-            {showBulkInput && (
-              <div className="p-4 bg-[#E7F5EF] rounded-xl border border-[#B8E4D3] space-y-3">
-                <label className="block text-xs font-bold text-[#285E56]" htmlFor="bulk-dishes">Mỗi dòng một món ăn:</label>
-                <textarea
-                  id="bulk-dishes"
-                  rows={4}
-                  maxLength={2000}
-                  value={bulkInputText}
-                  onChange={(event) => setBulkInputText(event.target.value)}
-                  placeholder={'Thịt kho trứng\nCanh chua cá\nRau muống xào tỏi'}
-                  className="w-full p-3 bg-white border border-[#B8E4D3] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
-                />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="text-[11px] text-[#738078]">Tối đa 20 món trong một đơn.</span>
-                  <button type="button" onClick={handleAddBulkDishes} className="px-4 py-2 bg-[#285E56] text-white text-xs font-bold rounded-lg hover:bg-[#1f4b44]">
-                    Thêm danh sách món
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <label className="md:col-span-5 block text-xs font-semibold text-[#263B35]">
-                Tên món ăn <span className="text-rose-600">*</span>
-                <input
-                  type="text"
-                  maxLength={120}
-                  value={customDishName}
-                  onChange={(event) => setCustomDishName(event.target.value)}
-                  onKeyDown={(event) => event.key === 'Enter' && (event.preventDefault(), handleAddCustomDish())}
-                  placeholder="Ví dụ: Sườn ram mặn, canh cải nấu tôm..."
-                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
-                />
-              </label>
-              <label className="md:col-span-3 block text-xs font-semibold text-[#263B35]">
-                Phân loại
-                <select value={customDishCategory} onChange={(event) => setCustomDishCategory(event.target.value as DishCategory)} className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm">
-                  <option value="meat">Món thịt</option>
-                  <option value="fish">Món cá</option>
-                  <option value="seafood">Hải sản</option>
-                  <option value="soup">Canh / súp</option>
-                  <option value="vegetable">Rau củ</option>
-                  <option value="tofu">Đậu hũ / trứng</option>
-                  <option value="vegetarian">Món chay</option>
-                  <option value="dessert">Tráng miệng</option>
-                  <option value="banquet">Món tiệc / cỗ</option>
-                </select>
-              </label>
-              <label className="md:col-span-4 block text-xs font-semibold text-[#263B35]">
-                Định lượng (tùy chọn)
-                <input
-                  type="text"
-                  maxLength={100}
-                  value={customDishPortion}
-                  onChange={(event) => setCustomDishPortion(event.target.value)}
-                  placeholder={`Mặc định: ${guestCount} người ăn`}
-                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm"
-                />
-              </label>
-              <label className="md:col-span-8 block text-xs font-semibold text-[#263B35]">
-                Ghi chú cách nấu (tùy chọn)
-                <input
-                  type="text"
-                  maxLength={300}
-                  value={customDishNotes}
-                  onChange={(event) => setCustomDishNotes(event.target.value)}
-                  onKeyDown={(event) => event.key === 'Enter' && (event.preventDefault(), handleAddCustomDish())}
-                  placeholder="Ví dụ: ít cay, kho mềm, không dùng bột ngọt..."
-                  className="mt-1 w-full px-3 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-sm"
-                />
-              </label>
-              <div className="md:col-span-4 flex items-end">
-                <button type="button" onClick={() => handleAddCustomDish()} className="w-full py-2.5 px-4 bg-[#285E56] hover:bg-[#1f4b44] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2">
-                  <Plus className="w-4 h-4" /> Thêm món vào thực đơn
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-[#E5ECE7]">
-              <div className="flex items-center gap-1.5 text-xs text-[#738078] mb-2 font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-[#F2AD72]" /> Gợi ý món ăn gia đình:
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { name: 'Thịt kho trứng nước dừa', category: 'meat' as DishCategory },
-                  { name: 'Sườn non ram mặn', category: 'meat' as DishCategory },
-                  { name: 'Cá lóc kho tộ', category: 'fish' as DishCategory },
-                  { name: 'Canh chua cá lóc', category: 'soup' as DishCategory },
-                  { name: 'Canh cua rau đay', category: 'soup' as DishCategory },
-                  { name: 'Rau muống xào tỏi', category: 'vegetable' as DishCategory },
-                  { name: 'Đậu hũ sốt cà', category: 'vegetarian' as DishCategory },
-                  { name: 'Tôm rim thịt ba chỉ', category: 'seafood' as DishCategory },
-                ].map((item) => (
-                  <button key={item.name} type="button" onClick={() => handleAddCustomDish(item.name, item.category)} className="px-2.5 py-1 bg-stone-100 hover:bg-[#E7F5EF] text-stone-700 hover:text-[#285E56] rounded-lg text-xs font-medium border border-stone-200 hover:border-[#B8E4D3]">
-                    + {item.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {selectedItems.some((item) => /^(custom|bulk)_/.test(item.dish.id)) && (
-              <div className="space-y-2 border-t border-[#E5ECE7] pt-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-[#263B35]">Món theo yêu cầu đã thêm</h3>
-                  <span className="text-xs text-[#738078]">{selectedItems.filter((item) => /^(custom|bulk)_/.test(item.dish.id)).length} món</span>
-                </div>
-                {selectedItems.filter((item) => /^(custom|bulk)_/.test(item.dish.id)).map((item) => (
-                  <div key={item.dish.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E5ECE7] bg-[#FFFDF7] p-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#263B35]">{item.dish.name}</p>
-                      <p className="text-xs text-[#738078]">Ước tính nguyên liệu: {formatVND(item.dish.estimatedCost)} · {item.dish.suggestedPortion}</p>
-                      {item.specialNotes && <p className="mt-1 text-xs text-[#738078]">Ghi chú: {item.specialNotes}</p>}
-                    </div>
-                    <button type="button" onClick={() => handleRemoveDish(item.dish.id)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">
-                      <Trash2 className="h-3.5 w-3.5" /> Xóa
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
+          {/* Header Card */}
           <div className="bg-white rounded-2xl p-6 border border-[#E5ECE7] shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-[#263B35]">Chọn từng món ăn lẻ</h2>
-                <p className="text-xs sm:text-sm text-[#738078]">
-                  Tự do chọn món thịt, cá, canh, rau tùy thích. Bạn đã chọn <strong>{selectedItems.length} món</strong>.
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#E7F5EF] text-[#285E56] text-xs font-bold border border-[#B8E4D3]">
+                    Khẩu vị riêng 100%
+                  </span>
+                  <span className="text-xs text-[#738078]">Không giới hạn theo danh mục cố định</span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[#263B35]">
+                  Tự điền món ăn gia đình bạn muốn
+                </h2>
+                <p className="text-xs sm:text-sm text-[#738078] mt-1">
+                  Nhập bất kỳ món ăn nào bạn thèm hôm nay (món mặn, xào, canh, hải sản, món chay...). Đầu bếp sẽ mua nguyên liệu tươi ngon tại chợ và chế biến theo đúng khẩu vị riêng của gia đình bạn.
                 </p>
               </div>
 
-              {/* Selected summary strip */}
-              <div className="text-right">
-                <span className="text-xs text-[#738078]">Nguyên liệu ước tính tạm tính:</span>
-                <p className="text-base font-bold text-[#285E56]">{formatVND(estimatedIngredientTotal)}</p>
+              {/* Status summary */}
+              <div className="text-left sm:text-right bg-[#FFFDF7] p-3.5 rounded-xl border border-[#E5ECE7] shrink-0">
+                <span className="text-xs text-[#738078] block">Thực đơn đã điền:</span>
+                <span className="text-base font-extrabold text-[#285E56]">
+                  {selectedItems.length} món ăn
+                </span>
+                <span className="text-[11px] text-[#738078] block mt-0.5">
+                  Ước tính tiền chợ: {formatVND(estimatedIngredientTotal)}
+                </span>
               </div>
-            </div>
-
-            {/* Category tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-[#E5ECE7] text-xs">
-              {[
-                { id: 'all', label: 'Tất cả' },
-                { id: 'meat', label: 'Món thịt' },
-                { id: 'fish', label: 'Món cá' },
-                { id: 'seafood', label: 'Hải sản' },
-                { id: 'vegetable', label: 'Rau củ' },
-                { id: 'soup', label: 'Canh' },
-                { id: 'vegetarian', label: 'Món chay' },
-                { id: 'dessert', label: 'Tráng miệng' },
-                { id: 'banquet', label: 'Món tiệc/cỗ' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedCategory(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors font-medium ${
-                    selectedCategory === tab.id
-                      ? 'bg-[#285E56] text-white'
-                      : 'bg-[#FFFDF7] text-[#263B35] hover:bg-[#E7F5EF]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
             </div>
           </div>
 
-          {/* Dish Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredDishes.map((dish) => {
-              const selected = selectedItems.find((i) => i.dish.id === dish.id);
+          {/* Main Input Form */}
+          <div className="bg-white rounded-2xl p-6 border border-[#B8E4D3] shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5ECE7] pb-3">
+              <div className="flex items-center gap-2">
+                <PenTool className="w-4 h-4 text-[#285E56]" />
+                <h3 className="font-bold text-[#263B35] text-sm sm:text-base">
+                  Điền món ăn bạn muốn đầu bếp nấu
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBulkInput(!showBulkInput)}
+                className="text-xs font-semibold text-[#285E56] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <ListPlus className="w-3.5 h-3.5" />
+                <span>{showBulkInput ? 'Đóng nhập nhanh' : 'Nhập nhanh nhiều món (mỗi dòng 1 món)'}</span>
+              </button>
+            </div>
 
-              return (
-                <div
-                  key={dish.id}
-                  className={`bg-white rounded-2xl border overflow-hidden transition-all flex flex-col justify-between ${
-                    selected ? 'border-[#285E56] ring-2 ring-[#285E56]/20 shadow-md' : 'border-[#E5ECE7] hover:border-[#B8E4D3]'
-                  }`}
-                >
-                  <div>
-                    <div className="relative aspect-16/10 overflow-hidden bg-stone-100">
-                      <ImageWithFallback
-                        src={dish.imageUrl}
-                        alt={dish.name}
-                        fallbackType="dish"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-xs text-[10px] font-semibold text-[#285E56]">
-                        {dish.suggestedPortion}
-                      </div>
-                      <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium">
-                        {dish.complexity === 'simple' ? 'Dễ làm' : dish.complexity === 'moderate' ? 'Vừa phải' : 'Kỳ công'}
-                      </div>
-                    </div>
-
-                    <div className="p-4 space-y-2">
-                      <h3 className="font-bold text-sm sm:text-base text-[#263B35] line-clamp-1">{dish.name}</h3>
-                      <p className="text-xs text-[#738078] line-clamp-2">{dish.description}</p>
-                      
-                      <div className="pt-2 flex items-center justify-between text-xs">
-                        <span className="text-[#738078]">Ước tính nguyên liệu:</span>
-                        <span className="font-bold text-[#263B35]">{formatVND(dish.estimatedCost)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 pt-0 border-t border-[#E5ECE7]/60 mt-2">
-                    {selected ? (
-                      <div className="flex items-center justify-between pt-3">
-                        <span className="text-xs font-semibold text-[#285E56]">Đã chọn:</span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleUpdateQuantity(dish.id, -1)}
-                            className="p-1 rounded-md border border-[#E5ECE7] text-[#263B35] hover:bg-stone-100"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-xs font-bold w-4 text-center">{selected.quantity}</span>
-                          <button
-                            onClick={() => handleUpdateQuantity(dish.id, 1)}
-                            className="p-1 rounded-md border border-[#E5ECE7] text-[#263B35] hover:bg-stone-100"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleRemoveDish(dish.id)}
-                            className="p-1 rounded-md text-rose-600 hover:bg-rose-50 ml-1"
-                            title="Xóa món này"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleAddDish(dish)}
-                        className="w-full mt-3 py-2 bg-[#E7F5EF] hover:bg-[#285E56] text-[#285E56] hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm vào mâm cơm</span>
-                      </button>
-                    )}
-                  </div>
+            {/* Bulk multiline input drawer */}
+            {showBulkInput && (
+              <div className="p-4 bg-[#E7F5EF] rounded-xl border border-[#B8E4D3] space-y-3">
+                <label className="block text-xs font-bold text-[#285E56]">
+                  Dán hoặc gõ danh sách món ăn (mỗi dòng một món):
+                </label>
+                <textarea
+                  rows={4}
+                  value={bulkInputText}
+                  onChange={(e) => setBulkInputText(e.target.value)}
+                  placeholder="Ví dụ:&#10;Thịt kho hột vịt nước dừa&#10;Canh chua cá lóc bông điên điển&#10;Rau muống xào tỏi giòn&#10;Dưa hấu tráng miệng"
+                  className="w-full p-3 bg-white border border-[#B8E4D3] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-[11px] text-[#738078]">
+                    Hệ thống tự động phân loại món và đưa vào mâm cơm ngay lập tức.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddBulkDishes}
+                    className="px-4 py-2 bg-[#285E56] hover:bg-[#1f4b44] text-white text-xs font-bold rounded-lg transition-all shadow-xs self-start sm:self-auto"
+                  >
+                    Thêm danh sách món này
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {/* Single dish entry inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+              {/* Dish Name */}
+              <div className="md:col-span-5">
+                <label className="block text-xs font-bold text-[#263B35] mb-1">
+                  Tên món ăn bạn muốn: <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={customDishName}
+                  onChange={(e) => setCustomDishName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomDish();
+                    }
+                  }}
+                  placeholder="Ví dụ: Sườn ram mặn, Canh cải nấu tôm, Cá bống kho..."
+                  className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm font-semibold text-[#263B35] focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+              </div>
+
+              {/* Category */}
+              <div className="md:col-span-3">
+                <label className="block text-xs font-bold text-[#263B35] mb-1">
+                  Phân loại món:
+                </label>
+                <select
+                  value={customDishCategory}
+                  onChange={(e) => setCustomDishCategory(e.target.value as DishCategory)}
+                  className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#285E56] outline-none"
+                >
+                  <option value="meat">Món thịt (Kho, rim, xào...)</option>
+                  <option value="fish">Món cá (Kho tộ, chiên...)</option>
+                  <option value="seafood">Hải sản (Tôm, cua, mực...)</option>
+                  <option value="soup">Món canh / Súp / Lẩu</option>
+                  <option value="vegetable">Món rau (Xào, luộc, gỏi...)</option>
+                  <option value="vegetarian">Món chay thanh đạm</option>
+                  <option value="dessert">Tráng miệng / Ăn kèm</option>
+                  <option value="banquet">Món tiệc / Cỗ đặc biệt</option>
+                </select>
+              </div>
+
+              {/* Portion / Quantity */}
+              <div className="md:col-span-4">
+                <label className="block text-xs font-bold text-[#263B35] mb-1">
+                  Định lượng / Số phần:
+                </label>
+                <input
+                  type="text"
+                  value={customDishPortion}
+                  onChange={(e) => setCustomDishPortion(e.target.value)}
+                  placeholder={`Mặc định: ${guestCount} người ăn (hoặc: 1 đĩa lớn, 2 tô)`}
+                  className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+              </div>
+
+              {/* Custom Notes / Taste Preferences */}
+              <div className="md:col-span-8">
+                <label className="block text-xs font-bold text-[#263B35] mb-1">
+                  Ghi chú khẩu vị & cách nấu cho món này (tùy chọn):
+                </label>
+                <input
+                  type="text"
+                  value={customDishNotes}
+                  onChange={(e) => setCustomDishNotes(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomDish();
+                    }
+                  }}
+                  placeholder="Ví dụ: Ít cay cho trẻ nhỏ, thịt kho mềm rục, không nêm bột ngọt, đậm đà..."
+                  className="w-full px-3.5 py-2.5 bg-[#FFFDF7] border border-[#E5ECE7] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#285E56] outline-none"
+                />
+              </div>
+
+              {/* Action Button */}
+              <div className="md:col-span-4 flex items-end">
+                <button
+                  type="button"
+                  onClick={() => handleAddCustomDish()}
+                  className="w-full py-2.5 px-4 bg-[#285E56] hover:bg-[#1f4b44] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 h-[42px]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Thêm món vào mâm cơm</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Inspiration Pills */}
+            <div className="pt-2 border-t border-[#E5ECE7]">
+              <div className="flex items-center gap-1.5 text-xs text-[#738078] mb-2 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-[#F2AD72]" />
+                <span>Gợi ý bấm nhanh món ăn gia đình quen thuộc:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: 'Thịt kho tàu nước dừa', cat: 'meat' as DishCategory },
+                  { name: 'Sườn non ram mặn', cat: 'meat' as DishCategory },
+                  { name: 'Gà ta kho sả ớt', cat: 'meat' as DishCategory },
+                  { name: 'Cá lóc đồng kho tộ', cat: 'fish' as DishCategory },
+                  { name: 'Canh chua cá lóc', cat: 'soup' as DishCategory },
+                  { name: 'Canh cua rau đay mồng tơi', cat: 'soup' as DishCategory },
+                  { name: 'Canh sườn hầm rau củ', cat: 'soup' as DishCategory },
+                  { name: 'Rau muống xào tỏi', cat: 'vegetable' as DishCategory },
+                  { name: 'Bò xào bông thiên lý', cat: 'meat' as DishCategory },
+                  { name: 'Đậu hũ sốt cà chua', cat: 'vegetarian' as DishCategory },
+                  { name: 'Tôm rim thịt ba chỉ', cat: 'seafood' as DishCategory },
+                  { name: 'Trứng chiên thịt bằm', cat: 'meat' as DishCategory },
+                ].map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleAddCustomDish(item.name, item.cat)}
+                    className="px-2.5 py-1 bg-stone-100 hover:bg-[#E7F5EF] text-stone-700 hover:text-[#285E56] rounded-lg text-xs font-medium border border-stone-200 hover:border-[#B8E4D3] transition-colors flex items-center gap-1"
+                  >
+                    <span>+ {item.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* List of Entered Dishes */}
+          <div className="bg-white rounded-2xl p-6 border border-[#E5ECE7] shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5ECE7]">
+              <div className="flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-[#285E56]" />
+                <h3 className="font-bold text-[#263B35] text-base">
+                  Mâm cơm của bạn ({selectedItems.length} món)
+                </h3>
+              </div>
+              {selectedItems.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllDishes}
+                  className="text-xs text-rose-600 hover:text-rose-800 font-semibold hover:underline"
+                >
+                  Xóa tất cả món
+                </button>
+              )}
+            </div>
+
+            {selectedItems.length === 0 ? (
+              <div className="text-center py-12 px-4 rounded-xl border border-dashed border-[#B8E4D3] bg-[#FFFDF7] space-y-3">
+                <div className="w-12 h-12 rounded-full bg-[#E7F5EF] text-[#285E56] flex items-center justify-center mx-auto text-xl">
+                  🍲
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-sm text-[#263B35]">Chưa có món ăn nào trong mâm cơm</h4>
+                  <p className="text-xs text-[#738078] max-w-md mx-auto">
+                    Hãy nhập tên món bạn muốn ăn ở khung phía trên, hoặc bấm vào các món gợi ý để thêm nhanh vào thực đơn.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {selectedItems.map((item, idx) => (
+                  <div
+                    key={item.dish.id || idx}
+                    className="p-4 rounded-xl border border-[#E5ECE7] bg-[#FFFDF7] hover:border-[#B8E4D3] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="w-6 h-6 rounded-full bg-[#E7F5EF] text-[#285E56] font-bold text-xs flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <h4 className="font-bold text-sm sm:text-base text-[#263B35]">
+                          {item.dish.name}
+                        </h4>
+                        <span className="text-[11px] font-semibold text-[#285E56] bg-[#E7F5EF] px-2 py-0.5 rounded-md border border-[#B8E4D3]">
+                          {item.dish.category === 'meat' ? 'Món thịt' :
+                           item.dish.category === 'fish' ? 'Món cá' :
+                           item.dish.category === 'seafood' ? 'Hải sản' :
+                           item.dish.category === 'soup' ? 'Món canh' :
+                           item.dish.category === 'vegetable' ? 'Món rau' :
+                           item.dish.category === 'vegetarian' ? 'Món chay' :
+                           item.dish.category === 'dessert' ? 'Tráng miệng' : 'Món tiệc/cỗ'}
+                        </span>
+                        {item.dish.suggestedPortion && (
+                          <span className="text-[11px] text-[#738078] bg-stone-100 px-2 py-0.5 rounded-md">
+                            {item.dish.suggestedPortion}
+                          </span>
+                        )}
+                      </div>
+
+                      {item.specialNotes && (
+                        <p className="text-xs text-amber-800 bg-amber-50/80 px-2.5 py-1 rounded-lg border border-amber-200/60 inline-block">
+                          ✍️ Khẩu vị: {item.specialNotes}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E5ECE7]">
+                      {/* Quantity controls */}
+                      <div className="flex items-center gap-1.5 bg-white border border-[#E5ECE7] rounded-lg p-1">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.dish.id, -1)}
+                          className="w-6 h-6 rounded flex items-center justify-center text-[#263B35] hover:bg-stone-100 text-xs"
+                          title="Giảm số lượng"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="text-xs font-bold w-6 text-center text-[#263B35]">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.dish.id, 1)}
+                          className="w-6 h-6 rounded flex items-center justify-center text-[#263B35] hover:bg-stone-100 text-xs"
+                          title="Tăng số lượng"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Estimated Cost */}
+                      <div className="text-right min-w-[90px]">
+                        <span className="text-[10px] text-[#738078] block">Ước tính chợ:</span>
+                        <span className="text-xs font-bold text-[#285E56]">
+                          {formatVND(item.dish.estimatedCost * item.quantity)}
+                        </span>
+                      </div>
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDish(item.dish.id)}
+                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                        title="Xóa món này"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -910,21 +960,21 @@ export const MealPlannerPage: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 5: TÍNH CÔNG NẤU & PHÍ GIAO HÀNG */}
+      {/* STEP 5: TÍNH CÔNG ĐẦU BẾP TẠI GIA */}
       {currentStep === 5 && (
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5ECE7] shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-[#263B35] mb-1">
-                Bảng tính tiền công nấu & Phí giao tận nơi
+                Bảng tính tiền công đầu bếp nấu tại gia
               </h2>
               <p className="text-xs sm:text-sm text-[#738078]">
-                Tiền công nấu tại gian bếp chuyên biệt của đầu bếp và phí giao tận nơi giữ nhiệt nóng sốt.
+                Đầu bếp đến tận nhà nấu nướng trực tiếp tại gian bếp của bạn, dọn dẹp sạch sẽ sau bữa ăn. Hoàn toàn không tốn phí ship.
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xs text-[#738078]">Tổng tiền công + phí giao:</span>
-              <p className="text-2xl font-extrabold text-[#285E56]">{formatVND(feeCalc.totalLaborFee + feeCalc.deliveryFee)}</p>
+              <span className="text-xs text-[#738078]">Tổng tiền công đầu bếp tại gia:</span>
+              <p className="text-2xl font-extrabold text-[#285E56]">{formatVND(feeCalc.totalLaborFee)}</p>
             </div>
           </div>
 
@@ -1040,9 +1090,9 @@ export const MealPlannerPage: React.FC = () => {
             {/* Left Column: Details */}
             <div className="space-y-4">
               <div className="bg-stone-50 p-4 rounded-xl border border-[#E5ECE7] space-y-2">
-                <h3 className="font-bold text-[#263B35]">Thông tin nhận món:</h3>
+                <h3 className="font-bold text-[#263B35]">Thông tin phục vụ tại nhà:</h3>
                 <div className="flex justify-between">
-                  <span className="text-[#738078]">Ngày giờ giao:</span>
+                  <span className="text-[#738078]">Thời gian đầu bếp tới:</span>
                   <span className="font-semibold text-[#285E56]">{draftOrder.date} lúc {draftOrder.servingTime}</span>
                 </div>
                 <div className="flex justify-between">
@@ -1052,11 +1102,11 @@ export const MealPlannerPage: React.FC = () => {
                 <div className="flex justify-between">
                   <span className="text-[#738078]">Hình thức dịch vụ:</span>
                   <span className="font-semibold text-[#285E56]">
-                    Nấu tại bếp đạt chuẩn & Giao hộp giữ nhiệt nóng sốt tận nơi
+                    Đầu bếp đến nhà nấu trực tiếp & dọn dẹp sau bữa ăn
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#738078]">Địa chỉ giao món:</span>
+                  <span className="text-[#738078]">Địa chỉ phục vụ:</span>
                   <span className="font-semibold text-[#263B35] text-right line-clamp-1">{draftOrder.customerAddress}</span>
                 </div>
                 {draftOrder.mealOccasion && (
@@ -1092,23 +1142,23 @@ export const MealPlannerPage: React.FC = () => {
                     <span className="font-bold text-[#285E56]">{formatVND(budget)}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-[#B8E4D3]/40">
-                    <span className="text-[#263B35]">2. Tiền công nấu (tạm tính):</span>
+                    <span className="text-[#263B35]">2. Tiền công đầu bếp đến tận nhà nấu:</span>
                     <span className="font-bold text-[#285E56]">{formatVND(feeCalc.totalLaborFee)}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-[#B8E4D3]/40">
-                    <span className="text-[#263B35]">3. Phí giao hàng nóng tận nơi:</span>
-                    <span className="font-bold text-[#285E56]">{formatVND(feeCalc.deliveryFee)}</span>
+                    <span className="text-[#263B35]">3. Phí giao hàng & di chuyển:</span>
+                    <span className="font-bold text-emerald-700">Miễn phí (Nấu tại nhà bạn)</span>
                   </div>
                   <div className="flex justify-between pt-2 text-sm font-extrabold text-[#263B35]">
                     <span>Tổng dự kiến tối đa:</span>
-                    <span className="text-base text-[#285E56]">{formatVND(budget + feeCalc.totalLaborFee + feeCalc.deliveryFee)}</span>
+                    <span className="text-base text-[#285E56]">{formatVND(budget + feeCalc.totalLaborFee)}</span>
                   </div>
                 </div>
 
                 <div className="p-3 bg-white/80 rounded-xl text-[11px] text-[#738078] space-y-1">
                   <p className="font-semibold text-[#285E56]">Chính sách thanh toán:</p>
                   <p>• Bạn chỉ thanh toán tiền chợ theo hóa đơn thực mua tại chợ, không bao giờ thu trọn gói.</p>
-                  <p>• Thanh toán chỉ diễn ra SAU KHI bạn đã nhận đồ ăn và dùng bữa xong.</p>
+                  <p>• Thanh toán chỉ diễn ra SAU KHI đầu bếp đã nấu xong, dọn mâm lên bàn và bạn dùng bữa xong.</p>
                   <p>• Có quyền khiếu nại từng dòng hóa đơn nếu thấy sai khác.</p>
                 </div>
               </div>

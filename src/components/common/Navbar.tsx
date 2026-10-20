@@ -24,7 +24,7 @@ export const Navbar: React.FC = () => {
     : authUser?.role === 'admin'
       ? { label: 'Trang Quản Trị', path: '/admin', icon: <Shield className="w-4 h-4" /> }
       : authUser
-        ? { label: 'Đặt bữa ăn ngay', path: '/meal-planner', icon: <ShoppingBag className="w-4 h-4" /> }
+        ? { label: 'Đặt đầu bếp tới nhà', path: '/meal-planner', icon: <ShoppingBag className="w-4 h-4" /> }
         : { label: 'Đăng nhập', path: '/login', icon: <User className="w-4 h-4" /> };
 
   const closeMobileMenu = () => setMobileMenuOpen(false);

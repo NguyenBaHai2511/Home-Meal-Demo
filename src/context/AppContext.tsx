@@ -201,7 +201,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Draft order initial state with 4-hour advance constraint
   const earliestDelivery = getEarliestDeliveryDate();
   const initialDraftOrder: Partial<Order> = {
-    serviceType: 'cook_and_deliver',
+    serviceType: 'cook_at_home',
     guestCount: 4,
     date: formatDateForInput(earliestDelivery),
     servingTime: formatTimeForInput(earliestDelivery),

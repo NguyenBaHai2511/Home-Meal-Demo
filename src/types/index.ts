@@ -1,6 +1,7 @@
 export type ServiceType = 
-  | 'cook_and_deliver'     // Nấu tại bếp của đầu bếp và giao đến tận nhà
-  | 'party_at_home';       // Nấu tiệc / mâm cỗ quy mô lớn giao tận nơi
+  | 'cook_at_home'         // Đầu bếp đến nhà khách hàng để đi chợ, nấu và dọn dẹp
+  | 'party_at_home'        // Đầu bếp đến nhà khách hàng nấu tiệc / mâm cỗ
+  | 'cook_and_deliver';    // Giá trị cũ, chỉ dùng để đọc đơn đã tạo trước khi đổi mô hình
 
 export type DishComplexity = 'simple' | 'moderate' | 'complex';
 
@@ -160,7 +161,7 @@ export interface Order {
   baseLaborFee: number;
   complexityAdjustment: number;
   guestCountAdjustment: number;
-  deliveryFee: number;
+  deliveryFee: number; // Luôn bằng 0 với đơn mới; giữ trường để đọc dữ liệu lịch sử
   additionalServiceFee: number; // Phụ bếp, dọn dẹp thêm
   totalLaborFee: number;
   
@@ -168,7 +169,7 @@ export interface Order {
   quotation?: Quotation;
   
   // Total calculation
-  finalPayableAmount: number; // = actualGroceryTotal + totalLaborFee + deliveryFee + additionalServiceFee
+  finalPayableAmount: number; // = actualGroceryTotal + totalLaborFee + additionalServiceFee cho đơn mới
   
   status: OrderStatus;
   statusHistory: { status: OrderStatus; timestamp: string; note: string }[];

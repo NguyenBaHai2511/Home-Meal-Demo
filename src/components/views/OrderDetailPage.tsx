@@ -254,7 +254,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs sm:text-sm">
           {/* Col 1: Delivery & Time */}
           <div className="space-y-3 bg-[#FFFDF7] p-4 rounded-2xl border border-[#E5ECE7]">
-            <h3 className="font-bold text-[#263B35]">Thông tin giao nhận & Phục vụ:</h3>
+            <h3 className="font-bold text-[#263B35]">Thông tin thời gian & Địa chỉ phục vụ tại gia:</h3>
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#285E56]" />
@@ -265,7 +265,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
                 <span>{order.guestCount} người ăn</span>
               </div>
               <div className="flex items-center gap-2 font-medium text-[#285E56]">
-                <span>Hình thức: {order.serviceType === 'party_at_home' ? 'Nấu tiệc & cỗ giao tận nơi' : 'Nấu tại bếp & Giao tận nơi'}</span>
+                <span>Hình thức: {order.serviceType === 'party_at_home' ? 'Đầu bếp nấu tiệc tại gia' : order.serviceType === 'cook_and_deliver' ? 'Giao theo đơn cũ' : 'Đầu bếp đến tận nhà nấu ăn'}</span>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#285E56] shrink-0 mt-0.5" />

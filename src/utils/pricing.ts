@@ -1,0 +1,152 @@
+import { Dish, ServiceType } from '../types';
+
+export function formatVND(amount: number): string {
+  if (isNaN(amount)) return '0 đ';
+  return new Intl.NumberFormat('vi-VN').format(Math.round(amount)) + ' đ';
+}
+
+export interface LaborFeeCalculation {
+  baseLaborFee: number;
+  guestAdjustment: number;
+  complexityAdjustment: number;
+  deliveryFee: number;
+  additionalServiceFee: number;
+  totalLaborFee: number;
+  requiresQuotation: boolean;
+  breakdownSummary: string[];
+}
+
+export function calculateLaborFee(
+  guestCount: number,
+  dishes: Dish[],
+  serviceType: ServiceType,
+  hasSpecialEquipment: boolean = false,
+  extraAssistants: number = 0
+): LaborFeeCalculation {
+  const breakdown: string[] = [];
+
+  // 1. Base fee by service type
+  let baseLaborFee = 150000;
+  if (serviceType === 'party_at_home') {
+    baseLaborFee = 450000;
+    breakdown.push(`Phí cơ bản mâm cỗ / tiệc giao tận nơi: ${formatVND(baseLaborFee)}`);
+  } else {
+    baseLaborFee = 150000;
+    breakdown.push(`Phí cơ bản nấu món ăn: ${formatVND(baseLaborFee)}`);
+  }
+
+  // 2. Delivery fee
+  const deliveryFee = 35000;
+  breakdown.push(`Phí giao đồ ăn bảo quản nóng tận nơi: ${formatVND(deliveryFee)}`);
+
+  // 3. Guest count tier
+  let guestAdjustment = 0;
+  if (guestCount <= 4) {
+    guestAdjustment = 20000;
+  } else if (guestCount <= 8) {
+    guestAdjustment = 60000;
+  } else if (guestCount <= 15) {
+    guestAdjustment = 160000;
+  } else if (guestCount <= 30) {
+    guestAdjustment = 380000;
+  } else {
+    guestAdjustment = 380000 + (guestCount - 30) * 15000;
+  }
+  breakdown.push(`Quy mô ${guestCount} khách: +${formatVND(guestAdjustment)}`);
+
+  // 4. Complexity & dish count
+  let complexityAdjustment = 0;
+  let simpleCount = 0;
+  let moderateCount = 0;
+  let complexCount = 0;
+
+  dishes.forEach((d) => {
+    if (d.complexity === 'simple') {
+      complexityAdjustment += 15000;
+      simpleCount++;
+    } else if (d.complexity === 'moderate') {
+      complexityAdjustment += 30000;
+      moderateCount++;
+    } else if (d.complexity === 'complex') {
+      complexityAdjustment += 65000;
+      complexCount++;
+    }
+  });
+
+  const dishDetailParts: string[] = [];
+  if (simpleCount > 0) dishDetailParts.push(`${simpleCount} món đơn giản`);
+  if (moderateCount > 0) dishDetailParts.push(`${moderateCount} món vừa`);
+  if (complexCount > 0) dishDetailParts.push(`${complexCount} món kỳ công`);
+
+  if (dishDetailParts.length > 0) {
+    breakdown.push(`Độ khó (${dishDetailParts.join(', ')}): +${formatVND(complexityAdjustment)}`);
+  }
+
+  // 5. Additional services (assistants, equipment)
+  let additionalServiceFee = 0;
+  if (extraAssistants > 0) {
+    const fee = extraAssistants * 250000;
+    additionalServiceFee += fee;
+    breakdown.push(`${extraAssistants} phụ bếp hỗ trợ: +${formatVND(fee)}`);
+  }
+  if (hasSpecialEquipment) {
+    additionalServiceFee += 150000;
+    breakdown.push(`Dụng cụ tiệc/bếp nướng chuyên dụng: +150.000 đ`);
+  }
+
+  // Flag if quotation is advised
+  const requiresQuotation = guestCount > 20 || dishes.length > 7 || serviceType === 'party_at_home';
+
+  const totalLaborFee = baseLaborFee + guestAdjustment + complexityAdjustment + additionalServiceFee;
+
+  return {
+    baseLaborFee,
+    guestAdjustment,
+    complexityAdjustment,
+    deliveryFee,
+    additionalServiceFee,
+    totalLaborFee,
+    requiresQuotation,
+    breakdownSummary: breakdown,
+  };
+}
+
+export function getStatusMeta(status: string): { label: string; bg: string; text: string; dot: string } {
+  switch (status) {
+    case 'draft':
+      return { label: 'Bản nháp', bg: 'bg-stone-100', text: 'text-stone-700', dot: 'bg-stone-400' };
+    case 'awaiting_cook':
+      return { label: 'Chờ đầu bếp nhận', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' };
+    case 'awaiting_quotation':
+      return { label: 'Chờ báo giá', bg: 'bg-sky-50', text: 'text-sky-800', dot: 'bg-sky-500' };
+    case 'quotation_submitted':
+      return { label: 'Đã có báo giá chi tiết', bg: 'bg-indigo-50', text: 'text-indigo-800', dot: 'bg-indigo-600' };
+    case 'confirmed':
+      return { label: 'Đã xác nhận', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+    case 'shopping_in_progress':
+      return { label: 'Đang đi chợ', bg: 'bg-teal-50', text: 'text-teal-800', dot: 'bg-teal-600' };
+    case 'evidence_submitted':
+      return { label: 'Đã tải hóa đơn đi chợ', bg: 'bg-cyan-50', text: 'text-cyan-800', dot: 'bg-cyan-600' };
+    case 'awaiting_budget_approval':
+      return { label: 'Chờ duyệt tăng ngân sách', bg: 'bg-amber-50', text: 'text-amber-900', dot: 'bg-amber-600' };
+    case 'preparing_meal':
+      return { label: 'Đang nấu nướng', bg: 'bg-orange-50', text: 'text-orange-900', dot: 'bg-orange-600' };
+    case 'ready_for_service':
+      return { label: 'Món đã sẵn sàng', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' };
+    case 'delivering_or_serving':
+      return { label: 'Đang giao / Phục vụ', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-600' };
+    case 'service_completed':
+      return { label: 'Đã phục vụ xong - Chờ kiểm tra & thanh toán', bg: 'bg-emerald-100', text: 'text-emerald-900', dot: 'bg-emerald-700' };
+    case 'awaiting_payment':
+      return { label: 'Chờ thanh toán', bg: 'bg-purple-50', text: 'text-purple-800', dot: 'bg-purple-600' };
+    case 'paid':
+    case 'completed':
+      return { label: 'Hoàn tất & Đã thanh toán', bg: 'bg-teal-100', text: 'text-teal-900', dot: 'bg-teal-700' };
+    case 'disputed':
+      return { label: 'Đang khiếu nại hóa đơn', bg: 'bg-rose-50', text: 'text-rose-900', dot: 'bg-rose-600' };
+    case 'cancelled':
+      return { label: 'Đã hủy', bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-400' };
+    default:
+      return { label: status, bg: 'bg-stone-50', text: 'text-stone-700', dot: 'bg-stone-400' };
+  }
+}

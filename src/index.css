@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-mint: #B8E4D3;
+  --color-deep-teal: #285E56;
+  --color-light-mint: #E7F5EF;
+  --color-warm-cream: #FFFDF7;
+  --color-accent-orange: #F2AD72;
+  --color-text-main: #263B35;
+  --color-text-secondary: #738078;
+  --color-border-soft: #E5ECE7;
+  --color-error-red: #C94C4C;
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FFFDF7;
+  color: #263B35;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #E7F5EF;
+}
+::-webkit-scrollbar-thumb {
+  background: #B8E4D3;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #285E56;
+}

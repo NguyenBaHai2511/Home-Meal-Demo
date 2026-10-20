@@ -1,0 +1,140 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Utility to enforce the rule: Orders must be placed at least 4 hours in advance.
+ * Quy định bắt buộc: Khách hàng phải đặt trước tối thiểu 4 tiếng so với giờ giao món.
+ */
+
+export const MIN_ADVANCE_HOURS = 4;
+
+export function getNow(): Date {
+  return new Date();
+}
+
+/**
+ * Returns the earliest allowable delivery Date object (now + 4 hours, rounded to next 15-min mark)
+ */
+export function getEarliestDeliveryDate(): Date {
+  const date = new Date(Date.now() + MIN_ADVANCE_HOURS * 60 * 60 * 1000);
+  const minutes = date.getMinutes();
+  const remainder = minutes % 15;
+  const addMinutes = remainder === 0 ? 0 : 15 - remainder;
+  date.setMinutes(minutes + addMinutes);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
+}
+
+export function formatDateForInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function formatTimeForInput(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+export function parseDeliveryDateTime(dateStr?: string, timeStr?: string): Date | null {
+  if (!dateStr || !timeStr) return null;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const [h, min] = timeStr.split(':').map(Number);
+  if (isNaN(y) || isNaN(m) || isNaN(d) || isNaN(h) || isNaN(min)) return null;
+  return new Date(y, m - 1, d, h, min, 0, 0);
+}
+
+export interface DeliveryValidationResult {
+  isValid: boolean;
+  hoursUntilDelivery: number;
+  minutesUntilDelivery: number;
+  message: string;
+  earliestDateStr: string;
+  earliestTimeStr: string;
+  suggestedFormatted: string;
+}
+
+export function validateDeliveryDateTime(dateStr?: string, timeStr?: string): DeliveryValidationResult {
+  const earliest = getEarliestDeliveryDate();
+  const earliestDateStr = formatDateForInput(earliest);
+  const earliestTimeStr = formatTimeForInput(earliest);
+  
+  const formattedDay = String(earliest.getDate()).padStart(2, '0');
+  const formattedMonth = String(earliest.getMonth() + 1).padStart(2, '0');
+  const suggestedFormatted = `${earliestTimeStr} ngày ${formattedDay}/${formattedMonth}/${earliest.getFullYear()}`;
+
+  if (!dateStr || !timeStr) {
+    return {
+      isValid: false,
+      hoursUntilDelivery: 0,
+      minutesUntilDelivery: 0,
+      message: 'Vui lòng chọn ngày và giờ giao món.',
+      earliestDateStr,
+      earliestTimeStr,
+      suggestedFormatted,
+    };
+  }
+
+  const selected = parseDeliveryDateTime(dateStr, timeStr);
+  if (!selected) {
+    return {
+      isValid: false,
+      hoursUntilDelivery: 0,
+      minutesUntilDelivery: 0,
+      message: 'Định dạng ngày hoặc giờ không hợp lệ.',
+      earliestDateStr,
+      earliestTimeStr,
+      suggestedFormatted,
+    };
+  }
+
+  const now = Date.now();
+  const diffMs = selected.getTime() - now;
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  if (diffMs <= 0) {
+    return {
+      isValid: false,
+      hoursUntilDelivery: 0,
+      minutesUntilDelivery: 0,
+      message: `Giờ giao đã qua hoặc thuộc quá khứ. Bạn phải chọn giờ sớm nhất từ ${suggestedFormatted} (tối thiểu 4 tiếng nữa).`,
+      earliestDateStr,
+      earliestTimeStr,
+      suggestedFormatted,
+    };
+  }
+
+  // Check 4-hour rule (allow 30-second leeway to avoid edge second ticks)
+  if (diffHours < MIN_ADVANCE_HOURS - 0.01) {
+    const selectedHoursAway = Math.floor(diffHours);
+    const selectedMinsAway = Math.round((diffHours - selectedHoursAway) * 60);
+
+    return {
+      isValid: false,
+      hoursUntilDelivery: diffHours,
+      minutesUntilDelivery: Math.round(diffMs / 60000),
+      message: `Không được chọn giờ này (chỉ cách hiện tại ${selectedHoursAway > 0 ? `${selectedHoursAway} giờ ` : ''}${selectedMinsAway} phút). HomeMeal yêu cầu đặt trước tối thiểu 4 tiếng để đầu bếp kịp đi chợ chọn nguyên liệu tươi và chế biến. Giờ giao sớm nhất bạn có thể chọn là ${suggestedFormatted}.`,
+      earliestDateStr,
+      earliestTimeStr,
+      suggestedFormatted,
+    };
+  }
+
+  const exactHours = Math.floor(diffHours);
+  const exactMinutes = Math.round((diffHours - exactHours) * 60);
+
+  return {
+    isValid: true,
+    hoursUntilDelivery: diffHours,
+    minutesUntilDelivery: Math.round(diffMs / 60000),
+    message: `Thời gian giao hợp lệ (đặt trước ${exactHours} tiếng ${exactMinutes > 0 ? `${exactMinutes} phút` : ''} - Đủ thời gian tối thiểu 4 tiếng).`,
+    earliestDateStr,
+    earliestTimeStr,
+    suggestedFormatted,
+  };
+}

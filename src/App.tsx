@@ -28,8 +28,26 @@ import { CookEarningsPage } from './components/views/cook/CookEarningsPage';
 import { AdminDashboardPage } from './components/views/admin/AdminDashboardPage';
 
 const AppContent: React.FC = () => {
-  const { currentPath } = useApp();
+  const { currentPath, authUser, authLoading, navigateTo } = useApp();
   const pathname = currentPath.split(/[?#]/)[0] || '/';
+  const requiredRole = pathname.startsWith('/admin')
+    ? 'admin'
+    : pathname.startsWith('/cook')
+      ? 'cook'
+      : pathname === '/orders' || pathname.startsWith('/orders/') || pathname === '/quotations' || pathname === '/party-booking'
+        ? 'customer'
+        : null;
+
+  useEffect(() => {
+    if (!requiredRole || authLoading) return;
+    if (!authUser) {
+      navigateTo(`/login?next=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+    if (authUser.role !== requiredRole) {
+      navigateTo(authUser.role === 'admin' ? '/admin' : authUser.role === 'cook' ? '/cook/dashboard' : '/');
+    }
+  }, [authLoading, authUser, currentPath, navigateTo, requiredRole]);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -45,6 +63,16 @@ const AppContent: React.FC = () => {
 
   // Route matching
   const renderCurrentView = () => {
+    if (requiredRole && authLoading) {
+      return <div className="px-4 py-20 text-center text-sm text-[#738078]">Đang kiểm tra quyền truy cập…</div>;
+    }
+    if (requiredRole && !authUser) {
+      return <div className="px-4 py-20 text-center text-sm text-[#738078]">Đang chuyển đến trang đăng nhập…</div>;
+    }
+    if (requiredRole && authUser?.role !== requiredRole) {
+      return <div className="px-4 py-20 text-center text-sm text-[#738078]">Bạn không có quyền truy cập trang này.</div>;
+    }
+
     // 1. Static Exact Routes
     if (pathname === '/') return <HomePage />;
     if (pathname === '/meal-planner') return <MealPlannerPage />;
@@ -53,7 +81,7 @@ const AppContent: React.FC = () => {
     if (pathname === '/party-booking') return <PartyBookingPage />;
     if (pathname === '/quotations') return <QuotationsPage />;
     if (pathname === '/orders') return <OrdersPage />;
-    if (pathname === '/account' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password') return <AccountPage />;
+    if (pathname === '/account' || pathname === '/login' || pathname === '/register') return <AccountPage />;
     if (pathname === '/support') return <SupportPage />;
 
     // 2. Cook Routes

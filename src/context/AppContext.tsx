@@ -6,8 +6,11 @@ import { getEarliestDeliveryDate, formatDateForInput, formatTimeForInput, valida
 
 interface AppContextType {
   currentUser: UserProfile;
-  setCurrentUser: (user: UserProfile) => void;
-  switchRole: (role: 'customer' | 'cook' | 'admin') => void;
+  authUser: UserProfile | null;
+  authLoading: boolean;
+  login: (email: string, password: string) => Promise<UserProfile>;
+  register: (name: string, email: string, password: string) => Promise<UserProfile>;
+  logout: () => Promise<void>;
   
   orders: Order[];
   cooks: Cook[];
@@ -56,20 +59,11 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY_ORDERS = 'homemeal_orders_v1';
-const STORAGE_KEY_ROLE = 'homemeal_user_role_v1';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
-    try {
-      const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
-      if (savedRole === 'customer' || savedRole === 'cook' || savedRole === 'admin') {
-        return MOCK_USERS[savedRole];
-      }
-    } catch {
-      // ignore
-    }
-    return MOCK_USERS.customer;
-  });
+  const [authUser, setAuthUser] = useState<UserProfile | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(MOCK_USERS.customer);
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ORDERS);
@@ -92,6 +86,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const applyAuthenticatedUser = (user: UserProfile) => {
+    setAuthUser(user);
+    setCurrentUser({ ...MOCK_USERS.customer, ...user });
+  };
+
+  useEffect(() => {
+    fetch('/api?resource=auth&action=me', { credentials: 'same-origin' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Could not restore the sign-in session.');
+        const result: { user: UserProfile | null } = await response.json();
+        if (result.user) applyAuthenticatedUser(result.user);
+      })
+      .catch(() => undefined)
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  const submitAuth = async (action: 'login' | 'register', payload: Record<string, string>) => {
+    const response = await fetch('/api?resource=auth', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, action }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Unable to sign in.');
+    applyAuthenticatedUser(result.user as UserProfile);
+    return result.user as UserProfile;
+  };
+
+  const login = (email: string, password: string) => submitAuth('login', { email, password });
+  const register = (name: string, email: string, password: string) =>
+    submitAuth('register', { name, email, password });
+
+  const logout = async () => {
+    try {
+      await fetch('/api?resource=auth', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
+    } finally {
+      setAuthUser(null);
+      setCurrentUser(MOCK_USERS.customer);
+    }
+  };
 
   // Sync route with browser history
   useEffect(() => {
@@ -123,12 +164,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [orders]);
 
-  const switchRole = (role: 'customer' | 'cook' | 'admin') => {
-    setCurrentUser(MOCK_USERS[role]);
-    localStorage.setItem(STORAGE_KEY_ROLE, role);
-    showToast(`Đã chuyển vai trò: ${role === 'customer' ? 'Khách hàng' : role === 'cook' ? 'Đầu bếp' : 'Quản trị viên'}`);
-  };
-
   // Draft order initial state with 4-hour advance constraint
   const earliestDelivery = getEarliestDeliveryDate();
   const initialDraftOrder: Partial<Order> = {
@@ -153,6 +188,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [draftOrder, setDraftOrder] = useState<Partial<Order>>(initialDraftOrder);
   const draftOrderRef = useRef(draftOrder);
 
+  useEffect(() => {
+    if (!authUser) return;
+    const updatedDraftOrder = {
+      ...draftOrderRef.current,
+      customerName: authUser.name,
+      customerPhone: authUser.phone,
+      customerAddress: authUser.address,
+    };
+    draftOrderRef.current = updatedDraftOrder;
+    setDraftOrder(updatedDraftOrder);
+  }, [authUser]);
+
   const updateDraftOrder = (data: Partial<Order>) => {
     const updatedDraftOrder = { ...draftOrderRef.current, ...data };
     draftOrderRef.current = updatedDraftOrder;
@@ -160,8 +207,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetDraftOrder = () => {
-    draftOrderRef.current = initialDraftOrder;
-    setDraftOrder(initialDraftOrder);
+    const resetDraft = {
+      ...initialDraftOrder,
+      customerName: currentUser.name,
+      customerPhone: currentUser.phone,
+      customerAddress: currentUser.address,
+    };
+    draftOrderRef.current = resetDraft;
+    setDraftOrder(resetDraft);
   };
 
   const submitDraftOrder = (): string => {
@@ -591,8 +644,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         currentUser,
-        setCurrentUser,
-        switchRole,
+        authUser,
+        authLoading,
+        login,
+        register,
+        logout,
         orders,
         cooks: MOCK_COOKS,
         dishes: MOCK_DISHES,

@@ -14,7 +14,6 @@ import {
   Receipt, 
   CheckCircle, 
   AlertTriangle, 
-  ChefHat, 
   Phone, 
   FileText, 
   ShieldCheck, 
@@ -39,8 +38,6 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
     rejectBudgetChange,
     acceptQuotation,
     rejectQuotation,
-    currentUser,
-    switchRole
   } = useApp();
 
   const [selectedEvidenceItem, setSelectedEvidenceItem] = useState<ShoppingEvidenceItem | null>(null);
@@ -79,19 +76,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
           <span>Quay lại danh sách đơn hàng</span>
         </button>
 
-        <div className="flex items-center gap-2">
-          {currentUser.role !== 'cook' && (
-            <button
-              onClick={() => {
-                switchRole('cook');
-                navigateTo(`/cook/orders/${order.id}`);
-              }}
-              className="text-xs font-medium text-[#285E56] hover:underline bg-[#E7F5EF] px-2.5 py-1 rounded-lg"
-            >
-              Mở ở chế độ Đầu Bếp để thao tác
-            </button>
-          )}
-        </div>
+        <div className="flex items-center gap-2" />
       </div>
 
       {/* Main Order Card */}

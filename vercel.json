@@ -14,6 +14,14 @@
   ],
   "rewrites": [
     {
+  "source": "/2010",
+  "destination": "https://2010-tan-eta.vercel.app/2010"
+    },
+    {
+  "source": "/2010/:path*",
+  "destination": "https://2010-tan-eta.vercel.app/2010/:path*"
+    },
+    {
       "source": "/HomeMeal/api",
       "destination": "/api"
     },

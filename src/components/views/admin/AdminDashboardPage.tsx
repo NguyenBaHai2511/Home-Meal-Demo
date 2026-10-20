@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../../../context/AppContext';
 import { formatVND } from '../../../utils/pricing';
 import { StatusBadge } from '../../common/StatusBadge';
+import { apiUrl } from '../../../utils/appPath';
 import { 
   Shield, 
   Users, 
@@ -39,7 +40,7 @@ export const AdminDashboardPage: React.FC = () => {
     let cancelled = false;
     setUsersLoading(true);
     setUsersError('');
-    fetch('/api?resource=admin/users', { credentials: 'same-origin' })
+    fetch(apiUrl('resource=admin/users'), { credentials: 'same-origin' })
       .then(async (response) => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Không tải được danh sách tài khoản.');
@@ -61,7 +62,7 @@ export const AdminDashboardPage: React.FC = () => {
   const updateUserRole = async (userId: string, role: ManagedUser['role']) => {
     setUsersError('');
     try {
-      const response = await fetch('/api?resource=admin/users', {
+      const response = await fetch(apiUrl('resource=admin/users'), {
         method: 'PATCH',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },

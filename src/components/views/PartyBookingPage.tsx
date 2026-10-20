@@ -42,7 +42,7 @@ export const PartyBookingPage: React.FC = () => {
 
   const timeValidation = validateDeliveryDateTime(date, time);
 
-  const handleSubmitQuotationRequest = (e: React.FormEvent) => {
+  const handleSubmitQuotationRequest = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!timeValidation.isValid) {
@@ -71,8 +71,8 @@ export const PartyBookingPage: React.FC = () => {
       ].join(' '),
     });
 
-    const newOrderId = submitDraftOrder();
-    navigateTo(`/orders/${newOrderId}`);
+    const newOrderId = await submitDraftOrder();
+    if (newOrderId) navigateTo(`/orders/${newOrderId}`);
   };
 
   return (

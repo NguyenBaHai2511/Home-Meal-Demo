@@ -164,14 +164,14 @@ export const MealPlannerPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!timeValidation.isValid) {
       alert(`Quy định đặt món: ${timeValidation.message}`);
       setCurrentStep(1);
       return;
     }
-    const newOrderId = submitDraftOrder();
-    navigateTo(`/orders/${newOrderId}`);
+    const newOrderId = await submitDraftOrder();
+    if (newOrderId) navigateTo(`/orders/${newOrderId}`);
   };
 
   // Filtered dishes

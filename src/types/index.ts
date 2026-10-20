@@ -204,4 +204,5 @@ export interface UserProfile {
   role: 'customer' | 'cook' | 'admin';
   address: string;
   avatar: string;
+  mfaEnabled?: boolean;
 }

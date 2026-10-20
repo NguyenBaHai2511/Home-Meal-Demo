@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Eye
 } from 'lucide-react';
-import { ImageWithFallback } from '../../common/ImageWithFallback';
 
 export const CookShoppingPage: React.FC = () => {
   const { 
@@ -23,7 +22,9 @@ export const CookShoppingPage: React.FC = () => {
     deleteShoppingEvidenceItem, 
     requestBudgetChange, 
     updateOrderStatus,
-    navigateTo 
+    navigateTo,
+    uploadPrivateEvidence,
+    showToast,
   } = useApp();
 
   // Pick the active order
@@ -43,7 +44,8 @@ export const CookShoppingPage: React.FC = () => {
   const [actualPrice, setActualPrice] = useState(52000);
   const [storeName, setStoreName] = useState('Chợ Tân Định');
   const [notes, setNotes] = useState('');
-  const [receiptUrl, setReceiptUrl] = useState('https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=500&q=80');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [savingEvidence, setSavingEvidence] = useState(false);
 
   // Request budget change form state
   const [showBudgetChangeModal, setShowBudgetChangeModal] = useState(false);
@@ -51,27 +53,37 @@ export const CookShoppingPage: React.FC = () => {
   const [bcrDifference, setBcrDifference] = useState(80000);
   const [bcrReason, setBcrReason] = useState('Giá tôm hôm nay tại vựa tăng đột xuất do nguồn hàng khan hiếm.');
 
-  const handleAddItem = (e: React.FormEvent) => {
+  if (!currentOrder) return <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-[#738078]">Chưa có đơn đi chợ được giao cho bạn.</div>;
+
+  const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-
-    addShoppingEvidenceItem(currentOrder.id, {
-      name,
-      quantity,
-      unit,
-      estimatedPrice,
-      actualPrice,
-      subtotal: actualPrice,
-      storeName,
-      purchaseTime: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      receiptImageUrl: receiptUrl,
-      notes,
-      status: actualPrice > estimatedPrice ? 'price_increased' : 'purchased',
-      approvedByCustomer: true,
-    });
-
-    setName('');
-    setShowAddModal(false);
+    if (!receiptFile) { showToast('Hãy chọn ảnh hóa đơn để lưu chứng từ riêng tư.'); return; }
+    setSavingEvidence(true);
+    try {
+      const receiptImageUrl = await uploadPrivateEvidence(currentOrder.id, receiptFile);
+      addShoppingEvidenceItem(currentOrder.id, {
+        name,
+        quantity,
+        unit,
+        estimatedPrice,
+        actualPrice,
+        subtotal: actualPrice,
+        storeName,
+        purchaseTime: new Date().toISOString(),
+        receiptImageUrl,
+        notes,
+        status: actualPrice > estimatedPrice ? 'price_increased' : 'purchased',
+        approvedByCustomer: false,
+      });
+      setName('');
+      setReceiptFile(null);
+      setShowAddModal(false);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không lưu được ảnh hóa đơn.');
+    } finally {
+      setSavingEvidence(false);
+    }
   };
 
   const handleSendBudgetChangeRequest = (e: React.FormEvent) => {
@@ -82,7 +94,6 @@ export const CookShoppingPage: React.FC = () => {
       difference: bcrDifference,
       reason: bcrReason,
       affectedItem: bcrItem,
-      evidencePhotoUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=500&q=80',
     });
     setShowBudgetChangeModal(false);
   };
@@ -309,15 +320,8 @@ export const CookShoppingPage: React.FC = () => {
 
               <div>
                 <label className="block font-semibold text-[#263B35] mb-1">Ảnh hóa đơn hoặc sạp chợ:</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={receiptUrl}
-                    onChange={(e) => setReceiptUrl(e.target.value)}
-                    placeholder="URL ảnh hóa đơn..."
-                    className="flex-1 px-3 py-2 bg-white rounded-xl border border-[#E5ECE7] text-xs focus:ring-2 focus:ring-[#285E56]"
-                  />
-                </div>
+                <input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => setReceiptFile(event.target.files?.[0] || null)} className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5ECE7] text-xs" />
+                <p className="mt-1 text-[11px] text-[#738078]">Ảnh JPEG, PNG hoặc WebP, tối đa 5 MB. Chỉ khách của đơn, đầu bếp được giao và admin mới xem được.</p>
               </div>
 
               <div>
@@ -341,9 +345,10 @@ export const CookShoppingPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
+                  disabled={savingEvidence}
                   className="px-5 py-2 bg-[#285E56] text-white text-xs font-bold rounded-lg hover:bg-[#1f4b44]"
                 >
-                  Lưu món vào danh sách
+                  {savingEvidence ? 'Đang tải ảnh…' : 'Lưu món vào danh sách'}
                 </button>
               </div>
             </form>

@@ -1,10 +1,20 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const configuredPath = env.APP_BASE_PATH?.trim() || '/HomeMeal';
+  const pathSegments = configuredPath.split('/').filter(Boolean);
+  if (configuredPath.includes('?') || configuredPath.includes('#') || pathSegments.some((segment) => segment === '.' || segment === '..')) {
+    throw new Error('APP_BASE_PATH must be a plain URL path without query strings or fragments.');
+  }
+  const basePath = pathSegments.length ? `/${pathSegments.join('/')}` : '';
+  const apiPrefix = `${basePath}/api` || '/api';
+
   return {
+    base: `${basePath || ''}/`,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
@@ -13,7 +23,10 @@ export default defineConfig(() => {
     },
     server: {
       proxy: {
-        '/api': 'http://localhost:3001',
+        [apiPrefix]: {
+          target: 'http://localhost:3001',
+          rewrite: (requestPath) => requestPath.startsWith(apiPrefix) ? `/api${requestPath.slice(apiPrefix.length)}` : requestPath,
+        },
       },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.

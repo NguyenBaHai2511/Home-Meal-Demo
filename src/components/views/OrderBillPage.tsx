@@ -11,8 +11,6 @@ import {
   ShieldCheck, 
   AlertTriangle, 
   CreditCard, 
-  Building2, 
-  QrCode, 
   Eye, 
   Sparkles, 
   Heart,
@@ -24,14 +22,11 @@ interface OrderBillPageProps {
 }
 
 export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
-  const { getOrderById, navigateTo, processPayment, submitReview } = useApp();
+  const { getOrderById, navigateTo, submitReview } = useApp();
   const order = getOrderById(orderId);
 
   const [selectedEvidenceItem, setSelectedEvidenceItem] = useState<ShoppingEvidenceItem | null>(null);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'bank_transfer' | 'momo' | 'card'>('bank_transfer');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Review states after payment
   const [reviewRating, setReviewRating] = useState(5);
@@ -51,15 +46,6 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
       </div>
     );
   }
-
-  const handleSimulatedPayment = () => {
-    setIsProcessingPayment(true);
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      setShowPaymentModal(false);
-      processPayment(order.id, selectedPaymentMethod === 'bank_transfer' ? 'Chuyển khoản VietQR' : selectedPaymentMethod === 'momo' ? 'Ví MoMo' : 'Thẻ Visa/Mastercard');
-    }, 1200);
-  };
 
   const handleSendReview = () => {
     submitReview(order.id, {
@@ -252,17 +238,9 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
                 <span>ĐÃ THANH TOÁN THÀNH CÔNG</span>
               </div>
             ) : (
-              <button
-                disabled={isDisputed}
-                onClick={() => setShowPaymentModal(true)}
-                className={`w-full sm:w-auto px-8 py-3.5 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 ${
-                  isDisputed
-                    ? 'bg-stone-300 cursor-not-allowed text-stone-500'
-                    : 'bg-[#285E56] hover:bg-[#1f4b44]'
-                }`}
-              >
+              <button disabled className="w-full sm:w-auto px-8 py-3.5 bg-stone-300 text-stone-600 font-bold text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                 <CreditCard className="w-4 h-4 text-[#B8E4D3]" />
-                <span>Xác nhận hoàn thành & Thanh toán ngay</span>
+                <span>{isDisputed ? 'Thanh toán đang tạm khóa do khiếu nại' : 'Cổng thanh toán chưa được cấu hình'}</span>
               </button>
             )}
           </div>
@@ -317,103 +295,6 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
           </div>
         )}
       </div>
-
-      {/* Simulated Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div
-            className="bg-[#FFFDF7] rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-[#E5ECE7]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-[#E5ECE7] bg-white flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-base text-[#263B35]">Thanh toán dịch vụ HomeMeal</h3>
-                <p className="text-xs text-[#738078]">Đơn #{order.orderCode} · Số tiền: {formatVND(order.finalPayableAmount)}</p>
-              </div>
-              <button onClick={() => setShowPaymentModal(false)} className="text-[#738078] hover:text-[#263B35]">
-                ✕
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 text-xs sm:text-sm">
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs">
-                * Đây là giao diện thanh toán mô phỏng (Demo Prototype). Bạn sẽ không bị trừ tiền thật trong tài khoản ngân hàng.
-              </div>
-
-              <div className="space-y-2">
-                <label className="block font-semibold text-[#263B35]">Chọn phương thức thanh toán:</label>
-
-                <label className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer ${
-                  selectedPaymentMethod === 'bank_transfer' ? 'border-[#285E56] bg-[#E7F5EF]' : 'border-[#E5ECE7]'
-                }`}>
-                  <input
-                    type="radio"
-                    name="payMethod"
-                    value="bank_transfer"
-                    checked={selectedPaymentMethod === 'bank_transfer'}
-                    onChange={() => setSelectedPaymentMethod('bank_transfer')}
-                  />
-                  <Building2 className="w-4 h-4 text-[#285E56]" />
-                  <div>
-                    <p className="font-bold text-xs text-[#263B35]">Chuyển khoản ngân hàng 24/7 (VietQR)</p>
-                    <p className="text-[10px] text-[#738078]">Quét mã QR qua mọi ứng dụng ngân hàng</p>
-                  </div>
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer ${
-                  selectedPaymentMethod === 'momo' ? 'border-[#285E56] bg-[#E7F5EF]' : 'border-[#E5ECE7]'
-                }`}>
-                  <input
-                    type="radio"
-                    name="payMethod"
-                    value="momo"
-                    checked={selectedPaymentMethod === 'momo'}
-                    onChange={() => setSelectedPaymentMethod('momo')}
-                  />
-                  <QrCode className="w-4 h-4 text-pink-600" />
-                  <div>
-                    <p className="font-bold text-xs text-[#263B35]">Ví điện tử MoMo</p>
-                    <p className="text-[10px] text-[#738078]">Thanh toán tức thì</p>
-                  </div>
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer ${
-                  selectedPaymentMethod === 'card' ? 'border-[#285E56] bg-[#E7F5EF]' : 'border-[#E5ECE7]'
-                }`}>
-                  <input
-                    type="radio"
-                    name="payMethod"
-                    value="card"
-                    checked={selectedPaymentMethod === 'card'}
-                    onChange={() => setSelectedPaymentMethod('card')}
-                  />
-                  <CreditCard className="w-4 h-4 text-blue-600" />
-                  <div>
-                    <p className="font-bold text-xs text-[#263B35]">Thẻ Quốc tế (Visa / Mastercard / JCB)</p>
-                    <p className="text-[10px] text-[#738078]">Cổng thẻ nội địa và quốc tế</p>
-                  </div>
-                </label>
-              </div>
-
-              <div className="pt-3 border-t border-[#E5ECE7] flex justify-end gap-2">
-                <button
-                  onClick={() => setShowPaymentModal(false)}
-                  className="px-4 py-2 border border-[#E5ECE7] text-xs font-semibold rounded-lg"
-                >
-                  Hủy
-                </button>
-                <button
-                  disabled={isProcessingPayment}
-                  onClick={handleSimulatedPayment}
-                  className="px-6 py-2 bg-[#285E56] hover:bg-[#1f4b44] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5"
-                >
-                  {isProcessingPayment ? 'Đang xác thực...' : `Thanh toán ${formatVND(order.finalPayableAmount)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modals */}
       {selectedEvidenceItem && (

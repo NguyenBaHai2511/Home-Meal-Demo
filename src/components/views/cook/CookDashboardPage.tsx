@@ -197,7 +197,7 @@ export const CookDashboardPage: React.FC = () => {
                 )}
 
                 <button
-                  onClick={() => navigateTo(`/orders/${order.id}`)}
+                  onClick={() => navigateTo(`/cook/orders/${order.id}`)}
                   className="px-3 py-1.5 border border-[#E5ECE7] text-xs font-semibold text-[#263B35] rounded-lg hover:bg-stone-50"
                 >
                   Xem chi tiết

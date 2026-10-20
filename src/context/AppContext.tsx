@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Order, Dish, Cook, UserProfile, OrderStatus, ShoppingEvidenceItem, BudgetChangeRequest, Quotation } from '../types';
 import { MOCK_ORDERS, MOCK_DISHES, MOCK_COOKS, MOCK_USERS } from '../data/mockData';
-import { calculateLaborFee } from '../utils/pricing';
-import { getEarliestDeliveryDate, formatDateForInput, formatTimeForInput, validateDeliveryDateTime } from '../utils/dateTimeValidation';
+import { getEarliestDeliveryDate, formatDateForInput, formatTimeForInput } from '../utils/dateTimeValidation';
+import { apiUrl, currentAppPath, toAppPath } from '../utils/appPath';
 
 interface AppContextType {
   currentUser: UserProfile;
   authUser: UserProfile | null;
   authLoading: boolean;
-  login: (email: string, password: string) => Promise<UserProfile>;
-  register: (name: string, email: string, password: string) => Promise<UserProfile>;
+  login: (email: string, password: string, totpCode?: string) => Promise<UserProfile>;
+  register: (name: string, email: string, password: string) => Promise<{ message: string }>;
   logout: () => Promise<void>;
   
   orders: Order[];
@@ -20,7 +20,7 @@ interface AppContextType {
   draftOrder: Partial<Order>;
   updateDraftOrder: (data: Partial<Order>) => void;
   resetDraftOrder: () => void;
-  submitDraftOrder: () => string; // returns created order ID
+  submitDraftOrder: () => Promise<string>;
   
   // Order actions
   getOrderById: (id: string) => Order | undefined;
@@ -31,6 +31,7 @@ interface AppContextType {
   rejectBudgetChange: (orderId: string, requestId: string, responseNote?: string) => void;
   requestBudgetChange: (orderId: string, request: Omit<BudgetChangeRequest, 'id' | 'status' | 'requestedAt'>) => void;
   addShoppingEvidenceItem: (orderId: string, item: Omit<ShoppingEvidenceItem, 'id'>) => void;
+  uploadPrivateEvidence: (orderId: string, file: File) => Promise<string>;
   deleteShoppingEvidenceItem: (orderId: string, itemId: string) => void;
   
   // Quotations
@@ -58,32 +59,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY_ORDERS = 'homemeal_orders_v1';
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authUser, setAuthUser] = useState<UserProfile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<UserProfile>(MOCK_USERS.customer);
-  const [orders, setOrders] = useState<Order[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_ORDERS);
-      if (saved) {
-        const parsed: Order[] = JSON.parse(saved);
-        return parsed.map((o) => ({
-          ...o,
-          serviceType: (o.serviceType as string) === 'cook_at_home' ? 'cook_and_deliver' : o.serviceType,
-          deliveryFee: o.deliveryFee > 0 ? o.deliveryFee : 35000,
-        }));
-      }
-    } catch {
-      // ignore
-    }
-    return MOCK_ORDERS;
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const [currentPath, setCurrentPath] = useState<string>(() =>
-    window.location.pathname + window.location.search + window.location.hash || '/'
-  );
+  const [currentPath, setCurrentPath] = useState<string>(() => currentAppPath());
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -93,18 +75,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    fetch('/api?resource=auth&action=me', { credentials: 'same-origin' })
+    let mounted = true;
+    fetch(apiUrl('resource=auth&action=me'), { credentials: 'same-origin' })
       .then(async (response) => {
         if (!response.ok) throw new Error('Could not restore the sign-in session.');
         const result: { user: UserProfile | null } = await response.json();
+        if (!mounted) return;
         if (result.user) applyAuthenticatedUser(result.user);
+        else setOrders(MOCK_ORDERS);
       })
-      .catch(() => undefined)
-      .finally(() => setAuthLoading(false));
+      .catch(() => { if (mounted) setOrders(MOCK_ORDERS); })
+      .finally(() => { if (mounted) setAuthLoading(false); });
+    return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    if (!authUser) return;
+    let mounted = true;
+    fetch(apiUrl('resource=orders'), { credentials: 'same-origin' })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Không tải được đơn hàng.');
+        if (mounted) setOrders(result.orders as Order[]);
+      })
+      .catch((error) => { if (mounted) showToast(error instanceof Error ? error.message : 'Không tải được đơn hàng.'); });
+    return () => { mounted = false; };
+  }, [authUser?.id]);
+
   const submitAuth = async (action: 'login' | 'register', payload: Record<string, string>) => {
-    const response = await fetch('/api?resource=auth', {
+    const response = await fetch(apiUrl('resource=auth'), {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
@@ -112,17 +111,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Unable to sign in.');
-    applyAuthenticatedUser(result.user as UserProfile);
-    return result.user as UserProfile;
+    return result as { user: UserProfile; message?: string };
   };
 
-  const login = (email: string, password: string) => submitAuth('login', { email, password });
-  const register = (name: string, email: string, password: string) =>
-    submitAuth('register', { name, email, password });
+  const login = async (email: string, password: string, totpCode?: string) => {
+    const result = await submitAuth('login', { email, password, ...(totpCode ? { totpCode } : {}) });
+    const user = result.user as UserProfile;
+    applyAuthenticatedUser(user);
+    return user;
+  };
+  const register = async (name: string, email: string, password: string) => {
+    const result = await submitAuth('register', { name, email, password });
+    return { message: result.message || 'Kiểm tra email để xác minh tài khoản.' };
+  };
 
   const logout = async () => {
     try {
-      await fetch('/api?resource=auth', {
+      await fetch(apiUrl('resource=auth'), {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -131,21 +136,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } finally {
       setAuthUser(null);
       setCurrentUser(MOCK_USERS.customer);
+      setOrders(MOCK_ORDERS);
     }
   };
 
   // Sync route with browser history
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname + window.location.search + window.location.hash || '/');
+      setCurrentPath(currentAppPath());
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const navigateTo = (path: string) => {
-    window.history.pushState({}, '', path);
-    setCurrentPath(window.location.pathname + window.location.search + window.location.hash || '/');
+    window.history.pushState({}, '', toAppPath(path));
+    setCurrentPath(currentAppPath());
   };
 
   const showToast = (msg: string) => {
@@ -155,14 +161,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4000);
   };
 
-  // Sync orders to localStorage
-  useEffect(() => {
+  const persistOrderAction = async (orderId: string, action: string, payload: Record<string, unknown> = {}) => {
     try {
-      localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(orders));
-    } catch {
-      // ignore
+      const response = await fetch(apiUrl(`resource=orders&action=${encodeURIComponent(action)}`), {
+        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, payload }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Không cập nhật được đơn hàng.');
+      const updatedOrder = result.order as Order;
+      setOrders((current) => [updatedOrder, ...current.filter((order) => order.id !== updatedOrder.id)]);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không cập nhật được đơn hàng.');
     }
-  }, [orders]);
+  };
+
+  const uploadPrivateEvidence = async (orderId: string, file: File) => {
+    if (!authUser || authUser.role !== 'cook') throw new Error('Chỉ đầu bếp được tải chứng từ.');
+    if (file.size < 1 || file.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      throw new Error('Chọn ảnh JPEG, PNG hoặc WebP có dung lượng tối đa 5 MB.');
+    }
+    const prepareResponse = await fetch(apiUrl('resource=evidence&action=prepare-upload'), {
+      method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, fileName: file.name, contentType: file.type, byteSize: file.size }),
+    });
+    const prepared = await prepareResponse.json();
+    if (!prepareResponse.ok) throw new Error(prepared.error || 'Không tạo được liên kết tải ảnh.');
+    const uploadResponse = await fetch(prepared.uploadUrl, { method: 'PUT', headers: prepared.headers, body: file });
+    if (!uploadResponse.ok) throw new Error('Không tải được ảnh lên kho riêng tư. Kiểm tra cấu hình CORS của bucket.');
+    const finalizeResponse = await fetch(apiUrl('resource=evidence&action=finalize-upload'), {
+      method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId: prepared.fileId }),
+    });
+    const finalized = await finalizeResponse.json();
+    if (!finalizeResponse.ok) throw new Error(finalized.error || 'Không xác nhận được ảnh đã tải lên.');
+    return finalized.fileUrl as string;
+  };
 
   // Draft order initial state with 4-hour advance constraint
   const earliestDelivery = getEarliestDeliveryDate();
@@ -217,67 +251,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDraftOrder(resetDraft);
   };
 
-  const submitDraftOrder = (): string => {
-    const submittedDraftOrder = draftOrderRef.current;
-    const dishes = (submittedDraftOrder.items || []).map((i) => i.dish);
-    const guestCount = submittedDraftOrder.guestCount || 4;
-    const serviceType = submittedDraftOrder.serviceType || 'cook_and_deliver';
-    const feeCalc = calculateLaborFee(guestCount, dishes, serviceType);
-
-    const newId = 'ord_' + Date.now();
-    const orderCode = 'HM-' + Math.floor(1000 + Math.random() * 9000);
-
-    const requiresQuotation = feeCalc.requiresQuotation;
-
-    const validation = validateDeliveryDateTime(submittedDraftOrder.date, submittedDraftOrder.servingTime);
-    const finalDate = validation.isValid && submittedDraftOrder.date ? submittedDraftOrder.date : validation.earliestDateStr;
-    const finalTime = validation.isValid && submittedDraftOrder.servingTime ? submittedDraftOrder.servingTime : validation.earliestTimeStr;
-
-    const newOrder: Order = {
-      id: newId,
-      orderCode,
-      customerId: currentUser.id,
-      customerName: submittedDraftOrder.customerName || currentUser.name,
-      customerPhone: submittedDraftOrder.customerPhone || currentUser.phone,
-      customerAddress: submittedDraftOrder.customerAddress || currentUser.address,
-      date: finalDate,
-      servingTime: finalTime,
-      guestCount,
-      mealOccasion: submittedDraftOrder.mealOccasion || 'Bữa cơm gia đình',
-      serviceType,
-      items: submittedDraftOrder.items || [],
-      allergies: submittedDraftOrder.allergies || [],
-      generalPreferences: submittedDraftOrder.generalPreferences || '',
-      estimatedGroceryBudget: submittedDraftOrder.estimatedGroceryBudget || 400000,
-      actualGroceryTotal: 0,
-      shoppingList: [],
-      budgetChangeRequests: [],
-      cookId: submittedDraftOrder.cookId || MOCK_COOKS[0].id,
-      cook: MOCK_COOKS.find((c) => c.id === (submittedDraftOrder.cookId || MOCK_COOKS[0].id)) || MOCK_COOKS[0],
-      baseLaborFee: feeCalc.baseLaborFee,
-      complexityAdjustment: feeCalc.complexityAdjustment,
-      guestCountAdjustment: feeCalc.guestAdjustment,
-      deliveryFee: feeCalc.deliveryFee,
-      additionalServiceFee: feeCalc.additionalServiceFee,
-      totalLaborFee: feeCalc.totalLaborFee,
-      finalPayableAmount: feeCalc.totalLaborFee + feeCalc.deliveryFee,
-      status: requiresQuotation ? 'awaiting_quotation' : 'awaiting_cook',
-      statusHistory: [
-        {
-          status: requiresQuotation ? 'awaiting_quotation' : 'awaiting_cook',
-          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          note: requiresQuotation
-            ? 'Đã gửi yêu cầu tiệc lớn. Đầu bếp sẽ gửi bảng báo giá chi tiết.'
-            : 'Đã gửi yêu cầu đặt bữa. Đang chờ đầu bếp xác nhận.',
-        },
-      ],
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    };
-
-    setOrders((prev) => [newOrder, ...prev]);
-    resetDraftOrder();
-    showToast(`Đã tạo đơn ${orderCode} thành công!`);
-    return newId;
+  const submitDraftOrder = async (): Promise<string> => {
+    if (!authUser || authUser.role !== 'customer') {
+      showToast('Vui lòng đăng nhập tài khoản khách hàng để gửi đơn.');
+      navigateTo(`/login?next=${encodeURIComponent(currentPath)}`);
+      return '';
+    }
+    try {
+      const draft = draftOrderRef.current;
+      const response = await fetch(apiUrl('resource=orders&action=create'), {
+        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draft: { ...draft, items: (draft.items || []).map((item) => ({ ...item, dish: { id: item.dish.id } })) } }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Không tạo được đơn hàng.');
+      const order = result.order as Order;
+      setOrders((current) => [order, ...current.filter((item) => item.id !== order.id)]);
+      resetDraftOrder();
+      showToast(`Đã tạo đơn ${order.orderCode} thành công!`);
+      return order.id;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không tạo được đơn hàng.');
+      return '';
+    }
   };
 
   const getOrderById = (id: string): Order | undefined => {
@@ -285,6 +281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus, note?: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'update-status', { status, note }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -307,6 +304,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Grocery budget change approvals
   const approveBudgetChange = (orderId: string, requestId: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'approve-budget-change', { requestId }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -339,6 +337,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const rejectBudgetChange = (orderId: string, requestId: string, responseNote?: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'reject-budget-change', { requestId, responseNote }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -369,6 +368,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     orderId: string,
     requestData: Omit<BudgetChangeRequest, 'id' | 'status' | 'requestedAt'>
   ) => {
+    if (authUser) { void persistOrderAction(orderId, 'request-budget-change', requestData as unknown as Record<string, unknown>); return; }
     const newReq: BudgetChangeRequest = {
       ...requestData,
       id: 'bcr_' + Date.now(),
@@ -398,6 +398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addShoppingEvidenceItem = (orderId: string, itemData: Omit<ShoppingEvidenceItem, 'id'>) => {
+    if (authUser) { void persistOrderAction(orderId, 'add-evidence-item', { item: itemData as unknown as Record<string, unknown> }); return; }
     const newItem: ShoppingEvidenceItem = {
       ...itemData,
       id: 'shop_' + Date.now(),
@@ -422,6 +423,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteShoppingEvidenceItem = (orderId: string, itemId: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'delete-evidence-item', { itemId }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -442,6 +444,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Quotation workflows
   const acceptQuotation = (orderId: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'accept-quotation'); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId || !ord.quotation) return ord;
@@ -474,6 +477,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const rejectQuotation = (orderId: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'reject-quotation'); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId || !ord.quotation) return ord;
@@ -499,6 +503,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     orderId: string,
     quotationData: Omit<Quotation, 'id' | 'orderId' | 'status' | 'submittedAt'>
   ) => {
+    if (authUser) { void persistOrderAction(orderId, 'submit-quotation', { quotation: quotationData as unknown as Record<string, unknown> }); return; }
     const newQuote: Quotation = {
       ...quotationData,
       id: 'quote_' + Date.now(),
@@ -535,6 +540,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     description: string,
     reportedAmount: number
   ) => {
+    if (authUser) { void persistOrderAction(orderId, 'file-dispute', { reason, description, reportedAmount }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -564,6 +570,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resolveDispute = (orderId: string, adminResolution: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'resolve-dispute', { resolution: adminResolution }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId || !ord.dispute) return ord;
@@ -595,6 +602,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const processPayment = (orderId: string, paymentMethod: string) => {
+    if (authUser) { void persistOrderAction(orderId, 'process-payment', { paymentMethod }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -619,6 +627,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     orderId: string,
     review: { rating: number; foodQuality: number; transparency: number; professionalism: number; punctuality: number; comment: string }
   ) => {
+    if (authUser) { void persistOrderAction(orderId, 'submit-review', { review: review as unknown as Record<string, unknown> }); return; }
     setOrders((prev) =>
       prev.map((ord) => {
         if (ord.id !== orderId) return ord;
@@ -635,8 +644,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetToInitialDemoData = () => {
+    if (authUser) { showToast('Dữ liệu production được quản lý ở server.'); return; }
     setOrders(MOCK_ORDERS);
-    localStorage.removeItem(STORAGE_KEY_ORDERS);
     showToast('Đã khôi phục dữ liệu mẫu ban đầu!');
   };
 
@@ -662,6 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         rejectBudgetChange,
         requestBudgetChange,
         addShoppingEvidenceItem,
+        uploadPrivateEvidence,
         deleteShoppingEvidenceItem,
         acceptQuotation,
         rejectQuotation,

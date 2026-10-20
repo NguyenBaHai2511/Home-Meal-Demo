@@ -204,7 +204,7 @@ async function writeSecurityAudit(actorId: string | null, action: string, subjec
 
 const fileTypes: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 
-app.all('/api', assertSameOrigin, async (req: AuthRequest, res: Response, next: NextFunction) => {
+app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   const resource = getString(req.query.resource, 32);
   const action = getString(req.query.action, 40) || getString(req.body?.action, 40);
   try {

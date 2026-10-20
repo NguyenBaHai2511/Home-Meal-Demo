@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Order, Dish, Cook, UserProfile, OrderStatus, ShoppingEvidenceItem, BudgetChangeRequest, Quotation } from '../types';
 import { MOCK_ORDERS, MOCK_DISHES, MOCK_COOKS, MOCK_USERS } from '../data/mockData';
 import { calculateLaborFee } from '../utils/pricing';
@@ -59,7 +59,17 @@ const STORAGE_KEY_ORDERS = 'homemeal_orders_v1';
 const STORAGE_KEY_ROLE = 'homemeal_user_role_v1';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(MOCK_USERS.customer);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
+    try {
+      const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
+      if (savedRole === 'customer' || savedRole === 'cook' || savedRole === 'admin') {
+        return MOCK_USERS[savedRole];
+      }
+    } catch {
+      // ignore
+    }
+    return MOCK_USERS.customer;
+  });
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ORDERS);
@@ -77,16 +87,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return MOCK_ORDERS;
   });
 
-  const [currentPath, setCurrentPath] = useState<string>(() => {
-    return window.location.pathname || '/';
-  });
+  const [currentPath, setCurrentPath] = useState<string>(() =>
+    window.location.pathname + window.location.search + window.location.hash || '/'
+  );
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync route with browser history
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname || '/');
+      setCurrentPath(window.location.pathname + window.location.search + window.location.hash || '/');
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -94,8 +104,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const navigateTo = (path: string) => {
     window.history.pushState({}, '', path);
-    setCurrentPath(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentPath(window.location.pathname + window.location.search + window.location.hash || '/');
   };
 
   const showToast = (msg: string) => {
@@ -142,19 +151,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [draftOrder, setDraftOrder] = useState<Partial<Order>>(initialDraftOrder);
+  const draftOrderRef = useRef(draftOrder);
 
   const updateDraftOrder = (data: Partial<Order>) => {
-    setDraftOrder((prev) => ({ ...prev, ...data }));
+    const updatedDraftOrder = { ...draftOrderRef.current, ...data };
+    draftOrderRef.current = updatedDraftOrder;
+    setDraftOrder(updatedDraftOrder);
   };
 
   const resetDraftOrder = () => {
+    draftOrderRef.current = initialDraftOrder;
     setDraftOrder(initialDraftOrder);
   };
 
   const submitDraftOrder = (): string => {
-    const dishes = (draftOrder.items || []).map((i) => i.dish);
-    const guestCount = draftOrder.guestCount || 4;
-    const serviceType = draftOrder.serviceType || 'cook_and_deliver';
+    const submittedDraftOrder = draftOrderRef.current;
+    const dishes = (submittedDraftOrder.items || []).map((i) => i.dish);
+    const guestCount = submittedDraftOrder.guestCount || 4;
+    const serviceType = submittedDraftOrder.serviceType || 'cook_and_deliver';
     const feeCalc = calculateLaborFee(guestCount, dishes, serviceType);
 
     const newId = 'ord_' + Date.now();
@@ -162,31 +176,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const requiresQuotation = feeCalc.requiresQuotation;
 
-    const validation = validateDeliveryDateTime(draftOrder.date, draftOrder.servingTime);
-    const finalDate = validation.isValid && draftOrder.date ? draftOrder.date : validation.earliestDateStr;
-    const finalTime = validation.isValid && draftOrder.servingTime ? draftOrder.servingTime : validation.earliestTimeStr;
+    const validation = validateDeliveryDateTime(submittedDraftOrder.date, submittedDraftOrder.servingTime);
+    const finalDate = validation.isValid && submittedDraftOrder.date ? submittedDraftOrder.date : validation.earliestDateStr;
+    const finalTime = validation.isValid && submittedDraftOrder.servingTime ? submittedDraftOrder.servingTime : validation.earliestTimeStr;
 
     const newOrder: Order = {
       id: newId,
       orderCode,
       customerId: currentUser.id,
-      customerName: draftOrder.customerName || currentUser.name,
-      customerPhone: draftOrder.customerPhone || currentUser.phone,
-      customerAddress: draftOrder.customerAddress || currentUser.address,
+      customerName: submittedDraftOrder.customerName || currentUser.name,
+      customerPhone: submittedDraftOrder.customerPhone || currentUser.phone,
+      customerAddress: submittedDraftOrder.customerAddress || currentUser.address,
       date: finalDate,
       servingTime: finalTime,
       guestCount,
-      mealOccasion: draftOrder.mealOccasion || 'Bữa cơm gia đình',
+      mealOccasion: submittedDraftOrder.mealOccasion || 'Bữa cơm gia đình',
       serviceType,
-      items: draftOrder.items || [],
-      allergies: draftOrder.allergies || [],
-      generalPreferences: draftOrder.generalPreferences || '',
-      estimatedGroceryBudget: draftOrder.estimatedGroceryBudget || 400000,
+      items: submittedDraftOrder.items || [],
+      allergies: submittedDraftOrder.allergies || [],
+      generalPreferences: submittedDraftOrder.generalPreferences || '',
+      estimatedGroceryBudget: submittedDraftOrder.estimatedGroceryBudget || 400000,
       actualGroceryTotal: 0,
       shoppingList: [],
       budgetChangeRequests: [],
-      cookId: draftOrder.cookId || MOCK_COOKS[0].id,
-      cook: MOCK_COOKS.find((c) => c.id === (draftOrder.cookId || MOCK_COOKS[0].id)) || MOCK_COOKS[0],
+      cookId: submittedDraftOrder.cookId || MOCK_COOKS[0].id,
+      cook: MOCK_COOKS.find((c) => c.id === (submittedDraftOrder.cookId || MOCK_COOKS[0].id)) || MOCK_COOKS[0],
       baseLaborFee: feeCalc.baseLaborFee,
       complexityAdjustment: feeCalc.complexityAdjustment,
       guestCountAdjustment: feeCalc.guestAdjustment,
@@ -379,19 +393,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map((ord) => {
         if (ord.id !== orderId || !ord.quotation) return ord;
         const acceptedQuote = { ...ord.quotation, status: 'accepted' as const };
-        const totalLaborFee = acceptedQuote.laborFee + acceptedQuote.assistantFee + acceptedQuote.equipmentFee;
+        const totalLaborFee = acceptedQuote.laborFee;
+        const additionalServiceFee = acceptedQuote.assistantFee + acceptedQuote.equipmentFee;
+        const totalServiceFee = totalLaborFee + additionalServiceFee;
+        const finalPayableAmount =
+          ord.actualGroceryTotal + totalLaborFee + ord.deliveryFee + additionalServiceFee;
 
         return {
           ...ord,
           quotation: acceptedQuote,
           totalLaborFee,
+          additionalServiceFee,
+          finalPayableAmount,
           status: 'confirmed',
           statusHistory: [
             ...ord.statusHistory,
             {
               status: 'confirmed',
               timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
-              note: `Khách hàng đã đồng ý bảng báo giá (${new Intl.NumberFormat('vi-VN').format(totalLaborFee)} đ). Đơn hàng đã chính thức được chốt!`,
+              note: `Khách hàng đã đồng ý bảng báo giá (${new Intl.NumberFormat('vi-VN').format(totalServiceFee)} đ). Đơn hàng đã chính thức được chốt!`,
             },
           ],
         };
@@ -495,7 +515,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map((ord) => {
         if (ord.id !== orderId || !ord.dispute) return ord;
         const adjustedActualGrocery = Math.max(0, ord.actualGroceryTotal - (ord.dispute.reportedAmount || 0));
-        const newTotal = adjustedActualGrocery + ord.totalLaborFee + ord.deliveryFee;
+        const newTotal =
+          adjustedActualGrocery + ord.totalLaborFee + ord.deliveryFee + ord.additionalServiceFee;
 
         return {
           ...ord,

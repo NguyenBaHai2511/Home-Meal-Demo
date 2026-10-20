@@ -456,7 +456,7 @@ export const MOCK_ORDERS: Order[] = [
     guestCountAdjustment: 400000,
     deliveryFee: 0,
     additionalServiceFee: 700000, // 2 phụ bếp hỗ trợ phục vụ tiệc
-    totalLaborFee: 2100000,
+    totalLaborFee: 1400000,
     quotation: {
       id: 'quote_01',
       cookId: 'cook_02',

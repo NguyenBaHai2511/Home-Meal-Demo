@@ -63,7 +63,12 @@ export const PartyBookingPage: React.FC = () => {
       estimatedGroceryBudget: targetGroceryBudget,
       cookId: selectedCookId,
       items: partyDishes.map((dish) => ({ dish, quantity: Math.ceil(guests / 6) })),
-      generalPreferences: `Hình thức: ${servingStyle}. Cần ${assistantCount} phụ bếp. Ghi chú: ${specialNotes}`,
+      generalPreferences: [
+        'Hình thức: ' + servingStyle + '.',
+        needAssistants ? 'Cần ' + assistantCount + ' phụ bếp.' : 'Không cần phụ bếp.',
+        needEquipment ? 'Yêu cầu dụng cụ chuyên dụng.' : 'Không cần dụng cụ chuyên dụng.',
+        'Ghi chú: ' + specialNotes,
+      ].join(' '),
     });
 
     const newOrderId = submitDraftOrder();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
@@ -29,57 +29,70 @@ import { AdminDashboardPage } from './components/views/admin/AdminDashboardPage'
 
 const AppContent: React.FC = () => {
   const { currentPath } = useApp();
+  const pathname = currentPath.split(/[?#]/)[0] || '/';
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(decodeURIComponent(hash))?.scrollIntoView({ behavior: 'smooth' });
+    });
+  }, [currentPath]);
 
   // Route matching
   const renderCurrentView = () => {
     // 1. Static Exact Routes
-    if (currentPath === '/') return <HomePage />;
-    if (currentPath === '/meal-planner') return <MealPlannerPage />;
-    if (currentPath === '/menu' || currentPath.startsWith('/menu?')) return <MenuPage />;
-    if (currentPath === '/cooks') return <CooksPage />;
-    if (currentPath === '/party-booking') return <PartyBookingPage />;
-    if (currentPath === '/quotations') return <QuotationsPage />;
-    if (currentPath === '/orders') return <OrdersPage />;
-    if (currentPath === '/account' || currentPath === '/login' || currentPath === '/register' || currentPath === '/forgot-password') return <AccountPage />;
-    if (currentPath === '/support') return <SupportPage />;
+    if (pathname === '/') return <HomePage />;
+    if (pathname === '/meal-planner') return <MealPlannerPage />;
+    if (pathname === '/menu') return <MenuPage />;
+    if (pathname === '/cooks') return <CooksPage />;
+    if (pathname === '/party-booking') return <PartyBookingPage />;
+    if (pathname === '/quotations') return <QuotationsPage />;
+    if (pathname === '/orders') return <OrdersPage />;
+    if (pathname === '/account' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password') return <AccountPage />;
+    if (pathname === '/support') return <SupportPage />;
 
     // 2. Cook Routes
-    if (currentPath === '/cook/dashboard' || currentPath === '/cook/orders') return <CookDashboardPage />;
-    if (currentPath === '/cook/shopping' || currentPath.startsWith('/cook/shopping?')) return <CookShoppingPage />;
-    if (currentPath === '/cook/earnings') return <CookEarningsPage />;
+    if (pathname === '/cook/dashboard' || pathname === '/cook/orders') return <CookDashboardPage />;
+    if (pathname === '/cook/shopping') return <CookShoppingPage />;
+    if (pathname === '/cook/earnings') return <CookEarningsPage />;
 
     // 3. Admin Routes
     if (
-      currentPath === '/admin' ||
-      currentPath === '/admin/orders' ||
-      currentPath === '/admin/cooks' ||
-      currentPath === '/admin/disputes' ||
-      currentPath === '/admin/payments'
+      pathname === '/admin' ||
+      pathname === '/admin/orders' ||
+      pathname === '/admin/cooks' ||
+      pathname === '/admin/disputes' ||
+      pathname === '/admin/payments'
     ) {
       return <AdminDashboardPage />;
     }
 
     // 4. Dynamic Parameter Routes:
     // /cooks/:id
-    if (currentPath.startsWith('/cooks/')) {
-      const cookId = currentPath.replace('/cooks/', '');
+    if (pathname.startsWith('/cooks/')) {
+      const cookId = pathname.replace('/cooks/', '');
       return <CookDetailPage cookId={cookId} />;
     }
 
     // /orders/:id/bill or /orders/:id/payment
-    if (currentPath.match(/^\/orders\/[^/]+\/(bill|payment)/)) {
-      const match = currentPath.match(/^\/orders\/([^/]+)\/(bill|payment)/);
+    if (pathname.match(/^\/orders\/[^/]+\/(bill|payment)$/)) {
+      const match = pathname.match(/^\/orders\/([^/]+)\/(bill|payment)$/);
       const orderId = match ? match[1] : '';
       return <OrderBillPage orderId={orderId} />;
     }
 
     // /orders/:id or /cook/orders/:id
-    if (currentPath.startsWith('/orders/')) {
-      const orderId = currentPath.replace('/orders/', '').split('/')[0];
+    if (pathname.startsWith('/orders/')) {
+      const orderId = pathname.replace('/orders/', '').split('/')[0];
       return <OrderDetailPage orderId={orderId} />;
     }
-    if (currentPath.startsWith('/cook/orders/')) {
-      const orderId = currentPath.replace('/cook/orders/', '').split('/')[0];
+    if (pathname.startsWith('/cook/orders/')) {
+      const orderId = pathname.replace('/cook/orders/', '').split('/')[0];
       return <OrderDetailPage orderId={orderId} />;
     }
 

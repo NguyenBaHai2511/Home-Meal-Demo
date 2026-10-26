@@ -33,4 +33,10 @@ The previous `pathname.startsWith('/cook')` guard also matched the public `/cook
 
 ## Remaining work outside this visual change
 
-Production authentication still requires its database/schema issue to be resolved and a real registration/login/profile-save test. This UI review does not establish database readiness. Production build retains the existing warning about the main JavaScript chunk exceeding 500 KB; route-level splitting is a useful follow-up. Replace illustrative stock images with verified HomeMeal meal/cook photography when available.
+Production authentication still requires its database/schema issue to be resolved and a real registration/login/profile-save test. This UI review does not establish database readiness. The main JavaScript chunk warning was resolved by route-level splitting in `db8c55e`. Replace remaining stock dish/cook imagery with verified HomeMeal photography when available.
+
+## Food imagery follow-up — 26/10/2026
+
+Revisited Cocoon's publicly served homepage HTML and inline CSS. Its large image-led content blocks, generous spacing and restrained fade/slide and hover transitions informed this pass. These are layout references only; HomeMeal retains its own colors, content and component code. No Cocoon source, assets or animations were copied.
+
+Five original AI-generated food photographs were created for HomeMeal: a family meal hero and four suggested menu spreads (family, weekend, party and banquet). The prompts specified the corresponding Vietnamese dishes, natural daylight, handmade ceramics, warm neutral surfaces and no text or logos. The built-in image generation tool produced PNG originals; the selected images were converted to 1200px WebP under `src/assets/food/` (about 1 MB total). Each image is labeled as illustrative in the UI. The Home hero, suggested menu cards, Menu introduction and party booking header use these local assets. Existing order, filter, pricing and submission behavior is unchanged.

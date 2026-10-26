@@ -17,6 +17,11 @@ import {
   Check
 } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
+import heroFamilyMeal from '../../assets/food/hero-family-meal.webp';
+import menuFamily from '../../assets/food/menu-family.webp';
+import menuWeekend from '../../assets/food/menu-weekend.webp';
+import menuParty from '../../assets/food/menu-party.webp';
+import menuBanquet from '../../assets/food/menu-banquet.webp';
 import { 
   validateDeliveryDateTime, 
   getEarliestDeliveryDate, 
@@ -24,6 +29,13 @@ import {
   formatTimeForInput, 
   getNow 
 } from '../../utils/dateTimeValidation';
+
+const menuPhotos: Record<string, string> = {
+  menu_fam_4: menuFamily,
+  menu_weekend_6: menuWeekend,
+  menu_party_15: menuParty,
+  menu_banquet_30: menuBanquet,
+};
 
 export const HomePage: React.FC = () => {
   const { navigateTo, cooks, dishes, updateDraftOrder } = useApp();
@@ -76,7 +88,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Left Column */}
-            <div className="lg:col-span-6 space-y-6">
+            <div className="hero-copy lg:col-span-6 space-y-6">
               <div className="eyebrow inline-flex items-center gap-2 text-accent">
                 <Sparkles className="w-3.5 h-3.5 text-detail" />
                 <span>Đầu bếp tại nhà · Đi chợ minh bạch</span>
@@ -133,7 +145,7 @@ export const HomePage: React.FC = () => {
 
             <figure className="hero-visual lg:col-span-6 relative">
               <div className="aspect-[5/4] sm:aspect-[6/5] overflow-hidden rounded-t-[8rem] rounded-b-lg bg-surface-alt">
-                <ImageWithFallback src={dishes[0]?.imageUrl} alt="Gợi cảm hứng cho một bữa ăn tươi ngon tại nhà" className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
+                <ImageWithFallback src={heroFamilyMeal} alt="Mâm cơm Việt với thịt kho trứng, canh chua và rau xào" className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
               </div>
               <figcaption className="flex items-center justify-between gap-4 py-4 border-b border-border-soft">
                 <div><p className="eyebrow text-detail">Bữa cơm chân tình</p><p className="mt-1 text-sm text-ink">Thêm thời gian bên những người thương.</p></div>
@@ -346,7 +358,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* 3. Suggested Menus */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="suggested-menus" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
             <span className="eyebrow text-detail">Cảm hứng cho bữa cơm nhà</span>
@@ -360,10 +372,20 @@ export const HomePage: React.FC = () => {
           {SUGGESTED_MENUS.map((menu, index) => (
             <div
               key={menu.id}
-              className="menu-story bg-white rounded-xl border border-border-soft overflow-hidden flex flex-col justify-between"
+              className="menu-story bg-white rounded-xl border border-border-soft overflow-hidden flex flex-col"
             >
+              <div className="menu-story-media relative aspect-[4/3] overflow-hidden bg-surface-alt">
+                <ImageWithFallback
+                  src={menuPhotos[menu.id]}
+                  alt={`Ảnh minh họa ${menu.title}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute left-4 bottom-4 rounded-full bg-canvas/95 px-3 py-1 font-editorial text-lg italic text-accent shadow-sm">0{index + 1}</span>
+              </div>
               <div className="space-y-3 p-5">
-                <div className="flex items-center justify-between pb-4 border-b border-border-soft"><span className="font-editorial text-4xl italic text-detail">0{index + 1}</span><ChefHat className="text-detail" size={24} strokeWidth={1} /></div>
+                <div className="flex items-center justify-between pb-3 border-b border-border-soft"><span className="eyebrow text-detail">Mâm cơm gợi ý</span><ChefHat className="text-detail" size={20} strokeWidth={1} /></div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-accent bg-surface-alt px-2.5 py-0.5 rounded-full">
                     {menu.guestCount}
@@ -388,7 +410,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mx-5 mb-5 mt-5 pt-3 border-t border-border-soft space-y-2">
+              <div className="mx-5 mb-5 mt-auto pt-3 border-t border-border-soft space-y-2">
                 <div className="text-[11px] space-y-1 text-muted">
                   <div className="flex justify-between">
                     <span>Tiền chợ ước tính:</span>

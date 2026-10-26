@@ -231,6 +231,16 @@ button:is(.bg-brand, .bg-accent):disabled {
   }
   .dish-card img { transition: transform 350ms ease; }
   .dish-card:hover img { transform: scale(1.025); }
+  .menu-story-media img { transition: transform 550ms var(--interaction-ease); }
+  .menu-story:hover .menu-story-media img { transform: scale(1.045); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes home-arrive {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-copy { animation: home-arrive 600ms var(--interaction-ease) both; }
+  .hero-visual { animation: home-arrive 750ms var(--interaction-ease) 100ms both; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

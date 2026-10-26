@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatVND } from '../../utils/pricing';
+import menuBanquet from '../../assets/food/menu-banquet.webp';
 import { 
   Users, 
   Calendar, 
@@ -71,17 +72,23 @@ export const PartyBookingPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-accent to-accent-hover rounded-3xl p-6 sm:p-10 text-white shadow-lg space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold backdrop-blur-xs text-brand">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Dành cho tiệc từ 10 đến hơn 50 khách</span>
+      <div className="grid overflow-hidden rounded-3xl bg-accent text-white shadow-lg md:grid-cols-2">
+        <div className="space-y-4 p-6 sm:p-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-brand">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Dành cho tiệc từ 10 đến hơn 50 khách</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Đặt đầu bếp nấu tiệc & Mâm cỗ tại gia theo yêu cầu
+          </h1>
+          <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+            Không ép combo tiệc sẵn có. Đầu bếp sẽ khảo sát thực đơn, số lượng món và quy mô khách để gửi <strong>bảng báo giá nấu tiệc trực tiếp tại gia, phụ bếp và dọn dẹp chi tiết</strong>. Khách hàng duyệt báo giá trước khi đầu bếp tiến hành.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-          Đặt đầu bếp nấu tiệc & Mâm cỗ tại gia theo yêu cầu
-        </h1>
-        <p className="text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed">
-          Không ép combo tiệc sẵn có. Đầu bếp sẽ khảo sát thực đơn, số lượng món và quy mô khách để gửi <strong>bảng báo giá nấu tiệc trực tiếp tại gia, phụ bếp và dọn dẹp chi tiết</strong>. Khách hàng duyệt báo giá trước khi đầu bếp tiến hành.
-        </p>
+        <figure className="relative min-h-56 overflow-hidden bg-surface-alt">
+          <img src={menuBanquet} alt="Mâm cỗ gia đình với heo quay bánh hỏi, tôm và gà" className="absolute inset-0 h-full w-full object-cover" decoding="async" />
+          <figcaption className="absolute bottom-3 right-3 rounded-full bg-canvas/95 px-3 py-1 text-[10px] text-accent">Ảnh minh họa</figcaption>
+        </figure>
       </div>
 
       {/* Booking Form */}

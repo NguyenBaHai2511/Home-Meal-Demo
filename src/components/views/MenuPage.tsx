@@ -4,6 +4,7 @@ import { Dish, DishCategory } from '../../types';
 import { formatVND } from '../../utils/pricing';
 import { Search, Plus, Check, Utensils, ShoppingBag } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
+import menuFamily from '../../assets/food/menu-family.webp';
 
 export const MenuPage: React.FC = () => {
   const { dishes, draftOrder, updateDraftOrder, navigateTo } = useApp();
@@ -38,24 +39,29 @@ export const MenuPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <div className="page-intro flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
+      <div className="page-intro grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="max-w-xl">
           <span className="text-xs font-bold text-accent uppercase tracking-wider">Thực đơn phong phú</span>
           <h1 className="editorial-title page-title mt-3 text-ink">Chọn món theo<br className="hidden sm:block" /> sở thích gia đình</h1>
-          <p className="text-xs sm:text-sm text-muted mt-1">
+          <p className="text-xs sm:text-sm text-muted mt-4">
             Mỗi món ăn đều liệt kê rõ nguyên liệu dự kiến và chi phí đi chợ tham khảo.
           </p>
+          {selectedItems.length > 0 && (
+            <button
+              onClick={() => navigateTo('/meal-planner')}
+              className="mt-6 px-5 py-2.5 bg-accent text-white font-semibold text-xs sm:text-sm rounded-xl inline-flex items-center gap-2 hover:bg-accent-hover shadow-sm"
+            >
+              <ShoppingBag className="w-4 h-4 text-brand" />
+              <span>Đã chọn {selectedItems.length} món · Đặt bữa ngay</span>
+            </button>
+          )}
         </div>
-
-        {selectedItems.length > 0 && (
-          <button
-            onClick={() => navigateTo('/meal-planner')}
-            className="px-5 py-2.5 bg-accent text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-2 hover:bg-accent-hover shadow-sm self-start md:self-auto"
-          >
-            <ShoppingBag className="w-4 h-4 text-brand" />
-            <span>Đã chọn {selectedItems.length} món · Đặt bữa ngay</span>
-          </button>
-        )}
+        <figure className="min-w-0">
+          <div className="aspect-[16/9] overflow-hidden rounded-t-[5rem] rounded-b-xl bg-surface-alt">
+            <ImageWithFallback src={menuFamily} alt="Mâm cơm Nam Bộ với thịt kho, canh chua và rau xào" className="h-full w-full object-cover" decoding="async" />
+          </div>
+          <figcaption className="pt-2 text-right text-[11px] text-muted">Gợi ý mâm cơm nhà · Ảnh minh họa</figcaption>
+        </figure>
       </div>
 
       {/* Search & Filter Toolbar */}

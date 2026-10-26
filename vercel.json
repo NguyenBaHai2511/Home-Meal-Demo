@@ -1,6 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/HomeMeal",
+      "permanent": true
+    },
+    {
+      "source": "/HomeMeal/",
+      "destination": "/HomeMeal",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/2010",
@@ -11,11 +22,22 @@
       "destination": "https://2010-tan-eta.vercel.app/2010/:path*"
     },
     {
-      "source": "/((?!api|assets|2010).*)",
+      "source": "/HomeMeal/api",
+      "destination": "/api"
+    },
+    {
+      "source": "/HomeMeal/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/HomeMeal",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/HomeMeal/:path*",
       "destination": "/index.html"
     }
   ],
-
   "headers": [
     {
       "source": "/(.*)",

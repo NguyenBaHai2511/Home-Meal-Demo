@@ -5,12 +5,9 @@ import {
   Star, 
   MapPin, 
   Users, 
-  ChefHat, 
   CheckCircle2, 
   ShieldCheck, 
-  Calendar, 
   ArrowLeft,
-  Utensils,
   Award
 } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';

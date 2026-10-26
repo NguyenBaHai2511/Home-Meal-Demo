@@ -3,15 +3,8 @@ import { FAQS } from '../../data/mockData';
 import { 
   HelpCircle, 
   ShieldCheck, 
-  Receipt, 
-  FileText, 
-  AlertTriangle, 
-  Phone, 
-  Mail, 
-  MessageSquare, 
   ChevronDown, 
-  CheckCircle2,
-  Clock
+  CheckCircle2
 } from 'lucide-react';
 
 export const SupportPage: React.FC = () => {
@@ -27,6 +20,7 @@ export const SupportPage: React.FC = () => {
 
   const policies = [
     {
+      id: 'cancellation',
       title: 'Hủy đơn TRƯỚC KHI đầu bếp đi chợ',
       content: 'Khách hàng được quyền hủy đơn miễn phí 100% nếu đầu bếp chưa bắt đầu quy trình đi chợ (trước trạng thái "Đang đi chợ"). Bạn không phải chịu bất kỳ khoản chi phí nào.'
     },
@@ -39,6 +33,7 @@ export const SupportPage: React.FC = () => {
       content: 'Đầu bếp tuyệt đối không được tự ý mua nguyên liệu vượt trần ngân sách thỏa thuận ban đầu. Nếu giá tăng đột xuất (do ngày lễ, rằm...), đầu bếp phải chụp ảnh bảng giá và gửi thông báo xin duyệt qua ứng dụng. Chỉ khi khách hàng bấm "Đồng ý" thì đầu bếp mới được mua.'
     },
     {
+      id: 'evidence',
       title: 'Hóa đơn mờ chữ hoặc chứng từ không rõ ràng',
       content: 'Khách hàng có quyền từ chối thanh toán các khoản tiền không có chứng từ hoặc hóa đơn bị nhòe mực, không ghi rõ món. Hệ thống sẽ tạm khóa thanh toán khoản tiền đó cho đến khi đầu bếp hoặc ban quản trị xác minh.'
     },
@@ -47,6 +42,7 @@ export const SupportPage: React.FC = () => {
       content: 'Nếu một loại nguyên liệu bị hết hàng tại chợ, đầu bếp phải liên hệ xin ý kiến khách hàng để thay thế loại tương đương với mức giá hợp lý, không được tự ý đổi món mà không thông báo.'
     },
     {
+      id: 'disputes',
       title: 'Giao trễ giờ hoặc dịch vụ chưa đạt yêu cầu',
       content: 'Nếu đầu bếp phục vụ trễ giờ quá 30 phút mà không có lý do bất khả kháng, tiền công phục vụ sẽ được giảm trừ theo thang quy chuẩn của HomeMeal. Khách hàng có quyền khiếu nại trực tiếp trước khi xác nhận hóa đơn.'
     }
@@ -70,12 +66,12 @@ export const SupportPage: React.FC = () => {
       <div className="space-y-4" id="policies">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-accent" />
-          <h2 className="text-xl font-bold text-ink">Quy định minh bạch & Chính sách hủy/hoàn tiền</h2>
+          <h2 id="terms" className="text-xl font-bold text-ink">Quy định minh bạch & Chính sách hủy/hoàn tiền</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {policies.map((p, idx) => (
-            <div key={idx} className="bg-white rounded-2xl border border-border-soft p-5 space-y-2 hover:border-brand transition-colors">
+            <div key={idx} id={p.id} className="bg-white rounded-2xl border border-border-soft p-5 space-y-2 hover:border-brand transition-colors">
               <h3 className="font-bold text-sm text-ink flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-surface-alt text-accent flex items-center justify-center text-[10px] font-bold">
                   {idx + 1}
@@ -118,7 +114,7 @@ export const SupportPage: React.FC = () => {
       </div>
 
       {/* Contact Form */}
-      <div className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 space-y-6">
+      <div id="cook-register" className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 space-y-6">
         <div>
           <h2 className="text-xl font-bold text-ink">Liên hệ với ban quản trị HomeMeal</h2>
           <p className="text-xs text-muted mt-1">Đội ngũ hỗ trợ phản hồi trong vòng 30 phút đối với các vấn đề liên quan đến đơn hàng đang diễn ra.</p>

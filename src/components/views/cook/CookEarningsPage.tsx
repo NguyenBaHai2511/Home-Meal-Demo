@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../../context/AppContext';
 import { formatVND } from '../../../utils/pricing';
-import { ArrowLeft, DollarSign, Receipt, CheckCircle, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowLeft, DollarSign, Receipt, CheckCircle, Wallet } from 'lucide-react';
 
 export const CookEarningsPage: React.FC = () => {
   const { orders, navigateTo } = useApp();

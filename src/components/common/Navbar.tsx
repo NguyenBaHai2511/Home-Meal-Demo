@@ -17,6 +17,18 @@ export const Navbar: React.FC = () => {
   }, [currentPath]);
 
   useEffect(() => {
+    const desktopNavigation = window.matchMedia('(min-width: 1280px)');
+    const closeHiddenMenus = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+      setMobileMenuOpen(false);
+      setRoleMenuOpen(false);
+    };
+
+    desktopNavigation.addEventListener('change', closeHiddenMenus);
+    return () => desktopNavigation.removeEventListener('change', closeHiddenMenus);
+  }, []);
+
+  useEffect(() => {
     if (!mobileMenuOpen && !roleMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;

@@ -19,38 +19,6 @@
 
 @font-face {
   font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-Light.ttf") format("truetype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-BoldItalic.ttf") format("truetype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-MediumItalic.ttf") format("truetype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-LightItalic.ttf") format("truetype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
   src: url("./assets/fonts/PlusJakartaSans-ExtraBold.ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
@@ -67,40 +35,8 @@
 
 @font-face {
   font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-ExtraLightItalic.ttf") format("truetype");
-  font-weight: 200;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-ExtraBoldItalic.ttf") format("truetype");
-  font-weight: 800;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
   src: url("./assets/fonts/PlusJakartaSans-Medium.ttf") format("truetype");
   font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-SemiBoldItalic.ttf") format("truetype");
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  src: url("./assets/fonts/PlusJakartaSans-ExtraLight.ttf") format("truetype");
-  font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
@@ -210,12 +146,6 @@ body {
 
 :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
   border-color: var(--color-control-border);
-}
-
-/* A burgundy outline stays visible on white, mint-white and mint surfaces. */
-:where(button, a, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
 }
 
 button.bg-brand:is(:hover, :active):not(:disabled) {
@@ -342,6 +272,7 @@ button:is(.bg-brand, .bg-accent):disabled {
 :where(section[id]) { scroll-margin-top: 6rem; }
 :where(button, summary) { cursor: pointer; }
 :where(button:disabled) { cursor: not-allowed; }
+/* A burgundy outline stays visible on white, mint-white and mint surfaces. */
 :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;

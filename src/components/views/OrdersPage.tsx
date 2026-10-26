@@ -7,12 +7,9 @@ import {
   ArrowRight, 
   Calendar, 
   Clock, 
-  Users, 
-  Receipt, 
   AlertTriangle, 
   FileText,
-  CheckCircle,
-  ChefHat
+  CheckCircle
 } from 'lucide-react';
 
 export const OrdersPage: React.FC = () => {

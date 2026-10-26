@@ -24,8 +24,6 @@ import {
   Trash2, 
   ChefHat, 
   Star, 
-  ShieldCheck, 
-  Receipt, 
   Info,
   CheckCircle2,
   AlertTriangle,
@@ -47,9 +45,8 @@ const STEPS = [
 ];
 
 export const MealPlannerPage: React.FC = () => {
-  const { dishes, cooks, draftOrder, updateDraftOrder, submitDraftOrder, navigateTo } = useApp();
+  const { cooks, draftOrder, updateDraftOrder, submitDraftOrder, navigateTo } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
-  const [newExcludedIngredient, setNewExcludedIngredient] = useState('');
   const [newAllergy, setNewAllergy] = useState('');
 
   // Custom dish input state

@@ -5,15 +5,8 @@ import { StatusBadge } from '../../common/StatusBadge';
 import { apiUrl } from '../../../utils/appPath';
 import { 
   Shield, 
-  Users, 
-  ChefHat, 
-  Receipt, 
   AlertTriangle, 
-  CheckCircle, 
-  Eye, 
-  Check, 
-  Search,
-  Filter
+  Check
 } from 'lucide-react';
 
 type ManagedUser = {

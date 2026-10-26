@@ -6,14 +6,11 @@ import { EvidenceModal } from '../common/EvidenceModal';
 import { DisputeModal } from '../common/DisputeModal';
 import { 
   ArrowLeft, 
-  Receipt, 
   CheckCircle, 
   ShieldCheck, 
   AlertTriangle, 
   CreditCard, 
   Eye, 
-  Sparkles, 
-  Heart,
   Star
 } from 'lucide-react';
 

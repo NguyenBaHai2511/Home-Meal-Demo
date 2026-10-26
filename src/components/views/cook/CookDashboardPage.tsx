@@ -4,18 +4,7 @@ import { useApp } from '../../../context/AppContext';
 import { formatVND } from '../../../utils/pricing';
 import { StatusBadge } from '../../common/StatusBadge';
 import type { Order, Quotation, UserProfile } from '../../../types';
-import { 
-  ChefHat, 
-  ShoppingBag, 
-  Receipt, 
-  DollarSign, 
-  CheckCircle, 
-  Clock, 
-  ArrowRight, 
-  AlertTriangle, 
-  FileText,
-  UserCheck
-} from 'lucide-react';
+import { ChefHat, Receipt } from 'lucide-react';
 
 export const CookDashboardPage: React.FC = () => {
   const { currentUser, orders, navigateTo, updateOrderStatus, submitCookQuotation } = useApp();

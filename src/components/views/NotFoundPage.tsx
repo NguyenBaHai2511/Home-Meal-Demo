@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Utensils, Home, ArrowLeft } from 'lucide-react';
+import { Utensils, Home } from 'lucide-react';
 
 export const NotFoundPage: React.FC = () => {
   const { navigateTo } = useApp();

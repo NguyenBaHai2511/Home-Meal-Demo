@@ -5,14 +5,9 @@ import {
   Plus, 
   Trash2, 
   Camera, 
-  Store, 
-  Calendar, 
   AlertTriangle, 
-  Check, 
   ArrowLeft, 
-  Receipt,
-  CheckCircle,
-  Eye
+  CheckCircle
 } from 'lucide-react';
 
 export const CookShoppingPage: React.FC = () => {
@@ -40,7 +35,7 @@ export const CookShoppingPage: React.FC = () => {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('500');
   const [unit, setUnit] = useState('gram');
-  const [estimatedPrice, setEstimatedPrice] = useState(50000);
+  const estimatedPrice = 50000;
   const [actualPrice, setActualPrice] = useState(52000);
   const [storeName, setStoreName] = useState('Chợ Tân Định');
   const [notes, setNotes] = useState('');

@@ -4,30 +4,24 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { NotificationToast } from './components/common/NotificationToast';
 
-// Views
 import { HomePage } from './components/views/HomePage';
-import { MealPlannerPage } from './components/views/MealPlannerPage';
-import { MenuPage } from './components/views/MenuPage';
-import { CooksPage } from './components/views/CooksPage';
-import { CookDetailPage } from './components/views/CookDetailPage';
-import { PartyBookingPage } from './components/views/PartyBookingPage';
-import { OrdersPage } from './components/views/OrdersPage';
-import { OrderDetailPage } from './components/views/OrderDetailPage';
-import { OrderBillPage } from './components/views/OrderBillPage';
-import { QuotationsPage } from './components/views/QuotationsPage';
 import { SupportPage } from './components/views/SupportPage';
-import { AccountPage } from './components/views/AccountPage';
-import { NotFoundPage } from './components/views/NotFoundPage';
-
-// Cook Portal
-import { CookDashboardPage } from './components/views/cook/CookDashboardPage';
-import { CookShoppingPage } from './components/views/cook/CookShoppingPage';
-import { CookEarningsPage } from './components/views/cook/CookEarningsPage';
-
-// Admin Portal
-import { AdminDashboardPage } from './components/views/admin/AdminDashboardPage';
-
+const MealPlannerPage = lazy(() => import('./components/views/MealPlannerPage').then((module) => ({ default: module.MealPlannerPage })));
+const MenuPage = lazy(() => import('./components/views/MenuPage').then((module) => ({ default: module.MenuPage })));
 const SmartMenuPage = lazy(() => import('./components/views/SmartMenuPage').then((module) => ({ default: module.SmartMenuPage })));
+const CooksPage = lazy(() => import('./components/views/CooksPage').then((module) => ({ default: module.CooksPage })));
+const CookDetailPage = lazy(() => import('./components/views/CookDetailPage').then((module) => ({ default: module.CookDetailPage })));
+const PartyBookingPage = lazy(() => import('./components/views/PartyBookingPage').then((module) => ({ default: module.PartyBookingPage })));
+const OrdersPage = lazy(() => import('./components/views/OrdersPage').then((module) => ({ default: module.OrdersPage })));
+const OrderDetailPage = lazy(() => import('./components/views/OrderDetailPage').then((module) => ({ default: module.OrderDetailPage })));
+const OrderBillPage = lazy(() => import('./components/views/OrderBillPage').then((module) => ({ default: module.OrderBillPage })));
+const QuotationsPage = lazy(() => import('./components/views/QuotationsPage').then((module) => ({ default: module.QuotationsPage })));
+const AccountPage = lazy(() => import('./components/views/AccountPage').then((module) => ({ default: module.AccountPage })));
+const NotFoundPage = lazy(() => import('./components/views/NotFoundPage').then((module) => ({ default: module.NotFoundPage })));
+const CookDashboardPage = lazy(() => import('./components/views/cook/CookDashboardPage').then((module) => ({ default: module.CookDashboardPage })));
+const CookShoppingPage = lazy(() => import('./components/views/cook/CookShoppingPage').then((module) => ({ default: module.CookShoppingPage })));
+const CookEarningsPage = lazy(() => import('./components/views/cook/CookEarningsPage').then((module) => ({ default: module.CookEarningsPage })));
+const AdminDashboardPage = lazy(() => import('./components/views/admin/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })));
 
 const AppContent: React.FC = () => {
   const { currentPath, authUser, authLoading, navigateTo } = useApp();
@@ -79,7 +73,7 @@ const AppContent: React.FC = () => {
     if (pathname === '/') return <HomePage />;
     if (pathname === '/meal-planner') return <MealPlannerPage />;
     if (pathname === '/menu') return <MenuPage />;
-    if (pathname === '/smart-menu') return <Suspense fallback={<div role="status" className="px-4 py-16 text-center text-sm text-muted">Đang mở trợ lý thực đơn…</div>}><SmartMenuPage /></Suspense>;
+    if (pathname === '/smart-menu') return <SmartMenuPage />;
     if (pathname === '/cooks') return <CooksPage />;
     if (pathname === '/party-booking') return <PartyBookingPage />;
     if (pathname === '/quotations') return <QuotationsPage />;
@@ -135,7 +129,11 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-canvas text-ink">
       <a href="#main-content" className="skip-link">Bỏ qua điều hướng</a>
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="flex-1">{renderCurrentView()}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1">
+        <Suspense fallback={<div role="status" className="px-4 py-16 text-center text-sm text-muted">Đang mở trang…</div>}>
+          {renderCurrentView()}
+        </Suspense>
+      </main>
       <Footer />
       <NotificationToast />
     </div>

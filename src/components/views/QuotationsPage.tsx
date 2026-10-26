@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatVND } from '../../utils/pricing';
-import { FileText, Check, X, ArrowRight, ShieldCheck, Users } from 'lucide-react';
+import { FileText, Check, ArrowRight } from 'lucide-react';
 
 export const QuotationsPage: React.FC = () => {
   const { orders, acceptQuotation, rejectQuotation, navigateTo } = useApp();

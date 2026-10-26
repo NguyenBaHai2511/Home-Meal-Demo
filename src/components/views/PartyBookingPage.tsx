@@ -6,26 +6,19 @@ import {
   Calendar, 
   Clock, 
   MapPin, 
-  FileText, 
-  ChefHat, 
-  Check, 
   ShieldCheck, 
   Sparkles,
-  Info,
   AlertTriangle,
-  Zap,
   CheckCircle2
 } from 'lucide-react';
 import { 
   validateDeliveryDateTime, 
-  getEarliestDeliveryDate, 
   formatDateForInput, 
-  formatTimeForInput, 
   getNow 
 } from '../../utils/dateTimeValidation';
 
 export const PartyBookingPage: React.FC = () => {
-  const { draftOrder, updateDraftOrder, cooks, dishes, submitDraftOrder, navigateTo } = useApp();
+  const { updateDraftOrder, cooks, dishes, submitDraftOrder, navigateTo } = useApp();
 
   const [eventType, setEventType] = useState('Tiệc sinh nhật');
   const [guests, setGuests] = useState(25);

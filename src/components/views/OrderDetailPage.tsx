@@ -8,7 +8,6 @@ import { DisputeModal } from '../common/DisputeModal';
 import { 
   ArrowLeft, 
   Calendar, 
-  Clock, 
   Users, 
   MapPin, 
   Receipt, 
@@ -16,13 +15,9 @@ import {
   AlertTriangle, 
   Phone, 
   FileText, 
-  ShieldCheck, 
-  ExternalLink,
-  DollarSign,
   HelpCircle,
   Eye,
-  Check,
-  X
+  Check
 } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
 

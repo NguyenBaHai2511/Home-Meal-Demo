@@ -107,7 +107,7 @@ export const MenuPage: React.FC = () => {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <div className="flex flex-wrap items-center gap-2 pb-1 text-xs">
           {CATEGORY_FILTERS.map((cat) => (
             <button
               key={cat.id}

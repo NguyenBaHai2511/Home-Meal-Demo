@@ -45,7 +45,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ item, onClose }) =
               <p className="text-xs font-semibold text-accent mb-1.5">Ảnh hóa đơn / Biên lai tính tiền:</p>
               <div className="aspect-4/3 rounded-xl overflow-hidden border border-border-soft bg-stone-50">
                 <ImageWithFallback
-                  src={item.receiptImageUrl || 'https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=600&q=80'}
+                  src={item.receiptImageUrl || ''}
                   alt={`Hóa đơn ${item.name}`}
                   fallbackType="receipt"
                   className="w-full h-full object-cover"
@@ -57,7 +57,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ item, onClose }) =
               <p className="text-xs font-semibold text-accent mb-1.5">Ảnh nguyên liệu / Sạp mua:</p>
               <div className="aspect-4/3 rounded-xl overflow-hidden border border-border-soft bg-stone-50">
                 <ImageWithFallback
-                  src={item.ingredientImageUrl || item.receiptImageUrl || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80'}
+                  src={item.ingredientImageUrl || item.receiptImageUrl || ''}
                   alt={`Nguyên liệu ${item.name}`}
                   fallbackType="dish"
                   className="w-full h-full object-cover"

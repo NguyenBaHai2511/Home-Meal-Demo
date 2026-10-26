@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatVND } from '../../utils/pricing';
+import { ImageWithFallback } from '../common/ImageWithFallback';
 import menuBanquet from '../../assets/food/menu-banquet.webp';
 import { 
   Users, 
@@ -301,7 +302,7 @@ export const PartyBookingPage: React.FC = () => {
                   className="w-4 h-4 text-accent focus:ring-accent"
                 />
                 <div className="w-12 h-12 rounded-full overflow-hidden border border-brand shrink-0">
-                  <img src={c.avatar} alt={c.name} className="w-full h-full object-cover" />
+                  <ImageWithFallback src={c.avatar} alt={c.name} fallbackType="cook" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-ink">{c.name}</h4>

@@ -1,4 +1,9 @@
 import { Dish, Cook, Order, UserProfile } from '../types';
+import familyDinnerImage from '../assets/food/menu-family.webp';
+import weekendMealImage from '../assets/food/menu-weekend.webp';
+import partyMealImage from '../assets/food/menu-party.webp';
+import banquetMealImage from '../assets/food/menu-banquet.webp';
+import homeMealHeroImage from '../assets/food/hero-family-meal.webp';
 
 export const MOCK_USERS: Record<string, UserProfile> = {
   customer: {
@@ -8,7 +13,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     phone: '0908 123 456',
     role: 'customer',
     address: 'Toà Landmark 3, Vinhomes Central Park, P. 22, Q. Bình Thạnh, TP.HCM',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    avatar: '',
   },
   cook: {
     id: 'cook_01',
@@ -17,7 +22,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     phone: '0912 345 678',
     role: 'cook',
     address: '142 Bạch Đằng, P. 24, Q. Bình Thạnh, TP.HCM',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+    avatar: '',
   },
   admin: {
     id: 'admin_01',
@@ -26,7 +31,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     phone: '1900 6868',
     role: 'admin',
     address: 'Văn phòng HomeMeal, 68 Nguyễn Huệ, Quận 1, TP.HCM',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
+    avatar: '',
   }
 };
 
@@ -42,7 +47,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 135000,
     prepTimeMinutes: 50,
     dietaryTags: ['Đậm vị', 'Món truyền thống', 'Thịt sạch VietGAP'],
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+    imageUrl: homeMealHeroImage,
     popular: true,
     ingredients: [
       { id: 'ing_1', name: 'Thịt ba rọi heo VietGAP', estimatedQuantity: '600', unit: 'gram', estimatedPrice: 85000 },
@@ -62,7 +67,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 120000,
     prepTimeMinutes: 35,
     dietaryTags: ['Thanh mát', 'Giàu canxi & Omega-3', 'Ít dầu mỡ'],
-    imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80',
+    imageUrl: weekendMealImage,
     popular: true,
     ingredients: [
       { id: 'ing_5', name: 'Cá bớp biển tươi cắt khoanh', estimatedQuantity: '400', unit: 'gram', estimatedPrice: 75000 },
@@ -82,7 +87,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 35000,
     prepTimeMinutes: 15,
     dietaryTags: ['Rau sạch hữu cơ', 'Xào nhanh', 'Giàu chất xơ'],
-    imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+    imageUrl: familyDinnerImage,
     popular: true,
     ingredients: [
       { id: 'ing_9', name: 'Rau muống nước hữu cơ non', estimatedQuantity: '1', unit: 'bó (500g)', estimatedPrice: 22000 },
@@ -100,7 +105,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 110000,
     prepTimeMinutes: 40,
     dietaryTags: ['Món dân dã', 'Đậm đà', 'Cá đồng tươi'],
-    imageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+    imageUrl: banquetMealImage,
     popular: true,
     ingredients: [
       { id: 'ing_11', name: 'Cá lóc đồng sống làm sạch', estimatedQuantity: '500', unit: 'gram', estimatedPrice: 75000 },
@@ -119,7 +124,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 190000,
     prepTimeMinutes: 45,
     dietaryTags: ['Gà thả vườn', 'Thanh đạm', 'Món cỗ & tiệc'],
-    imageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80',
+    imageUrl: familyDinnerImage,
     ingredients: [
       { id: 'ing_14', name: 'Gà ta thả vườn nguyên con', estimatedQuantity: '1.4', unit: 'kg', estimatedPrice: 165000 },
       { id: 'ing_15', name: 'Lá chanh tươi, gừng già, muối hột', estimatedQuantity: '1', unit: 'bộ gia vị', estimatedPrice: 25000 },
@@ -136,7 +141,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 280000,
     prepTimeMinutes: 30,
     dietaryTags: ['Hải sản tươi sống', 'Món tiệc sang trọng', 'Giàu canxi'],
-    imageUrl: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=600&q=80',
+    imageUrl: partyMealImage,
     ingredients: [
       { id: 'ing_16', name: 'Tôm càng xanh sống loại 1', estimatedQuantity: '800', unit: 'gram', estimatedPrice: 250000 },
       { id: 'ing_17', name: 'Nước dừa xiêm & muối tiêu chanh ớt', estimatedQuantity: '1', unit: 'phần', estimatedPrice: 30000 },
@@ -153,7 +158,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 175000,
     prepTimeMinutes: 25,
     dietaryTags: ['Thịt bò nhập khẩu', 'Trẻ em yêu thích', 'Giàu sắt'],
-    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+    imageUrl: partyMealImage,
     ingredients: [
       { id: 'ing_18', name: 'Thăn bò mềm cao cấp', estimatedQuantity: '450', unit: 'gram', estimatedPrice: 130000 },
       { id: 'ing_19', name: 'Ớt chuông Đà Lạt & hành tây', estimatedQuantity: '300', unit: 'gram', estimatedPrice: 25000 },
@@ -171,7 +176,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 60000,
     prepTimeMinutes: 20,
     dietaryTags: ['Món thuần chay', 'Ít calo', 'Thanh lọc cơ thể'],
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+    imageUrl: familyDinnerImage,
     ingredients: [
       { id: 'ing_21', name: 'Đậu hũ non tươi sạch', estimatedQuantity: '2', unit: 'hộp', estimatedPrice: 24000 },
       { id: 'ing_22', name: 'Nấm đông cô & nấm rơm tươi', estimatedQuantity: '250', unit: 'gram', estimatedPrice: 26000 },
@@ -189,7 +194,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 55000,
     prepTimeMinutes: 40,
     dietaryTags: ['Món tráng miệng', 'Vị ngọt thanh', 'Truyền thống miền Tây'],
-    imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
+    imageUrl: weekendMealImage,
     ingredients: [
       { id: 'ing_24', name: 'Cùi bưởi sơ chế khử đắng', estimatedQuantity: '200', unit: 'gram', estimatedPrice: 20000 },
       { id: 'ing_25', name: 'Đậu xanh bóc vỏ loại 1', estimatedQuantity: '200', unit: 'gram', estimatedPrice: 18000 },
@@ -207,7 +212,7 @@ export const MOCK_DISHES: Dish[] = [
     estimatedCost: 550000,
     prepTimeMinutes: 90,
     dietaryTags: ['Món tiệc chính', 'Thịnh soạn', 'Phù hợp đám tiệc/cỗ'],
-    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
+    imageUrl: banquetMealImage,
     ingredients: [
       { id: 'ing_27', name: 'Thịt heo ba chỉ quay lu giòn da', estimatedQuantity: '1.5', unit: 'kg', estimatedPrice: 420000 },
       { id: 'ing_28', name: 'Bánh hỏi tơ miến & mỡ hẹ', estimatedQuantity: '1', unit: 'kg', estimatedPrice: 65000 },
@@ -221,7 +226,7 @@ export const MOCK_COOKS: Cook[] = [
     id: 'cook_01',
     name: 'Cô Bích Huệ',
     title: 'Nghệ nhân mâm cơm gia đình Nam Bộ',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    avatar: '',
     rating: 4.96,
     reviewCount: 142,
     experienceYears: 16,
@@ -239,7 +244,7 @@ export const MOCK_COOKS: Cook[] = [
     id: 'cook_02',
     name: 'Chú Hùng Chef',
     title: 'Chuyên gia tiệc gia đình & Hải sản',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+    avatar: '',
     rating: 4.92,
     reviewCount: 98,
     experienceYears: 14,
@@ -257,7 +262,7 @@ export const MOCK_COOKS: Cook[] = [
     id: 'cook_03',
     name: 'Chị Mai Lan',
     title: 'Bếp trưởng món Bắc & Thực đơn Eat Clean',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+    avatar: '',
     rating: 4.88,
     reviewCount: 76,
     experienceYears: 9,
@@ -275,7 +280,7 @@ export const MOCK_COOKS: Cook[] = [
     id: 'cook_04',
     name: 'Anh Tuấn Kiệt',
     title: 'Chuyên gia cỗ tiệc truyền thống & Đám giỗ',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+    avatar: '',
     rating: 4.95,
     reviewCount: 115,
     experienceYears: 12,
@@ -325,7 +330,7 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 92000,
         storeName: 'Co.opmart Văn Thánh',
         purchaseTime: '2026-10-13 14:15',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
         notes: 'Mua miếng thịt rọi rút sườn tươi mới về trong ngày, có tem kiểm dịch',
         status: 'purchased',
         approvedByCustomer: true,
@@ -340,8 +345,8 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 82000,
         storeName: 'Sạp cá tươi Chợ Thị Nghè',
         purchaseTime: '2026-10-13 14:35',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=500&q=80',
-        ingredientImageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
+        ingredientImageUrl: '',
         notes: 'Cá biển tươi mang đỏ au, thịt chắc nịch',
         status: 'purchased',
         approvedByCustomer: true,
@@ -356,7 +361,7 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 36000,
         storeName: 'Co.opmart Văn Thánh',
         purchaseTime: '2026-10-13 14:20',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
         status: 'purchased',
         approvedByCustomer: true,
       },
@@ -370,7 +375,7 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 48000,
         storeName: 'Chợ Thị Nghè',
         purchaseTime: '2026-10-13 14:45',
-        ingredientImageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80',
+        ingredientImageUrl: '',
         notes: 'Rau tươi hái sáng, rửa sạch khử khuẩn',
         status: 'purchased',
         approvedByCustomer: true,
@@ -515,7 +520,7 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 170000,
         storeName: 'Chợ Bà Chiểu',
         purchaseTime: '2026-10-13 07:30',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
         status: 'purchased',
         approvedByCustomer: true,
       },
@@ -542,8 +547,8 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 460000,
         storeName: 'Vựa hải sản Tươi Sống Bà Chiểu',
         purchaseTime: '2026-10-13 08:00',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=500&q=80',
-        ingredientImageUrl: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
+        ingredientImageUrl: '',
         notes: 'Hôm nay rằm nước kém, tôm càng loại to giá tăng 80.000đ so với dự tính. Đã chụp ảnh bảng giá sạp chợ.',
         status: 'price_increased',
         approvedByCustomer: false,
@@ -557,7 +562,7 @@ export const MOCK_ORDERS: Order[] = [
         difference: 80000,
         reason: 'Hôm nay nước kém nên nguồn tôm càng xanh sống loại 1 khan hiếm, giá tại vựa tăng từ 380k lên 460k/kg (+80.000đ). Nếu khách muốn giữ ngân sách cũ, tôi có thể đổi sang Tôm sú loại to (370.000đ) thịt cũng rất chắc ngọt.',
         affectedItem: 'Tôm càng xanh sống loại 1',
-        evidencePhotoUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=500&q=80',
+        evidencePhotoUrl: '',
         status: 'pending',
         requestedAt: '2026-10-13 08:05',
       }
@@ -612,7 +617,7 @@ export const MOCK_ORDERS: Order[] = [
         subtotal: 320000,
         storeName: 'Cửa hàng thịt nhập khẩu',
         purchaseTime: '2026-10-11 16:00',
-        receiptImageUrl: 'https://images.unsplash.com/photo-1554415707-9e44667ff221?auto=format&fit=crop&w=500&q=80',
+        receiptImageUrl: '',
         notes: 'Hóa đơn in nhòe, không rõ tên loại thịt thăn hay wagyu',
         status: 'purchased',
       }

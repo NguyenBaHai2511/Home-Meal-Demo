@@ -60,7 +60,7 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 
 1. Tạo API key trong OpenAI Platform và bật quyền API/billing cho project phù hợp.
 2. Local: đặt `OPENAI_API_KEY` trong `.env`. Production: thêm cùng biến trong Vercel → Project Settings → Environment Variables cho môi trường cần dùng.
-3. Redeploy Vercel sau khi thêm hoặc đổi key. Server gọi model `gpt-6-luna`; không cần đặt `OPENAI_MODEL`.
+3. Redeploy Vercel sau khi thêm hoặc đổi key. Server mặc định gọi model `gpt-6-luna`; có thể đặt `OPENAI_MODEL` ở server để ghi đè model.
 
 Khóa chỉ được đọc ở backend. Khi chưa có key hợp lệ, trợ lý vẫn cung cấp thực đơn mẫu; không đưa key vào Git, trình duyệt hoặc biến `VITE_*`.
 

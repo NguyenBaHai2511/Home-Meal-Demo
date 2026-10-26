@@ -25,6 +25,7 @@ const plansSchema = {
 
 export async function generateWithOpenAI(p: Preferences, replacement?: Replacement): Promise<unknown> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
+   const model = process.env.OPENAI_MODEL?.trim() || 'gpt-6-luna';
   if (!apiKey || apiKey === 'YOUR_OPENAI_API_KEY') {
     throw new SmartMenuError(503, 'AI_NOT_CONFIGURED', 'AI chưa được cấu hình. Quản trị viên cần thêm OPENAI_API_KEY trong biến môi trường server. Bạn có thể xem gợi ý mẫu bên dưới.');
   }
@@ -41,7 +42,7 @@ export async function generateWithOpenAI(p: Preferences, replacement?: Replaceme
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(50000),
       body: JSON.stringify({
-        model: 'gpt-6-luna',
+        model,
         reasoning: { effort: 'none' },
         instructions: systemInstruction,
         input: JSON.stringify({ ...task, preferences: foodPreferences, goalName: NUTRITION_GOALS.find((g) => g.id === p.goal)?.name }),

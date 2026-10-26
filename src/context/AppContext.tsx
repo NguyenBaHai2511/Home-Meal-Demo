@@ -8,8 +8,9 @@ interface AppContextType {
   currentUser: UserProfile;
   authUser: UserProfile | null;
   authLoading: boolean;
-  login: (email: string, password: string, totpCode?: string) => Promise<UserProfile>;
+  login: (email: string, password: string) => Promise<UserProfile>;
   register: (name: string, email: string, password: string) => Promise<{ message: string }>;
+  updateProfile: (profile: Pick<UserProfile, 'name' | 'phone' | 'address'>) => Promise<void>;
   logout: () => Promise<void>;
   
   orders: Order[];
@@ -114,8 +115,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return result as { user: UserProfile; message?: string };
   };
 
-  const login = async (email: string, password: string, totpCode?: string) => {
-    const result = await submitAuth('login', { email, password, ...(totpCode ? { totpCode } : {}) });
+  const login = async (email: string, password: string) => {
+    const result = await submitAuth('login', { email, password });
     const user = result.user as UserProfile;
     applyAuthenticatedUser(user);
     return user;
@@ -123,6 +124,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const register = async (name: string, email: string, password: string) => {
     const result = await submitAuth('register', { name, email, password });
     return { message: result.message || 'Kiểm tra email để xác minh tài khoản.' };
+  };
+
+  const updateProfile = async (profile: Pick<UserProfile, 'name' | 'phone' | 'address'>) => {
+    const response = await fetch(apiUrl('resource=auth&action=profile'), {
+      method: 'PATCH', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Không cập nhật được hồ sơ.');
+    applyAuthenticatedUser(result.user as UserProfile);
   };
 
   const logout = async () => {
@@ -660,6 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         authLoading,
         login,
         register,
+        updateProfile,
         logout,
         orders,
         cooks: MOCK_COOKS,

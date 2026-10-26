@@ -34,18 +34,18 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="bg-[#FFFDF7] rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE7]"
+        className="bg-[#FFFFFF] rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5E5DC]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 border-b border-[#E5ECE7] flex items-center justify-between bg-white">
+        <div className="p-5 border-b border-[#E5E5DC] flex items-center justify-between bg-white">
           <div className="flex items-center gap-2 text-[#C94C4C]">
             <ShieldAlert className="w-6 h-6" />
             <div>
-              <h3 className="font-bold text-[#263B35] text-base">Khiếu nại chứng từ / Yêu cầu giải trình</h3>
-              <p className="text-xs text-[#738078]">Đơn hàng: #{orderCode}</p>
+              <h3 className="font-bold text-[#333333] text-base">Khiếu nại chứng từ / Yêu cầu giải trình</h3>
+              <p className="text-xs text-[#62625C]">Đơn hàng: #{orderCode}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-[#738078] hover:bg-stone-100">
+          <button onClick={onClose} className="p-1 rounded-lg text-[#62625C] hover:bg-stone-100">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -59,11 +59,11 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold text-[#263B35] mb-1">Lý do khiếu nại:</label>
+            <label className="block font-semibold text-[#333333] mb-1">Lý do khiếu nại:</label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5ECE7] focus:ring-2 focus:ring-[#285E56] text-xs sm:text-sm"
+              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620] text-xs sm:text-sm"
             >
               <option value="Hóa đơn mờ chữ hoặc không có tên món">Hóa đơn mờ chữ hoặc không có tên món</option>
               <option value="Giá nguyên liệu vượt quá mức thỏa thuận không báo trước">Giá nguyên liệu vượt quá mức thỏa thuận không báo trước</option>
@@ -74,7 +74,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold text-[#263B35] mb-1">
+            <label className="block font-semibold text-[#333333] mb-1">
               Số tiền bạn thấy chưa hợp lý (VNĐ):
             </label>
             <input
@@ -84,15 +84,15 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
               max={actualTotal}
               value={reportedAmount}
               onChange={(e) => setReportedAmount(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5ECE7] focus:ring-2 focus:ring-[#285E56] text-xs sm:text-sm"
+              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620] text-xs sm:text-sm"
             />
-            <p className="text-[11px] text-[#738078] mt-1">
+            <p className="text-[11px] text-[#62625C] mt-1">
               Khoản tiền đề nghị giải trình: <strong>{formatVND(reportedAmount)}</strong> (Tổng tiền đi chợ: {formatVND(actualTotal)})
             </p>
           </div>
 
           <div>
-            <label className="block font-semibold text-[#263B35] mb-1">
+            <label className="block font-semibold text-[#333333] mb-1">
               Chi tiết thắc mắc / Mô tả cụ thể:
             </label>
             <textarea
@@ -100,7 +100,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Ví dụ: Khoản tiền thịt bò ghi 320.000đ nhưng hóa đơn viết tay nhòe mực, đề nghị đầu bếp gửi lại hình chụp rõ hoặc giải thích lý do..."
-              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5ECE7] focus:ring-2 focus:ring-[#285E56] text-xs sm:text-sm"
+              className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620] text-xs sm:text-sm"
               required
             />
           </div>
@@ -109,7 +109,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-[#E5ECE7] bg-white text-[#738078] font-medium rounded-lg hover:bg-stone-50"
+              className="px-4 py-2 border border-[#E5E5DC] bg-white text-[#62625C] font-medium rounded-lg hover:bg-stone-50"
             >
               Hủy bỏ
             </button>

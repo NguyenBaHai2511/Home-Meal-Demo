@@ -6,7 +6,6 @@ import { hashPassword, verifyPassword } from './passwords.js';
 import { OrderError, createOrder, getOrder, listOrders, mutateOrder, type OrderActor } from './orderService.js';
 import { deleteEvidenceObject, isObjectStorageConfigured, makeEvidenceObjectKey, signEvidenceRead, signEvidenceUpload, verifyEvidenceObject } from './objectStorage.js';
 import { sendAccountEmail } from './email.js';
-import { decryptTotpSecret, encryptTotpSecret, generateTotpSecret, verifyTotp } from './totp.js';
 import { appPath } from './appPaths.js';
 import { createSmartMenuHandler } from './smart-menu/handler.js';
 
@@ -18,7 +17,6 @@ type AuthUser = {
   phone: string;
   address: string;
   role: UserRole;
-  mfaEnabled: boolean;
 };
 type AuthRequest = Request & { authUser?: AuthUser; requestId?: string };
 
@@ -110,8 +108,8 @@ async function createSession(userId: string, res: Response) {
   res.cookie(SESSION_COOKIE, token, sessionCookieOptions());
 }
 
-function mapUser(row: { id: string; email: string; full_name: string; phone: string; address: string; role: UserRole; mfa_enabled?: boolean }): AuthUser {
-  return { id: row.id, email: row.email, name: row.full_name, phone: row.phone, address: row.address, role: row.role, mfaEnabled: Boolean(row.mfa_enabled) };
+function mapUser(row: { id: string; email: string; full_name: string; phone: string; address: string; role: UserRole }): AuthUser {
+  return { id: row.id, email: row.email, name: row.full_name, phone: row.phone, address: row.address, role: row.role };
 }
 
 async function authenticate(req: AuthRequest) {
@@ -119,7 +117,7 @@ async function authenticate(req: AuthRequest) {
   if (!token || token.length > 128) return undefined;
   const tokenHash = createHash('sha256').update(token).digest('hex');
   const result = await pool.query(
-    `SELECT u.id, u.email, u.full_name, u.phone, u.address, u.role, u.mfa_enabled
+    `SELECT u.id, u.email, u.full_name, u.phone, u.address, u.role
      FROM auth_sessions s JOIN app_users u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.email_verified = TRUE`,
     [tokenHash],
@@ -296,24 +294,35 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
     if (resource === 'auth' && req.method === 'POST' && action === 'login') {
       const email = getString(req.body?.email, 254).toLowerCase();
       const password = getPassword(req.body?.password);
-      const code = getString(req.body?.totpCode, 12);
       if (password.length > 128) { res.status(400).json({ error: 'Password must be no longer than 128 characters.' }); return; }
       if (!(await takeRateLimit(req, 'login', email, 8, 15 * 60 * 1000))) { res.status(429).json({ error: 'Too many sign-in attempts. Try again later.' }); return; }
       const result = await pool.query(
-        'SELECT id, email, full_name, phone, address, role, password_hash, email_verified, mfa_enabled, mfa_secret_ciphertext, mfa_secret_iv, mfa_secret_tag FROM app_users WHERE email = $1',
+        'SELECT id, email, full_name, phone, address, role, password_hash, email_verified FROM app_users WHERE email = $1',
         [email],
       );
       const row = result.rows[0];
       const verified = row ? await verifyPassword(password, row.password_hash) : (await hashPassword(password || randomBytes(16).toString('hex')), false);
       if (!row || !verified) { res.status(401).json({ error: 'Email or password is incorrect.' }); return; }
       if (!row.email_verified) { res.status(403).json({ code: 'EMAIL_VERIFICATION_REQUIRED', error: 'Verify your email before signing in.' }); return; }
-      if (row.role === 'admin' && row.mfa_enabled) {
-        if (!code) { res.status(401).json({ code: 'MFA_REQUIRED', error: 'Enter the code from your authenticator app.' }); return; }
-        const secret = decryptTotpSecret({ ciphertext: row.mfa_secret_ciphertext, iv: row.mfa_secret_iv, tag: row.mfa_secret_tag });
-        if (!verifyTotp(secret, code)) { res.status(401).json({ code: 'MFA_INVALID', error: 'Authenticator code is incorrect.' }); return; }
-      }
       await createSession(row.id, res);
       res.json({ user: mapUser(row) });
+      return;
+    }
+
+    if (resource === 'auth' && req.method === 'PATCH' && action === 'profile') {
+      const user = await requireActor(req, res);
+      if (!user) return;
+      const name = getString(req.body?.name, 100);
+      const phone = getString(req.body?.phone, 32);
+      const address = getString(req.body?.address, 300);
+      if (name.length < 2) { res.status(400).json({ error: 'Name must contain at least 2 characters.' }); return; }
+      const updated = await pool.query(
+        'UPDATE app_users SET full_name = $2, phone = $3, address = $4, updated_at = NOW() WHERE id = $1 RETURNING id, email, full_name, phone, address, role',
+        [user.id, name, phone, address],
+      );
+      const profile = mapUser(updated.rows[0]);
+      await writeSecurityAudit(user.id, 'auth.profile_updated', user.id, req);
+      res.json({ user: profile });
       return;
     }
 
@@ -357,38 +366,6 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       if (token && token.length <= 128) await pool.query('DELETE FROM auth_sessions WHERE token_hash = $1', [hashOpaqueToken(token)]);
       res.clearCookie(SESSION_COOKIE, baseCookieOptions());
       res.json({ ok: true });
-      return;
-    }
-
-    if (resource === 'auth' && req.method === 'POST' && ['mfa-setup', 'mfa-enable', 'mfa-disable'].includes(action)) {
-      const user = await requireActor(req, res);
-      if (!user) return;
-      if (user.role !== 'admin') { res.status(403).json({ error: 'Administrator access required.' }); return; }
-      if (action === 'mfa-setup') {
-        if (!process.env.MFA_ENCRYPTION_KEY) { res.status(503).json({ error: 'MFA_ENCRYPTION_KEY must be configured before enabling admin MFA.' }); return; }
-        if (user.mfaEnabled) { res.status(409).json({ error: 'MFA is already enabled. Disable it before creating a new secret.' }); return; }
-        const secret = generateTotpSecret();
-        const encrypted = encryptTotpSecret(secret);
-        await pool.query('UPDATE app_users SET mfa_secret_ciphertext = $2, mfa_secret_iv = $3, mfa_secret_tag = $4 WHERE id = $1', [user.id, encrypted.ciphertext, encrypted.iv, encrypted.tag]);
-        const label = encodeURIComponent(`HomeMeal:${user.email}`);
-        res.json({ secret, otpauthUrl: `otpauth://totp/${label}?secret=${secret}&issuer=HomeMeal&algorithm=SHA1&digits=6&period=30` });
-        return;
-      }
-      const code = getString(req.body?.totpCode, 12);
-      const result = await pool.query('SELECT mfa_enabled, mfa_secret_ciphertext, mfa_secret_iv, mfa_secret_tag FROM app_users WHERE id = $1', [user.id]);
-      const row = result.rows[0];
-      if (!row?.mfa_secret_ciphertext) { res.status(409).json({ error: 'Start MFA setup first.' }); return; }
-      const secret = decryptTotpSecret({ ciphertext: row.mfa_secret_ciphertext, iv: row.mfa_secret_iv, tag: row.mfa_secret_tag });
-      if (!verifyTotp(secret, code)) { res.status(400).json({ error: 'Authenticator code is incorrect.' }); return; }
-      if (action === 'mfa-enable') {
-        await pool.query('UPDATE app_users SET mfa_enabled = TRUE, updated_at = NOW() WHERE id = $1', [user.id]);
-        await writeSecurityAudit(user.id, 'auth.mfa_enabled', user.id, req);
-        res.json({ ok: true, mfaEnabled: true });
-      } else {
-        await pool.query('UPDATE app_users SET mfa_enabled = FALSE, mfa_secret_ciphertext = NULL, mfa_secret_iv = NULL, mfa_secret_tag = NULL, updated_at = NOW() WHERE id = $1', [user.id]);
-        await writeSecurityAudit(user.id, 'auth.mfa_disabled', user.id, req);
-        res.json({ ok: true, mfaEnabled: false });
-      }
       return;
     }
 

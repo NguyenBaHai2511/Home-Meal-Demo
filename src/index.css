@@ -1,22 +1,239 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-ExtraLightItalic.ttf") format("truetype");
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-ExtraBoldItalic.ttf") format("truetype");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-SemiBoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("./assets/fonts/PlusJakartaSans-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --color-primary-mint: #B8E4D3;
-  --color-deep-teal: #285E56;
-  --color-light-mint: #E7F5EF;
-  --color-warm-cream: #FFFDF7;
-  --color-accent-orange: #F2AD72;
-  --color-text-main: #263B35;
-  --color-text-secondary: #738078;
-  --color-border-soft: #E5ECE7;
+  /* 60%: clean white surfaces and mint-white alternating panels. */
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F0FFF6;
+
+  /* 30%: mint supporting surfaces, selections and highlights. */
+  --color-brand: #60D5AE;
+  --color-brand-hover: #53C39D;
+  --color-on-brand: #333333;
+
+  /* 10%: warm-brown details and deep-burgundy visual anchors. */
+  --color-accent: #481620;
+  --color-detail: #735444;
+  --color-footer-watermark: #2BA17A;
+  --color-accent-hover: #361018;
+  --color-on-accent: #FFFFFF;
+
+  /* Neutral supporting colors keep text and controls accessible. */
+  --color-ink: #333333;
+  --color-muted: #62625C;
+  --color-border-soft: #E5E5DC;
+  --color-control-border: #89897F;
+  --color-disabled: #E9E9E1;
+  --color-overlay: #000000;
+  /* Compatibility aliases for existing screens while they keep their behavior. */
+  --color-primary-mint: var(--color-brand);
+  --color-deep-teal: var(--color-accent);
+  --color-light-mint: var(--color-surface-alt);
+  --color-warm-cream: var(--color-surface);
+  --color-accent-orange: var(--color-detail);
+  --color-text-main: var(--color-ink);
+  --color-text-secondary: var(--color-muted);
   --color-error-red: #C94C4C;
-  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  /* One family, with distinct roles instead of competing typefaces. */
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-body: var(--font-sans);
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.5;
+  --text-sm--line-height: 1.65;
+  --text-base--line-height: 1.65;
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: #FFFDF7;
-  color: #263B35;
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.65;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+/* Heading levels retain their responsive sizes; weight and rhythm define hierarchy. */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-heading);
+  line-height: 1.4;
+}
+
+:where(h1) {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+
+:where(h2) {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+:where(h3, h4) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+:where(h5, h6) {
+  font-weight: 600;
+}
+
+:where(p, li) {
+  line-height: 1.65;
+}
+
+:where(button, input, select, textarea) {
+  font-family: var(--font-body);
+}
+
+:where(label) {
+  font-weight: 500;
+}
+
+:where(strong, b) {
+  font-weight: 700;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-color: var(--color-control-border);
+}
+
+/* A burgundy outline stays visible on white, mint-white and mint surfaces. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+button.bg-brand:is(:hover, :active):not(:disabled) {
+  background-color: var(--color-brand-hover);
+  color: var(--color-on-brand);
+}
+
+button.bg-accent:is(:hover, :active):not(:disabled) {
+  background-color: var(--color-accent-hover);
+  color: var(--color-on-accent);
+}
+
+button:is(.bg-brand, .bg-accent):disabled {
+  background-color: var(--color-disabled);
+  color: var(--color-muted);
+  border-color: var(--color-border-soft);
+}
+
+::selection {
+  background-color: var(--color-brand);
+  color: var(--color-on-brand);
 }
 
 /* Custom scrollbar */
@@ -25,12 +242,196 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #E7F5EF;
+  background: var(--color-surface-alt);
 }
 ::-webkit-scrollbar-thumb {
-  background: #B8E4D3;
+  background: var(--color-brand);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #285E56;
+  background: var(--color-accent);
+}
+
+/* Effects reuse the palette; they never change layout or capture clicks. */
+:root {
+  --interaction-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.site-header {
+  transition: background-color 300ms var(--interaction-ease),
+    box-shadow 300ms var(--interaction-ease), border-color 300ms var(--interaction-ease);
+}
+
+.site-header[data-scrolled="true"] {
+  background-color: color-mix(in srgb, var(--color-surface-alt) 78%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom-color: color-mix(in srgb, var(--color-detail) 12%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+/* Keep the header readable on browsers without backdrop blur. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header[data-scrolled="true"] {
+    background-color: var(--color-surface-alt);
+  }
+}
+
+.interaction-card {
+  --card-selected-shadow: 0 0 transparent;
+  position: relative;
+  isolation: isolate;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
+    var(--tw-ring-shadow, 0 0 transparent),
+    var(--card-selected-shadow),
+    0 3px 8px color-mix(in srgb, var(--color-accent) 4.5%, transparent);
+  transition: translate 250ms var(--interaction-ease),
+    box-shadow 250ms var(--interaction-ease), border-color 250ms var(--interaction-ease),
+    background-color 250ms var(--interaction-ease);
+}
+
+.interaction-card::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-surface) 98%, transparent),
+    color-mix(in srgb, var(--color-surface-alt) 96%, transparent) 55%,
+    color-mix(in srgb, var(--color-brand) 16%, transparent));
+  opacity: 0;
+  transition: opacity 250ms var(--interaction-ease);
+}
+
+.interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked)) {
+  --card-selected-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-brand) 80%, transparent);
+  border-color: var(--color-brand);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
+    var(--tw-ring-shadow, 0 0 transparent),
+    var(--card-selected-shadow),
+    0 3px 8px color-mix(in srgb, var(--color-brand) 14%, transparent);
+}
+
+.interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked), :focus-within)::before {
+  opacity: 1;
+}
+
+.interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked))::before {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-surface-alt) 85%, transparent),
+    color-mix(in srgb, var(--color-brand) 24%, transparent));
+}
+
+.interaction-card:focus-within {
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
+    var(--tw-ring-shadow, 0 0 transparent), var(--card-selected-shadow),
+    0 0 0 3px color-mix(in srgb, var(--color-brand) 80%, transparent),
+    0 4px 10px color-mix(in srgb, var(--color-brand) 12%, transparent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card) {
+  /* Outlined/light buttons stay clean at rest, with a restrained mint hover glow. */
+  --button-rest-shadow: none;
+  --button-hover-shadow: 0 3px 8px color-mix(in srgb, var(--color-brand) 12%, transparent),
+    0 2px 4px color-mix(in srgb, var(--color-brand) 8%, transparent);
+  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-brand) 8%, transparent);
+  box-shadow: var(--button-rest-shadow);
+  transition: translate 200ms var(--interaction-ease),
+    box-shadow 200ms var(--interaction-ease), background-color 200ms var(--interaction-ease),
+    border-color 200ms var(--interaction-ease), color 200ms var(--interaction-ease);
+}
+
+button.bg-brand:not(.interaction-card) {
+  --button-rest-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 40%, transparent),
+    0 3px 8px color-mix(in srgb, var(--color-brand) 16%, transparent),
+    0 2px 4px color-mix(in srgb, var(--color-accent) 3.5%, transparent);
+  --button-hover-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 55%, transparent),
+    0 5px 12px color-mix(in srgb, var(--color-brand) 22%, transparent),
+    0 3px 5px color-mix(in srgb, var(--color-accent) 4.5%, transparent);
+  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-brand) 10%, transparent);
+}
+
+button.bg-accent:not(.interaction-card) {
+  --button-rest-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 15%, transparent),
+    0 2px 6px color-mix(in srgb, var(--color-accent) 8%, transparent),
+    0 1px 3px color-mix(in srgb, var(--color-accent) 4%, transparent);
+  --button-hover-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 20%, transparent),
+    0 3px 8px color-mix(in srgb, var(--color-accent) 10%, transparent),
+    0 2px 4px color-mix(in srgb, var(--color-accent) 5%, transparent);
+  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .interaction-card:not(:disabled):hover {
+    translate: 0 -4px;
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
+      var(--tw-ring-shadow, 0 0 transparent),
+      var(--card-selected-shadow),
+      0 5px 12px color-mix(in srgb, var(--color-accent) 6%, transparent),
+      0 4px 10px color-mix(in srgb, var(--color-brand) 12%, transparent);
+  }
+
+  .interaction-card:not(:disabled):hover::before {
+    opacity: 1;
+  }
+
+  button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card):not(:disabled):hover {
+    translate: 0 -2px;
+    box-shadow: var(--button-hover-shadow);
+  }
+}
+
+button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card):not(:disabled):active {
+  translate: 0 1px;
+  box-shadow: var(--button-pressed-shadow);
+}
+
+.interaction-card:not(:disabled):active {
+  translate: 0 1px;
+  box-shadow: inset 0 1px 3px color-mix(in srgb, var(--color-accent) 10%, transparent),
+    0 1px 2px color-mix(in srgb, var(--color-accent) 4%, transparent);
+}
+
+button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):disabled {
+  translate: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .interaction-card,
+  .interaction-card::before,
+  button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border) {
+    transition: none !important;
+    translate: none !important;
+  }
+}
+
+/* Solid mint footer: crop the original logo into the background, behind content. */
+.site-footer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image: none;
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+  .site-footer::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    width: clamp(25rem, 46vw, 42rem);
+    aspect-ratio: 1286 / 784;
+    right: -5rem;
+    bottom: -8rem;
+    background-color: var(--color-footer-watermark);
+    opacity: 0.32;
+    -webkit-mask: url('./assets/brand/homemeal-footer.svg') center / contain no-repeat;
+    mask: url('./assets/brand/homemeal-footer.svg') center / contain no-repeat;
+  }
 }

@@ -2,5 +2,5 @@
   "name": "HomeMeal - Dịch Vụ Nấu Cơm & Đi Chợ Minh Bạch",
   "description": "Nền tảng đặt nấu cơm gia đình và tiệc giao tận nơi: chọn món theo sở thích, ngân sách đi chợ minh bạch có hóa đơn chụp thực tế, tách bạch tiền công và nguyên liệu, thanh toán sau khi hoàn thành dịch vụ.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_OPENAI_API"]
 }

@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 import { normalizeFood } from '../../shared/smartMenu.js';
-import { generateWithGemini } from './provider.js';
+import { generateWithOpenAI } from './provider.js';
 import { parseRequest, parsePlans, parseDish, SmartMenuError } from './validation.js';
 
 // Per-instance limits. Add Vercel Firewall rate limits for aggregate protection on serverless.
-export function createSmartMenuHandler(generate = generateWithGemini) {
+export function createSmartMenuHandler(generate = generateWithOpenAI) {
   const attempts = new Map<string, { count: number; resetAt: number }>();
   const active = new Set<string>();
   let total = 0;

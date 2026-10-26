@@ -15,7 +15,7 @@ HomeMeal kết nối khách hàng với đầu bếp gia đình, hỗ trợ đ�
 
 1. Cài dependencies bằng `npm install`.
 2. Sao chép `.env.example` thành `.env`.
-3. Điền `DATABASE_URL` và `APP_ORIGIN=http://localhost:3000`.
+3. Điền `DATABASE_URL`, `APP_ORIGIN=http://localhost:3000` và `OPENAI_API_KEY` nếu cần sinh thực đơn bằng AI.
 4. Chạy migration: `npm run db:migrate`.
 5. Trong một terminal chạy `npm run dev:api`; terminal khác chạy `npm run dev`.
 
@@ -43,8 +43,8 @@ Xóa các giá trị `INITIAL_ADMIN_*` khỏi `.env` sau khi tạo admin. Không
 - `APP_ORIGIN`: origin production, ví dụ `https://ten-web.vercel.app`, không có đường dẫn.
 - `RESEND_API_KEY` và `EMAIL_FROM`: gửi email xác minh và đặt lại mật khẩu. `EMAIL_FROM` cần dùng domain đã xác minh với Resend.
 - `OBJECT_STORAGE_BUCKET`, `OBJECT_STORAGE_REGION`, `OBJECT_STORAGE_ACCESS_KEY_ID`, `OBJECT_STORAGE_SECRET_ACCESS_KEY`: bucket S3-compatible riêng tư.
-- `MFA_ENCRYPTION_KEY`: khóa base64 giải mã được thành đúng 32 bytes để mã hóa secret MFA admin.
 - `AUTH_RATE_LIMIT_SECRET`: khóa ngẫu nhiên dùng để băm định danh trong bảng rate limit.
+- `OPENAI_API_KEY`: khóa bí mật server-side để gọi GPT-6 Luna qua OpenAI Responses API; không đặt khóa trong `VITE_*` hay mã frontend.
 
 Tạo khóa base64 32 bytes bằng Node:
 
@@ -56,16 +56,23 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 
 Đặt `SENTRY_DSN` để gửi lỗi API lên Sentry. Đặt `APP_TIME_ZONE` nếu lịch đặt món dùng múi giờ khác; mặc định `Asia/Ho_Chi_Minh`.
 
+## AI thực đơn với GPT-6 Luna
+
+1. Tạo API key trong OpenAI Platform và bật quyền API/billing cho project phù hợp.
+2. Local: đặt `OPENAI_API_KEY` trong `.env`. Production: thêm cùng biến trong Vercel → Project Settings → Environment Variables cho môi trường cần dùng.
+3. Redeploy Vercel sau khi thêm hoặc đổi key. Server gọi model `gpt-6-luna`; không cần đặt `OPENAI_MODEL`.
+
+Khóa chỉ được đọc ở backend. Khi chưa có key hợp lệ, trợ lý vẫn cung cấp thực đơn mẫu; không đưa key vào Git, trình duyệt hoặc biến `VITE_*`.
+
 ## Triển khai Vercel
 
 Ứng dụng được phục vụ tại `https://www.thomasely.id.vn/HomeMeal`. Vercel chuyển `/` tới đường dẫn này, phục vụ các route giao diện dưới `/HomeMeal/`, chuyển asset đã build về thư mục `/assets/` và chuyển `/HomeMeal/api` tới API function. `APP_BASE_PATH` mặc định là `/HomeMeal`; nếu đổi đường dẫn, cần cập nhật cả `vercel.json`.
 
-1. Trong Project Settings → Environment Variables, thêm `DATABASE_URL`, `APP_ORIGIN=https://www.thomasely.id.vn`, `APP_BASE_PATH=/HomeMeal`, cấu hình email, storage, MFA và Sentry cho môi trường phù hợp. `APP_ORIGIN` chỉ là origin, không thêm `/HomeMeal` hay đường dẫn. Không thêm `INITIAL_ADMIN_*`.
+1. Trong Project Settings → Environment Variables, thêm `DATABASE_URL`, `APP_ORIGIN=https://www.thomasely.id.vn`, `APP_BASE_PATH=/HomeMeal`, `OPENAI_API_KEY` cùng cấu hình email, storage và Sentry cần thiết. `APP_ORIGIN` chỉ là origin, không thêm `/HomeMeal` hay đường dẫn. Không thêm `INITIAL_ADMIN_*`.
 2. Chạy `npm run db:migrate` một lần từ máy tin cậy với `DATABASE_URL` production.
 3. Chạy `npm run db:seed-admin` một lần bằng `INITIAL_ADMIN_*` tạm thời trong `.env` local rồi xóa các giá trị đó.
 4. Redeploy Production để Vercel nạp biến môi trường.
-5. Đăng nhập admin, mở Tài khoản và bật MFA bằng ứng dụng Authenticator. Giữ `MFA_ENCRYPTION_KEY` ổn định; đổi khóa sẽ khiến secret MFA hiện tại không giải mã được.
-6. Kiểm tra `https://www.thomasely.id.vn/HomeMeal/api?resource=health`; endpoint chỉ trả tình trạng phụ thuộc, không tiết lộ thông tin kết nối.
+5. Kiểm tra `https://www.thomasely.id.vn/HomeMeal/api?resource=health`; endpoint chỉ trả tình trạng phụ thuộc, không tiết lộ thông tin kết nối.
 
 Lệnh dọn upload chưa hoàn tất là `npm run storage:cleanup`. Có thể lên lịch chạy định kỳ để xóa metadata và object bị bỏ dở sau hai giờ.
 
@@ -74,7 +81,8 @@ Lệnh dọn upload chưa hoàn tất là `npm run storage:cleanup`. Có thể l
 - Đơn hàng, báo giá, hóa đơn, yêu cầu đổi ngân sách, khiếu nại, đánh giá và audit event được lưu trong PostgreSQL. API kiểm tra khách sở hữu đơn, đầu bếp được giao đơn hoặc admin trước khi đọc/ghi.
 - Ảnh chứng từ được tải lên bucket riêng tư bằng URL ký số hết hạn sau 5 phút; URL đọc hết hạn sau 2 phút. Dùng CORS giới hạn đúng domain ứng dụng.
 - Rate limit đăng nhập, đăng ký và khôi phục mật khẩu được chia sẻ giữa các function qua PostgreSQL, thay vì bộ nhớ riêng từng tiến trình.
-- Admin có thể bật TOTP MFA. Email xác minh, khôi phục mật khẩu và thay đổi role được ghi audit.
+- Email xác minh, khôi phục mật khẩu và thay đổi role được ghi audit.
+- Migration `004_remove_totp_mfa.sql` gỡ TOTP và xóa các cột chứa thiết lập MFA cũ khỏi `app_users`.
 - Thanh toán thật chưa được tích hợp. Nút thanh toán bị khóa và API không thể đánh dấu đơn đã trả tiền từ yêu cầu trình duyệt.
 - Dữ liệu mẫu chỉ còn cho phiên khách chưa đăng nhập; không đồng bộ các đơn `localStorage` cũ sang production.
 

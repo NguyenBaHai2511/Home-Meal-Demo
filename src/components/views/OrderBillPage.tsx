@@ -36,10 +36,10 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
   if (!order) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-xl font-bold text-[#263B35]">Không tìm thấy hóa đơn</h2>
+        <h2 className="text-xl font-bold text-[#333333]">Không tìm thấy hóa đơn</h2>
         <button
           onClick={() => navigateTo('/orders')}
-          className="mt-4 px-4 py-2 bg-[#285E56] text-white rounded-xl text-xs font-semibold"
+          className="mt-4 px-4 py-2 bg-[#481620] text-white rounded-xl text-xs font-semibold"
         >
           Quay lại danh sách đơn hàng
         </button>
@@ -66,38 +66,38 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <button
         onClick={() => navigateTo(`/orders/${order.id}`)}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#738078] hover:text-[#285E56]"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#62625C] hover:text-[#481620]"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Quay lại trang chi tiết đơn #{order.orderCode}</span>
       </button>
 
       {/* Main Invoice Container */}
-      <div className="bg-white rounded-3xl border border-[#E5ECE7] p-6 sm:p-10 shadow-lg space-y-8">
+      <div className="bg-white rounded-3xl border border-[#E5E5DC] p-6 sm:p-10 shadow-lg space-y-8">
         {/* Invoice Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E5ECE7]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E5E5DC]">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-[#285E56] text-white flex items-center justify-center font-bold text-base">
+              <div className="w-8 h-8 rounded-lg bg-[#481620] text-white flex items-center justify-center font-bold text-base">
                 H
               </div>
-              <span className="text-xl font-extrabold text-[#285E56]">HomeMeal Invoice</span>
+              <span className="text-xl font-extrabold text-[#481620]">HomeMeal Invoice</span>
             </div>
-            <p className="text-xs text-[#738078]">
+            <p className="text-xs text-[#62625C]">
               Hóa đơn quyết toán dịch vụ · Mã đơn: <strong>#{order.orderCode}</strong>
             </p>
           </div>
 
-          <div className="text-left sm:text-right text-xs text-[#738078]">
-            <p>Ngày phục vụ: <strong className="text-[#263B35]">{order.date}</strong></p>
-            <p>Khách hàng: <strong className="text-[#263B35]">{order.customerName}</strong></p>
-            <p>Đầu bếp: <strong className="text-[#285E56]">{order.cook?.name}</strong></p>
+          <div className="text-left sm:text-right text-xs text-[#62625C]">
+            <p>Ngày phục vụ: <strong className="text-[#333333]">{order.date}</strong></p>
+            <p>Khách hàng: <strong className="text-[#333333]">{order.customerName}</strong></p>
+            <p>Đầu bếp: <strong className="text-[#481620]">{order.cook?.name}</strong></p>
           </div>
         </div>
 
         {/* Notice of Separation */}
-        <div className="p-4 bg-[#E7F5EF] rounded-2xl border border-[#B8E4D3] text-xs text-[#285E56] flex items-center gap-3">
-          <ShieldCheck className="w-5 h-5 shrink-0 text-[#285E56]" />
+        <div className="p-4 bg-[#F0FFF6] rounded-2xl border border-[#60D5AE] text-xs text-[#481620] flex items-center gap-3">
+          <ShieldCheck className="w-5 h-5 shrink-0 text-[#481620]" />
           <div>
             <strong>Cam kết thanh toán minh bạch:</strong> Chi phí nguyên liệu được thanh toán theo đúng hóa đơn thực tế của đầu bếp. Tiền công nấu ăn được tính riêng biệt và không kèm bất kỳ phụ phí ẩn nào.
           </div>
@@ -105,12 +105,12 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
 
         {/* SECTION A: INGREDIENT EXPENSES */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#E5ECE7]">
-            <h3 className="font-bold text-base text-[#263B35] flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#285E56] text-white flex items-center justify-center text-xs">A</span>
+          <div className="flex items-center justify-between pb-2 border-b border-[#E5E5DC]">
+            <h3 className="font-bold text-base text-[#333333] flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-[#481620] text-white flex items-center justify-center text-xs">A</span>
               <span>Chi phí nguyên liệu thực chi (Có chứng từ hóa đơn)</span>
             </h3>
-            <span className="text-xs text-[#738078]">
+            <span className="text-xs text-[#62625C]">
               Ngân sách duyệt: <strong>{formatVND(order.estimatedGroceryBudget)}</strong>
             </span>
           </div>
@@ -118,7 +118,7 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-stone-50 text-[#738078] border-b border-[#E5ECE7]">
+                <tr className="bg-stone-50 text-[#62625C] border-b border-[#E5E5DC]">
                   <th className="py-2.5 px-3">Tên nguyên liệu</th>
                   <th className="py-2.5 px-3">Nơi mua</th>
                   <th className="py-2.5 px-3">Số lượng</th>
@@ -127,18 +127,18 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
                   <th className="py-2.5 px-3 text-center">Chứng từ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5ECE7]">
+              <tbody className="divide-y divide-[#E5E5DC]">
                 {order.shoppingList.map((item) => (
                   <tr key={item.id} className="hover:bg-stone-50/60">
-                    <td className="py-2.5 px-3 font-medium text-[#263B35]">{item.name}</td>
-                    <td className="py-2.5 px-3 text-[#738078]">{item.storeName}</td>
-                    <td className="py-2.5 px-3 text-[#738078]">{item.quantity} {item.unit}</td>
+                    <td className="py-2.5 px-3 font-medium text-[#333333]">{item.name}</td>
+                    <td className="py-2.5 px-3 text-[#62625C]">{item.storeName}</td>
+                    <td className="py-2.5 px-3 text-[#62625C]">{item.quantity} {item.unit}</td>
                     <td className="py-2.5 px-3 text-right font-medium">{formatVND(item.actualPrice)}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-[#285E56]">{formatVND(item.subtotal)}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-[#481620]">{formatVND(item.subtotal)}</td>
                     <td className="py-2.5 px-3 text-center">
                       <button
                         onClick={() => setSelectedEvidenceItem(item)}
-                        className="inline-flex items-center gap-1 text-[11px] text-[#285E56] hover:underline font-semibold bg-[#E7F5EF] px-2 py-0.5 rounded"
+                        className="inline-flex items-center gap-1 text-[11px] text-[#481620] hover:underline font-semibold bg-[#F0FFF6] px-2 py-0.5 rounded"
                       >
                         <Eye className="w-3 h-3" />
                         <span>Xem ảnh</span>
@@ -151,8 +151,8 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
           </div>
 
           <div className="flex justify-between items-center p-3.5 bg-stone-50 rounded-xl text-xs font-bold">
-            <span className="text-[#263B35]">CỘNG TIỀN CHỢ THỰC TẾ (Mục A):</span>
-            <span className="text-base text-[#285E56]">{formatVND(order.actualGroceryTotal)}</span>
+            <span className="text-[#333333]">CỘNG TIỀN CHỢ THỰC TẾ (Mục A):</span>
+            <span className="text-base text-[#481620]">{formatVND(order.actualGroceryTotal)}</span>
           </div>
 
           {order.actualGroceryTotal < order.estimatedGroceryBudget && (
@@ -164,52 +164,52 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
 
         {/* SECTION B: SERVICE FEES */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#E5ECE7]">
-            <h3 className="font-bold text-base text-[#263B35] flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#285E56] text-white flex items-center justify-center text-xs">B</span>
+          <div className="flex items-center justify-between pb-2 border-b border-[#E5E5DC]">
+            <h3 className="font-bold text-base text-[#333333] flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-[#481620] text-white flex items-center justify-center text-xs">B</span>
               <span>Chi phí công đầu bếp đến nhà nấu ăn</span>
             </h3>
           </div>
 
-          <div className="bg-[#FFFDF7] rounded-xl border border-[#E5ECE7] p-4 space-y-2 text-xs">
-            <div className="flex justify-between py-1 border-b border-[#E5ECE7]/60">
-              <span className="text-[#263B35]">
+          <div className="bg-[#FFFFFF] rounded-xl border border-[#E5E5DC] p-4 space-y-2 text-xs">
+            <div className="flex justify-between py-1 border-b border-[#E5E5DC]/60">
+              <span className="text-[#333333]">
                 Tiền công nấu chính ({order.guestCount} khách · {order.items.length} món):
               </span>
-              <span className="font-semibold text-[#263B35]">{formatVND(order.totalLaborFee)}</span>
+              <span className="font-semibold text-[#333333]">{formatVND(order.totalLaborFee)}</span>
             </div>
 
             {order.deliveryFee > 0 && (
-              <div className="flex justify-between py-1 border-b border-[#E5ECE7]/60">
-                <span className="text-[#263B35]">Phí giao theo đơn đã đặt trước đây:</span>
-                <span className="font-semibold text-[#263B35]">{formatVND(order.deliveryFee)}</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5DC]/60">
+                <span className="text-[#333333]">Phí giao theo đơn đã đặt trước đây:</span>
+                <span className="font-semibold text-[#333333]">{formatVND(order.deliveryFee)}</span>
               </div>
             )}
 
             {order.additionalServiceFee > 0 && (
-              <div className="flex justify-between py-1 border-b border-[#E5ECE7]/60">
-                <span className="text-[#263B35]">Phí phụ bếp & Thiết bị tiệc chuyên dụng:</span>
-                <span className="font-semibold text-[#263B35]">{formatVND(order.additionalServiceFee)}</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5DC]/60">
+                <span className="text-[#333333]">Phí phụ bếp & Thiết bị tiệc chuyên dụng:</span>
+                <span className="font-semibold text-[#333333]">{formatVND(order.additionalServiceFee)}</span>
               </div>
             )}
 
             <div className="flex justify-between pt-2 font-bold text-xs">
-              <span className="text-[#263B35]">CỘNG TIỀN CÔNG & DỊCH VỤ (Mục B):</span>
-              <span className="text-[#285E56]">{formatVND(order.totalLaborFee + order.deliveryFee + order.additionalServiceFee)}</span>
+              <span className="text-[#333333]">CỘNG TIỀN CÔNG & DỊCH VỤ (Mục B):</span>
+              <span className="text-[#481620]">{formatVND(order.totalLaborFee + order.deliveryFee + order.additionalServiceFee)}</span>
             </div>
           </div>
         </div>
 
         {/* SECTION C: FINAL TOTAL */}
-        <div className="p-6 bg-gradient-to-br from-[#E7F5EF] to-white rounded-2xl border-2 border-[#285E56] space-y-4">
+        <div className="p-6 bg-gradient-to-br from-[#F0FFF6] to-white rounded-2xl border-2 border-[#481620] space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-[#285E56] uppercase tracking-wider">Mục C: Tổng quyết toán</span>
-              <h4 className="text-xl font-extrabold text-[#263B35]">Tổng số tiền thanh toán</h4>
-              <p className="text-[11px] text-[#738078] mt-0.5">= Tiền chợ thực tế (A) + Tiền công & Dịch vụ (B)</p>
+              <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">Mục C: Tổng quyết toán</span>
+              <h4 className="text-xl font-extrabold text-[#333333]">Tổng số tiền thanh toán</h4>
+              <p className="text-[11px] text-[#62625C] mt-0.5">= Tiền chợ thực tế (A) + Tiền công & Dịch vụ (B)</p>
             </div>
             <div className="text-right">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#285E56]">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#481620]">
                 {formatVND(order.finalPayableAmount)}
               </span>
             </div>
@@ -239,7 +239,7 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
               </div>
             ) : (
               <button disabled className="w-full sm:w-auto px-8 py-3.5 bg-stone-300 text-stone-600 font-bold text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                <CreditCard className="w-4 h-4 text-[#B8E4D3]" />
+                <CreditCard className="w-4 h-4 text-[#60D5AE]" />
                 <span>{isDisputed ? 'Thanh toán đang tạm khóa do khiếu nại' : 'Cổng thanh toán chưa được cấu hình'}</span>
               </button>
             )}
@@ -248,9 +248,9 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
 
         {/* Review Section after Payment */}
         {isPaid && (
-          <div className="p-6 bg-[#FFFDF7] rounded-2xl border border-[#E5ECE7] space-y-4">
-            <h4 className="font-bold text-base text-[#263B35] flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#F2AD72] fill-[#F2AD72]" />
+          <div className="p-6 bg-[#FFFFFF] rounded-2xl border border-[#E5E5DC] space-y-4">
+            <h4 className="font-bold text-base text-[#333333] flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#735444] fill-[#735444]" />
               <span>Đánh giá trải nghiệm bữa ăn</span>
             </h4>
 
@@ -262,13 +262,13 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
             ) : (
               <div className="space-y-3 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-[#263B35]">Độ hài lòng chung:</span>
+                  <span className="font-medium text-[#333333]">Độ hài lòng chung:</span>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         onClick={() => setReviewRating(star)}
-                        className={`text-lg ${star <= reviewRating ? 'text-[#F2AD72]' : 'text-stone-300'}`}
+                        className={`text-lg ${star <= reviewRating ? 'text-[#735444]' : 'text-stone-300'}`}
                       >
                         ★
                       </button>
@@ -281,12 +281,12 @@ export const OrderBillPage: React.FC<OrderBillPageProps> = ({ orderId }) => {
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Viết nhận xét về độ ngon món ăn, sự nhiệt tình và độ minh bạch chứng từ..."
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5ECE7] focus:ring-2 focus:ring-[#285E56]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
                 />
 
                 <button
                   onClick={handleSendReview}
-                  className="px-4 py-2 bg-[#285E56] text-white font-semibold rounded-lg hover:bg-[#1f4b44]"
+                  className="px-4 py-2 bg-[#481620] text-white font-semibold rounded-lg hover:bg-[#361018]"
                 >
                   Gửi đánh giá
                 </button>

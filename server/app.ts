@@ -8,6 +8,7 @@ import { deleteEvidenceObject, isObjectStorageConfigured, makeEvidenceObjectKey,
 import { sendAccountEmail } from './email.js';
 import { appPath } from './appPaths.js';
 import { createSmartMenuHandler } from './smart-menu/handler.js';
+import { matchesAllowedOrigin } from './originPolicy.js';
 
 type UserRole = 'customer' | 'cook' | 'admin';
 type AuthUser = {
@@ -80,15 +81,15 @@ function assertSameOrigin(req: Request, res: Response, next: NextFunction) {
     return;
   }
   try {
-    const deploymentOrigin = process.env.APP_ORIGIN || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
-    const expectedOrigin = deploymentOrigin
-      ? new URL(deploymentOrigin).origin
-      : `${req.protocol}://${req.get('x-forwarded-host') || req.get('host')}`;
-    if (process.env.NODE_ENV === 'production' && !deploymentOrigin) {
+    const configuredOrigin = process.env.APP_ORIGIN || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+    if (process.env.NODE_ENV === 'production' && !configuredOrigin) {
       res.status(503).json({ error: 'APP_ORIGIN must be configured in production.' });
       return;
     }
-    if (new URL(originHeader).origin !== expectedOrigin) {
+    const forwardedHost = req.get('x-forwarded-host')?.split(',')[0]?.trim();
+    const requestOrigin = `${req.protocol}://${forwardedHost || req.get('host')}`;
+    const allowedOrigins = [requestOrigin, configuredOrigin].filter((origin): origin is string => Boolean(origin));
+    if (!matchesAllowedOrigin(originHeader, allowedOrigins)) {
       res.status(403).json({ error: 'Cross-origin request rejected.' });
       return;
     }

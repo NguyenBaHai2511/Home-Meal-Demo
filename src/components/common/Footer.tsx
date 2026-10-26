@@ -6,10 +6,10 @@ export const Footer: React.FC = () => {
   const { navigateTo } = useApp();
 
   return (
-    <footer className="site-footer bg-brand text-ink pt-8 pb-6 border-t border-accent/15">
+    <footer className="site-footer bg-surface-alt text-ink pt-12 sm:pt-16 pb-6 border-t border-border-soft">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Core Pillars */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pb-6 border-b border-border-soft text-sm">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-6 pb-10 border-b border-border-soft text-sm">
           <div className="flex items-start gap-3">
             <Receipt className="w-5 h-5 text-ink shrink-0 mt-0.5" />
             <div>
@@ -41,9 +41,9 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-5 gap-y-6 py-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8 py-10">
           <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <p className="text-sm font-medium text-ink italic mb-2">
+            <p className="editorial-title text-3xl text-accent italic mb-4 max-w-sm">
               "Bữa cơm chân tình cho người bận rộn"
             </p>
             <p className="text-xs text-ink leading-relaxed max-w-sm mb-3">

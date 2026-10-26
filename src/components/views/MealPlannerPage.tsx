@@ -292,11 +292,11 @@ export const MealPlannerPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header & Stepper */}
-      <div className="bg-white rounded-2xl p-6 border border-[#E5E5DC] shadow-xs">
+      <div className="planner-progress bg-surface-alt rounded-xl p-5 sm:p-8 border border-border-soft">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">
+              <span className="text-xs font-bold text-accent uppercase tracking-wider">
                 Quy trình đặt nấu bữa ăn
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -304,36 +304,37 @@ export const MealPlannerPage: React.FC = () => {
                 Đầu bếp nấu tại nhà bạn
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-[#333333]">
+            <h1 className="editorial-title text-3xl sm:text-4xl mt-3 text-ink" aria-live="polite">
               {STEPS[currentStep - 1]}
             </h1>
           </div>
-          <div className="text-xs text-[#62625C] flex items-center gap-2">
+          <div className="text-xs text-muted flex items-center gap-2">
             <span>Bước {currentStep} / {STEPS.length}</span>
-            <span className="font-semibold text-[#481620]">
+            <span className="font-semibold text-accent">
               ({Math.round((currentStep / STEPS.length) * 100)}%)
             </span>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-[#F0FFF6] h-2 rounded-full overflow-hidden mb-4">
+        <div role="progressbar" aria-label="Tiến trình đặt bữa ăn" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuetext={`Bước ${currentStep}: ${STEPS[currentStep - 1]}`} className="w-full bg-border-soft h-1 rounded-full overflow-hidden mb-4">
           <div
-            className="bg-[#481620] h-full transition-all duration-300 rounded-full"
+            className="bg-accent h-full transition-all duration-300 rounded-full"
             style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
           />
         </div>
 
         {/* Step Pills on Desktop */}
-        <div className="hidden lg:grid grid-cols-7 gap-2 text-[11px] font-medium text-center text-[#62625C]">
+        <div className="hidden lg:grid grid-cols-7 gap-2 text-[11px] font-medium text-center text-muted">
           {STEPS.map((step, idx) => (
             <div
               key={idx}
+              aria-current={currentStep === idx + 1 ? 'step' : undefined}
               className={`py-1.5 px-1 rounded-lg truncate ${
                 currentStep === idx + 1
-                  ? 'bg-[#481620] text-white font-semibold'
+                  ? 'bg-accent text-white font-semibold'
                   : currentStep > idx + 1
-                  ? 'bg-[#F0FFF6] text-[#481620]'
+                  ? 'bg-surface-alt text-accent'
                   : 'bg-stone-50'
               }`}
             >
@@ -345,13 +346,13 @@ export const MealPlannerPage: React.FC = () => {
 
       {/* STEP 1: THỜI GIAN, ĐỊA CHỈ & QUY MÔ (ĐẦU BẾP ĐẾN TẬN NHÀ NẤU ĂN, BẮT BUỘC ĐẶT TRƯỚC 4 TIẾNG) */}
       {currentStep === 1 && (
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DC] shadow-xs space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#E5E5DC]">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-border-soft shadow-xs space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-border-soft">
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#333333]">
+              <h2 className="text-lg sm:text-xl font-bold text-ink">
                 Thời gian phục vụ & Địa chỉ gian bếp nhà bạn
               </h2>
-              <p className="text-xs sm:text-sm text-[#62625C] mt-0.5">
+              <p className="text-xs sm:text-sm text-muted mt-0.5">
                 Đầu bếp HomeMeal đến tận gian bếp nhà bạn nấu nóng hổi, đi chợ mua nguyên liệu tươi sống trong ngày, dọn mâm lên bàn và dọn dẹp sạch sẽ sau khi dùng bữa.
               </p>
             </div>
@@ -399,43 +400,43 @@ export const MealPlannerPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
-              <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-                <Calendar className="w-4 h-4 text-[#481620]" /> Ngày đầu bếp tới nấu:
+              <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+                <Calendar className="w-4 h-4 text-accent" /> Ngày đầu bếp tới nấu:
               </label>
               <input
                 type="date"
                 min={minDateAllowed}
                 value={draftOrder.date || ''}
                 onChange={(e) => updateDraftOrder({ date: e.target.value })}
-                className={`w-full px-3.5 py-2.5 bg-[#FFFFFF] border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] font-medium ${
-                  !timeValidation.isValid ? 'border-rose-400 ring-1 ring-rose-200' : 'border-[#E5E5DC]'
+                className={`w-full px-3.5 py-2.5 bg-surface border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent font-medium ${
+                  !timeValidation.isValid ? 'border-rose-400 ring-1 ring-rose-200' : 'border-border-soft'
                 }`}
               />
-              <p className="text-[11px] text-[#62625C] mt-1">
+              <p className="text-[11px] text-muted mt-1">
                 Sớm nhất: hôm nay hoặc ngày mai
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-                <Clock className="w-4 h-4 text-[#481620]" /> Giờ ăn cơm mong muốn:
+              <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+                <Clock className="w-4 h-4 text-accent" /> Giờ ăn cơm mong muốn:
               </label>
               <input
                 type="time"
                 value={draftOrder.servingTime || ''}
                 onChange={(e) => updateDraftOrder({ servingTime: e.target.value })}
-                className={`w-full px-3.5 py-2.5 bg-[#FFFFFF] border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] font-medium ${
-                  !timeValidation.isValid ? 'border-rose-400 ring-1 ring-rose-200 bg-rose-50/40 text-rose-900' : 'border-[#E5E5DC]'
+                className={`w-full px-3.5 py-2.5 bg-surface border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent font-medium ${
+                  !timeValidation.isValid ? 'border-rose-400 ring-1 ring-rose-200 bg-rose-50/40 text-rose-900' : 'border-border-soft'
                 }`}
               />
-              <p className="text-[11px] text-[#62625C] mt-1">
+              <p className="text-[11px] text-muted mt-1">
                 * Đầu bếp sẽ đến sớm 1-2 tiếng trước giờ ăn để nấu trực tiếp
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-                <Users className="w-4 h-4 text-[#481620]" /> Số lượng khách ăn:
+              <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+                <Users className="w-4 h-4 text-accent" /> Số lượng khách ăn:
               </label>
               <div className="relative">
                 <input
@@ -445,13 +446,13 @@ export const MealPlannerPage: React.FC = () => {
                   value={draftOrder.guestCount || 4}
                   onChange={(e) => updateDraftOrder({ guestCount: Math.max(1, parseInt(e.target.value) || 1) })}
                   placeholder="Nhập số người ăn..."
-                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] font-bold text-[#333333]"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent font-bold text-ink"
                 />
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#62625C] pointer-events-none">
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-muted pointer-events-none">
                   người ăn
                 </span>
               </div>
-              <p className="text-[11px] text-[#62625C] mt-1">
+              <p className="text-[11px] text-muted mt-1">
                 Tùy ý nhập số lượng người ăn cho bữa cơm của bạn
               </p>
               {guestCount > 20 && (
@@ -462,34 +463,34 @@ export const MealPlannerPage: React.FC = () => {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-                <MapPin className="w-4 h-4 text-[#481620]" /> Địa chỉ nhà bạn (Nơi đầu bếp đến nấu):
+              <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+                <MapPin className="w-4 h-4 text-accent" /> Địa chỉ nhà bạn (Nơi đầu bếp đến nấu):
               </label>
               <input
                 type="text"
                 placeholder="Ví dụ: Căn hộ 12.04, Toà Landmark 3, Vinhomes Central Park, Bình Thạnh"
                 value={draftOrder.customerAddress || ''}
                 onChange={(e) => updateDraftOrder({ customerAddress: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+                className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#333333] mb-1.5">Dịp bữa ăn:</label>
+              <label className="block text-xs font-semibold text-ink mb-1.5">Dịp bữa ăn:</label>
               <input
                 type="text"
                 placeholder="Ví dụ: Cơm tối thường nhật, Sinh nhật con, Giỗ ông bà..."
                 value={draftOrder.mealOccasion || 'Bữa cơm gia đình'}
                 onChange={(e) => updateDraftOrder({ mealOccasion: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+                className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
               />
             </div>
           </div>
 
-          <div className="p-4 bg-[#FFFFFF] rounded-xl border border-[#E5E5DC] text-xs text-[#62625C] flex items-start gap-2">
-            <Info className="w-4 h-4 text-[#481620] shrink-0 mt-0.5" />
+          <div className="p-4 bg-surface rounded-xl border border-border-soft text-xs text-muted flex items-start gap-2">
+            <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold text-[#333333]">Cam kết phục vụ tại nhà:</span> Đầu bếp mang nguyên liệu tươi đến nhà bạn, nấu trực tiếp tại gian bếp, dọn mâm lên bàn và lau dọn sạch sẽ sau bữa ăn.
+              <span className="font-semibold text-ink">Cam kết phục vụ tại nhà:</span> Đầu bếp mang nguyên liệu tươi đến nhà bạn, nấu trực tiếp tại gian bếp, dọn mâm lên bàn và lau dọn sạch sẽ sau bữa ăn.
             </div>
           </div>
         </div>
@@ -499,30 +500,30 @@ export const MealPlannerPage: React.FC = () => {
       {currentStep === 2 && (
         <div className="space-y-6">
           {/* Header Card */}
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E5DC] shadow-xs">
+          <div className="bg-white rounded-2xl p-6 border border-border-soft shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#F0FFF6] text-[#481620] text-xs font-bold border border-[#60D5AE]">
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-alt text-accent text-xs font-bold border border-brand">
                     Khẩu vị riêng 100%
                   </span>
-                  <span className="text-xs text-[#62625C]">Không giới hạn theo danh mục cố định</span>
+                  <span className="text-xs text-muted">Không giới hạn theo danh mục cố định</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-[#333333]">
+                <h2 className="text-lg sm:text-xl font-bold text-ink">
                   Tự điền món ăn gia đình bạn muốn
                 </h2>
-                <p className="text-xs sm:text-sm text-[#62625C] mt-1">
+                <p className="text-xs sm:text-sm text-muted mt-1">
                   Nhập bất kỳ món ăn nào bạn thèm hôm nay (món mặn, xào, canh, hải sản, món chay...). Đầu bếp sẽ mua nguyên liệu tươi ngon tại chợ và chế biến theo đúng khẩu vị riêng của gia đình bạn.
                 </p>
               </div>
 
               {/* Status summary */}
-              <div className="text-left sm:text-right bg-[#FFFFFF] p-3.5 rounded-xl border border-[#E5E5DC] shrink-0">
-                <span className="text-xs text-[#62625C] block">Thực đơn đã điền:</span>
-                <span className="text-base font-extrabold text-[#481620]">
+              <div className="text-left sm:text-right bg-surface p-3.5 rounded-xl border border-border-soft shrink-0">
+                <span className="text-xs text-muted block">Thực đơn đã điền:</span>
+                <span className="text-base font-extrabold text-accent">
                   {selectedItems.length} món ăn
                 </span>
-                <span className="text-[11px] text-[#62625C] block mt-0.5">
+                <span className="text-[11px] text-muted block mt-0.5">
                   Ước tính tiền chợ: {formatVND(estimatedIngredientTotal)}
                 </span>
               </div>
@@ -530,18 +531,18 @@ export const MealPlannerPage: React.FC = () => {
           </div>
 
           {/* Main Input Form */}
-          <div className="bg-white rounded-2xl p-6 border border-[#60D5AE] shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E5DC] pb-3">
+          <div className="bg-white rounded-2xl p-6 border border-brand shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-soft pb-3">
               <div className="flex items-center gap-2">
-                <PenTool className="w-4 h-4 text-[#481620]" />
-                <h3 className="font-bold text-[#333333] text-sm sm:text-base">
+                <PenTool className="w-4 h-4 text-accent" />
+                <h3 className="font-bold text-ink text-sm sm:text-base">
                   Điền món ăn bạn muốn đầu bếp nấu
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowBulkInput(!showBulkInput)}
-                className="text-xs font-semibold text-[#481620] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
+                className="text-xs font-semibold text-accent hover:underline flex items-center gap-1.5 self-start sm:self-auto"
               >
                 <ListPlus className="w-3.5 h-3.5" />
                 <span>{showBulkInput ? 'Đóng nhập nhanh' : 'Nhập nhanh nhiều món (mỗi dòng 1 món)'}</span>
@@ -550,8 +551,8 @@ export const MealPlannerPage: React.FC = () => {
 
             {/* Bulk multiline input drawer */}
             {showBulkInput && (
-              <div className="p-4 bg-[#F0FFF6] rounded-xl border border-[#60D5AE] space-y-3">
-                <label className="block text-xs font-bold text-[#481620]">
+              <div className="p-4 bg-surface-alt rounded-xl border border-brand space-y-3">
+                <label className="block text-xs font-bold text-accent">
                   Dán hoặc gõ danh sách món ăn (mỗi dòng một món):
                 </label>
                 <textarea
@@ -559,16 +560,16 @@ export const MealPlannerPage: React.FC = () => {
                   value={bulkInputText}
                   onChange={(e) => setBulkInputText(e.target.value)}
                   placeholder="Ví dụ:&#10;Thịt kho hột vịt nước dừa&#10;Canh chua cá lóc bông điên điển&#10;Rau muống xào tỏi giòn&#10;Dưa hấu tráng miệng"
-                  className="w-full p-3 bg-white border border-[#60D5AE] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] outline-none"
+                  className="w-full p-3 bg-white border border-brand rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent outline-none"
                 />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="text-[11px] text-[#62625C]">
+                  <span className="text-[11px] text-muted">
                     Hệ thống tự động phân loại món và đưa vào mâm cơm ngay lập tức.
                   </span>
                   <button
                     type="button"
                     onClick={handleAddBulkDishes}
-                    className="px-4 py-2 bg-[#481620] hover:bg-[#361018] text-white text-xs font-bold rounded-lg transition-all shadow-xs self-start sm:self-auto"
+                    className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-lg transition-all shadow-xs self-start sm:self-auto"
                   >
                     Thêm danh sách món này
                   </button>
@@ -580,7 +581,7 @@ export const MealPlannerPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
               {/* Dish Name */}
               <div className="md:col-span-5">
-                <label className="block text-xs font-bold text-[#333333] mb-1">
+                <label className="block text-xs font-bold text-ink mb-1">
                   Tên món ăn bạn muốn: <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -594,19 +595,19 @@ export const MealPlannerPage: React.FC = () => {
                     }
                   }}
                   placeholder="Ví dụ: Sườn ram mặn, Canh cải nấu tôm, Cá bống kho..."
-                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm font-semibold text-[#333333] focus:ring-2 focus:ring-[#481620] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-semibold text-ink focus:ring-2 focus:ring-accent outline-none"
                 />
               </div>
 
               {/* Category */}
               <div className="md:col-span-3">
-                <label className="block text-xs font-bold text-[#333333] mb-1">
+                <label className="block text-xs font-bold text-ink mb-1">
                   Phân loại món:
                 </label>
                 <select
                   value={customDishCategory}
                   onChange={(e) => setCustomDishCategory(e.target.value as DishCategory)}
-                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#481620] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-accent outline-none"
                 >
                   <option value="meat">Món thịt (Kho, rim, xào...)</option>
                   <option value="fish">Món cá (Kho tộ, chiên...)</option>
@@ -621,7 +622,7 @@ export const MealPlannerPage: React.FC = () => {
 
               {/* Portion / Quantity */}
               <div className="md:col-span-4">
-                <label className="block text-xs font-bold text-[#333333] mb-1">
+                <label className="block text-xs font-bold text-ink mb-1">
                   Định lượng / Số phần:
                 </label>
                 <input
@@ -629,13 +630,13 @@ export const MealPlannerPage: React.FC = () => {
                   value={customDishPortion}
                   onChange={(e) => setCustomDishPortion(e.target.value)}
                   placeholder={`Mặc định: ${guestCount} người ăn (hoặc: 1 đĩa lớn, 2 tô)`}
-                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent outline-none"
                 />
               </div>
 
               {/* Custom Notes / Taste Preferences */}
               <div className="md:col-span-8">
-                <label className="block text-xs font-bold text-[#333333] mb-1">
+                <label className="block text-xs font-bold text-ink mb-1">
                   Ghi chú khẩu vị & cách nấu cho món này (tùy chọn):
                 </label>
                 <input
@@ -649,7 +650,7 @@ export const MealPlannerPage: React.FC = () => {
                     }
                   }}
                   placeholder="Ví dụ: Ít cay cho trẻ nhỏ, thịt kho mềm rục, không nêm bột ngọt, đậm đà..."
-                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent outline-none"
                 />
               </div>
 
@@ -658,7 +659,7 @@ export const MealPlannerPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddCustomDish()}
-                  className="w-full py-2.5 px-4 bg-[#481620] hover:bg-[#361018] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 h-[42px]"
+                  className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 h-[42px]"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Thêm món vào mâm cơm</span>
@@ -667,9 +668,9 @@ export const MealPlannerPage: React.FC = () => {
             </div>
 
             {/* Quick Inspiration Pills */}
-            <div className="pt-2 border-t border-[#E5E5DC]">
-              <div className="flex items-center gap-1.5 text-xs text-[#62625C] mb-2 font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-[#735444]" />
+            <div className="pt-2 border-t border-border-soft">
+              <div className="flex items-center gap-1.5 text-xs text-muted mb-2 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-detail" />
                 <span>Gợi ý bấm nhanh món ăn gia đình quen thuộc:</span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -691,7 +692,7 @@ export const MealPlannerPage: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => handleAddCustomDish(item.name, item.cat)}
-                    className="px-2.5 py-1 bg-stone-100 hover:bg-[#F0FFF6] text-stone-700 hover:text-[#481620] rounded-lg text-xs font-medium border border-stone-200 hover:border-[#60D5AE] transition-colors flex items-center gap-1"
+                    className="px-2.5 py-1 bg-stone-100 hover:bg-surface-alt text-stone-700 hover:text-accent rounded-lg text-xs font-medium border border-stone-200 hover:border-brand transition-colors flex items-center gap-1"
                   >
                     <span>+ {item.name}</span>
                   </button>
@@ -701,11 +702,11 @@ export const MealPlannerPage: React.FC = () => {
           </div>
 
           {/* List of Entered Dishes */}
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E5DC] shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E5E5DC]">
+          <div className="bg-white rounded-2xl p-6 border border-border-soft shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border-soft">
               <div className="flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-[#481620]" />
-                <h3 className="font-bold text-[#333333] text-base">
+                <Utensils className="w-4 h-4 text-accent" />
+                <h3 className="font-bold text-ink text-base">
                   Mâm cơm của bạn ({selectedItems.length} món)
                 </h3>
               </div>
@@ -721,13 +722,13 @@ export const MealPlannerPage: React.FC = () => {
             </div>
 
             {selectedItems.length === 0 ? (
-              <div className="text-center py-12 px-4 rounded-xl border border-dashed border-[#60D5AE] bg-[#FFFFFF] space-y-3">
-                <div className="w-12 h-12 rounded-full bg-[#F0FFF6] text-[#481620] flex items-center justify-center mx-auto text-xl">
+              <div className="text-center py-12 px-4 rounded-xl border border-dashed border-brand bg-surface space-y-3">
+                <div className="w-12 h-12 rounded-full bg-surface-alt text-accent flex items-center justify-center mx-auto text-xl">
                   🍲
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-bold text-sm text-[#333333]">Chưa có món ăn nào trong mâm cơm</h4>
-                  <p className="text-xs text-[#62625C] max-w-md mx-auto">
+                  <h4 className="font-bold text-sm text-ink">Chưa có món ăn nào trong mâm cơm</h4>
+                  <p className="text-xs text-muted max-w-md mx-auto">
                     Hãy nhập tên món bạn muốn ăn ở khung phía trên, hoặc bấm vào các món gợi ý để thêm nhanh vào thực đơn.
                   </p>
                 </div>
@@ -737,17 +738,17 @@ export const MealPlannerPage: React.FC = () => {
                 {selectedItems.map((item, idx) => (
                   <div
                     key={item.dish.id || idx}
-                    className="p-4 rounded-xl border border-[#E5E5DC] bg-[#FFFFFF] hover:border-[#60D5AE] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="p-4 rounded-xl border border-border-soft bg-surface hover:border-brand transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="w-6 h-6 rounded-full bg-[#F0FFF6] text-[#481620] font-bold text-xs flex items-center justify-center shrink-0">
+                        <span className="w-6 h-6 rounded-full bg-surface-alt text-accent font-bold text-xs flex items-center justify-center shrink-0">
                           {idx + 1}
                         </span>
-                        <h4 className="font-bold text-sm sm:text-base text-[#333333]">
+                        <h4 className="font-bold text-sm sm:text-base text-ink">
                           {item.dish.name}
                         </h4>
-                        <span className="text-[11px] font-semibold text-[#481620] bg-[#F0FFF6] px-2 py-0.5 rounded-md border border-[#60D5AE]">
+                        <span className="text-[11px] font-semibold text-accent bg-surface-alt px-2 py-0.5 rounded-md border border-brand">
                           {item.dish.category === 'meat' ? 'Món thịt' :
                            item.dish.category === 'fish' ? 'Món cá' :
                            item.dish.category === 'seafood' ? 'Hải sản' :
@@ -757,7 +758,7 @@ export const MealPlannerPage: React.FC = () => {
                            item.dish.category === 'dessert' ? 'Tráng miệng' : 'Món tiệc/cỗ'}
                         </span>
                         {item.dish.suggestedPortion && (
-                          <span className="text-[11px] text-[#62625C] bg-stone-100 px-2 py-0.5 rounded-md">
+                          <span className="text-[11px] text-muted bg-stone-100 px-2 py-0.5 rounded-md">
                             {item.dish.suggestedPortion}
                           </span>
                         )}
@@ -770,24 +771,24 @@ export const MealPlannerPage: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E5E5DC]">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-soft">
                       {/* Quantity controls */}
-                      <div className="flex items-center gap-1.5 bg-white border border-[#E5E5DC] rounded-lg p-1">
+                      <div className="flex items-center gap-1.5 bg-white border border-border-soft rounded-lg p-1">
                         <button
                           type="button"
                           onClick={() => handleUpdateQuantity(item.dish.id, -1)}
-                          className="w-6 h-6 rounded flex items-center justify-center text-[#333333] hover:bg-stone-100 text-xs"
+                          className="w-6 h-6 rounded flex items-center justify-center text-ink hover:bg-stone-100 text-xs"
                           title="Giảm số lượng"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="text-xs font-bold w-6 text-center text-[#333333]">
+                        <span className="text-xs font-bold w-6 text-center text-ink">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleUpdateQuantity(item.dish.id, 1)}
-                          className="w-6 h-6 rounded flex items-center justify-center text-[#333333] hover:bg-stone-100 text-xs"
+                          className="w-6 h-6 rounded flex items-center justify-center text-ink hover:bg-stone-100 text-xs"
                           title="Tăng số lượng"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -796,8 +797,8 @@ export const MealPlannerPage: React.FC = () => {
 
                       {/* Estimated Cost */}
                       <div className="text-right min-w-[90px]">
-                        <span className="text-[10px] text-[#62625C] block">Ước tính chợ:</span>
-                        <span className="text-xs font-bold text-[#481620]">
+                        <span className="text-[10px] text-muted block">Ước tính chợ:</span>
+                        <span className="text-xs font-bold text-accent">
                           {formatVND(item.dish.estimatedCost * item.quantity)}
                         </span>
                       </div>
@@ -822,12 +823,12 @@ export const MealPlannerPage: React.FC = () => {
 
       {/* STEP 3: NGUYÊN LIỆU & KIÊNG KHEM */}
       {currentStep === 3 && (
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DC] shadow-xs space-y-6">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-border-soft shadow-xs space-y-6">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#333333] mb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-ink mb-2">
               Khẩu vị, dị ứng & yêu cầu nêm nếm
             </h2>
-            <p className="text-xs sm:text-sm text-[#62625C]">
+            <p className="text-xs sm:text-sm text-muted">
               Đầu bếp HomeMeal sẽ nêm nếm cá nhân hóa hoàn toàn theo ý gia đình bạn.
             </p>
           </div>
@@ -842,7 +843,7 @@ export const MealPlannerPage: React.FC = () => {
 
           {/* Allergies list */}
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-2">Dị ứng thực phẩm cần tránh tuyệt đối:</label>
+            <label className="block text-xs font-semibold text-ink mb-2">Dị ứng thực phẩm cần tránh tuyệt đối:</label>
             <div className="flex flex-wrap gap-2 mb-3">
               {(draftOrder.allergies || []).map((allergy, idx) => (
                 <span
@@ -856,7 +857,7 @@ export const MealPlannerPage: React.FC = () => {
                 </span>
               ))}
               {(draftOrder.allergies || []).length === 0 && (
-                <span className="text-xs text-[#62625C] italic">Chưa có ghi chú dị ứng nào</span>
+                <span className="text-xs text-muted italic">Chưa có ghi chú dị ứng nào</span>
               )}
             </div>
             <div className="flex gap-2 max-w-md">
@@ -866,12 +867,12 @@ export const MealPlannerPage: React.FC = () => {
                 value={newAllergy}
                 onChange={(e) => setNewAllergy(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAllergy())}
-                className="flex-1 px-3 py-2 bg-[#FFFFFF] border border-[#E5E5DC] rounded-lg text-xs focus:ring-2 focus:ring-[#481620]"
+                className="flex-1 px-3 py-2 bg-surface border border-border-soft rounded-lg text-xs focus:ring-2 focus:ring-accent"
               />
               <button
                 type="button"
                 onClick={handleAddAllergy}
-                className="px-3 py-2 bg-[#481620] text-white text-xs font-semibold rounded-lg hover:bg-[#361018]"
+                className="px-3 py-2 bg-accent text-white text-xs font-semibold rounded-lg hover:bg-accent-hover"
               >
                 Thêm
               </button>
@@ -880,7 +881,7 @@ export const MealPlannerPage: React.FC = () => {
 
           {/* Preferences */}
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5">
+            <label className="block text-xs font-semibold text-ink mb-1.5">
               Ghi chú nêm nếm & yêu cầu riêng:
             </label>
             <textarea
@@ -888,7 +889,7 @@ export const MealPlannerPage: React.FC = () => {
               placeholder="Ví dụ: Bớt bột ngọt, ít đường ngọt theo kiểu miền Trung, rau muống xào mềm cho ông bà dễ nhai, không cho ớt cay vào canh..."
               value={draftOrder.generalPreferences || ''}
               onChange={(e) => updateDraftOrder({ generalPreferences: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
             />
           </div>
         </div>
@@ -896,64 +897,64 @@ export const MealPlannerPage: React.FC = () => {
 
       {/* STEP 4: NGÂN SÁCH ĐI CHỢ */}
       {currentStep === 4 && (
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DC] shadow-xs space-y-6">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-border-soft shadow-xs space-y-6">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#333333] mb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-ink mb-2">
               Thiết lập trần ngân sách nguyên liệu
             </h2>
-            <p className="text-xs sm:text-sm text-[#62625C]">
+            <p className="text-xs sm:text-sm text-muted">
               Bạn đặt mức tiền tối đa cho đầu bếp đi chợ. Đầu bếp chỉ mua trong giới hạn này và bạn <strong>chỉ thanh toán đúng số tiền trên hóa đơn thực tế</strong>.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="p-5 rounded-2xl bg-[#F0FFF6]/60 border border-[#60D5AE] space-y-2">
-              <span className="text-xs text-[#62625C]">Chi phí nguyên liệu ước tính:</span>
-              <p className="text-2xl font-bold text-[#481620]">{formatVND(estimatedIngredientTotal)}</p>
-              <p className="text-[11px] text-[#62625C]">Dựa trên giá trung bình tại chợ và siêu thị hôm nay</p>
+            <div className="p-5 rounded-2xl bg-surface-alt/60 border border-brand space-y-2">
+              <span className="text-xs text-muted">Chi phí nguyên liệu ước tính:</span>
+              <p className="text-2xl font-bold text-accent">{formatVND(estimatedIngredientTotal)}</p>
+              <p className="text-[11px] text-muted">Dựa trên giá trung bình tại chợ và siêu thị hôm nay</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white border border-[#E5E5DC] space-y-2">
-              <span className="text-xs text-[#62625C]">Ước tính trên mỗi khách:</span>
-              <p className="text-2xl font-bold text-[#333333]">
+            <div className="p-5 rounded-2xl bg-white border border-border-soft space-y-2">
+              <span className="text-xs text-muted">Ước tính trên mỗi khách:</span>
+              <p className="text-2xl font-bold text-ink">
                 {formatVND(guestCount > 0 ? estimatedIngredientTotal / guestCount : 0)}
               </p>
-              <p className="text-[11px] text-[#62625C]">Quy mô {guestCount} người ăn</p>
+              <p className="text-[11px] text-muted">Quy mô {guestCount} người ăn</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white border border-[#E5E5DC] space-y-2">
-              <span className="text-xs text-[#62625C]">Chênh lệch ngân sách:</span>
+            <div className="p-5 rounded-2xl bg-white border border-border-soft space-y-2">
+              <span className="text-xs text-muted">Chênh lệch ngân sách:</span>
               <p className={`text-2xl font-bold ${budgetDifference >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                 {budgetDifference >= 0 ? `+${formatVND(budgetDifference)}` : formatVND(budgetDifference)}
               </p>
-              <p className="text-[11px] text-[#62625C]">
+              <p className="text-[11px] text-muted">
                 {budgetDifference >= 0 ? 'Ngân sách đủ để đầu bếp mua thực phẩm ngon' : 'Ngân sách thấp hơn giá ước tính của các món đã chọn'}
               </p>
             </div>
           </div>
 
           <div className="max-w-lg space-y-3">
-            <label className="block text-xs font-semibold text-[#333333]">
+            <label className="block text-xs font-semibold text-ink">
               Hạn mức ngân sách đi chợ bạn phê duyệt (VNĐ):
             </label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="number"
                 step="50000"
                 min="100000"
                 value={budget}
                 onChange={(e) => updateDraftOrder({ estimatedGroceryBudget: Number(e.target.value) })}
-                className="flex-1 px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-base font-bold text-[#481620] focus:ring-2 focus:ring-[#481620]"
+                className="min-w-0 flex-1 px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-base font-bold text-accent focus:ring-2 focus:ring-accent"
               />
               <button
                 type="button"
                 onClick={() => updateDraftOrder({ estimatedGroceryBudget: Math.ceil(estimatedIngredientTotal / 50000) * 50000 })}
-                className="px-4 py-2 bg-[#F0FFF6] text-[#481620] text-xs font-semibold rounded-xl hover:bg-[#60D5AE]"
+                className="px-4 py-2 bg-surface-alt text-accent text-xs font-semibold rounded-xl hover:bg-brand"
               >
                 Đặt theo ước tính
               </button>
             </div>
-            <p className="text-xs text-[#62625C]">
+            <p className="text-xs text-muted">
               * Nếu đầu bếp đi chợ hết ít hơn ngân sách này (ví dụ hết 350.000đ), bạn chỉ trả 350.000đ. Không bao giờ thu cố định!
             </p>
           </div>
@@ -962,29 +963,29 @@ export const MealPlannerPage: React.FC = () => {
 
       {/* STEP 5: TÍNH CÔNG ĐẦU BẾP TẠI GIA */}
       {currentStep === 5 && (
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DC] shadow-xs space-y-6">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-border-soft shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#333333] mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-ink mb-1">
                 Bảng tính tiền công đầu bếp nấu tại gia
               </h2>
-              <p className="text-xs sm:text-sm text-[#62625C]">
+              <p className="text-xs sm:text-sm text-muted">
                 Đầu bếp đến tận nhà nấu nướng trực tiếp tại gian bếp của bạn, dọn dẹp sạch sẽ sau bữa ăn. Hoàn toàn không tốn phí ship.
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xs text-[#62625C]">Tổng tiền công đầu bếp tại gia:</span>
-              <p className="text-2xl font-extrabold text-[#481620]">{formatVND(feeCalc.totalLaborFee)}</p>
+              <span className="text-xs text-muted">Tổng tiền công đầu bếp tại gia:</span>
+              <p className="text-2xl font-extrabold text-accent">{formatVND(feeCalc.totalLaborFee)}</p>
             </div>
           </div>
 
           {/* Breakdown items */}
-          <div className="space-y-3 bg-[#FFFFFF] p-5 rounded-2xl border border-[#E5E5DC] text-xs sm:text-sm">
-            <h3 className="font-bold text-[#333333] border-b border-[#E5E5DC] pb-2">Chi tiết từng cấu phần tính công:</h3>
+          <div className="space-y-3 bg-surface p-5 rounded-2xl border border-border-soft text-xs sm:text-sm">
+            <h3 className="font-bold text-ink border-b border-border-soft pb-2">Chi tiết từng cấu phần tính công:</h3>
             {feeCalc.breakdownSummary.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between py-1 border-b border-[#E5E5DC]/50">
-                <span className="text-[#333333]">{item.split(':')[0]}</span>
-                <span className="font-semibold text-[#481620]">{item.split(':')[1] || ''}</span>
+              <div key={idx} className="flex items-center justify-between py-1 border-b border-border-soft/50">
+                <span className="text-ink">{item.split(':')[0]}</span>
+                <span className="font-semibold text-accent">{item.split(':')[1] || ''}</span>
               </div>
             ))}
           </div>
@@ -1001,11 +1002,11 @@ export const MealPlannerPage: React.FC = () => {
       {/* STEP 6: CHỌN ĐẦU BẾP */}
       {currentStep === 6 && (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E5DC] shadow-xs">
-            <h2 className="text-lg sm:text-xl font-bold text-[#333333] mb-1">
+          <div className="bg-white rounded-2xl p-6 border border-border-soft shadow-xs">
+            <h2 className="text-lg sm:text-xl font-bold text-ink mb-1">
               Chọn đầu bếp chuẩn bị bữa ăn
             </h2>
-            <p className="text-xs sm:text-sm text-[#62625C]">
+            <p className="text-xs sm:text-sm text-muted">
               Dựa trên khu vực hoạt động, kinh nghiệm nấu nướng và sở trường ẩm thực của từng đầu bếp.
             </p>
           </div>
@@ -1020,13 +1021,13 @@ export const MealPlannerPage: React.FC = () => {
                   onClick={() => updateDraftOrder({ cookId: cook.id })}
                   className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-[#481620] bg-[#F0FFF6]/30 shadow-md ring-2 ring-[#481620]/20'
-                      : 'border-[#E5E5DC] bg-white hover:border-[#60D5AE]'
+                      ? 'border-accent bg-surface-alt/30 shadow-md ring-2 ring-accent/20'
+                      : 'border-border-soft bg-white hover:border-brand'
                   }`}
                 >
                   <div>
                     <div className="flex items-center gap-3.5 mb-3">
-                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#60D5AE] shrink-0">
+                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-brand shrink-0">
                         <ImageWithFallback
                           src={cook.avatar}
                           alt={cook.name}
@@ -1036,35 +1037,35 @@ export const MealPlannerPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-bold text-base text-[#333333]">{cook.name}</h3>
+                          <h3 className="font-bold text-base text-ink">{cook.name}</h3>
                           {cook.verified && (
                             <span title="Đã kiểm định VSATTP">
                               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[#62625C]">{cook.title}</p>
-                        <div className="flex items-center gap-1 text-xs text-[#481620] font-semibold mt-0.5">
-                          <Star className="w-3 h-3 fill-[#735444] text-[#735444]" />
+                        <p className="text-xs text-muted">{cook.title}</p>
+                        <div className="flex items-center gap-1 text-xs text-accent font-semibold mt-0.5">
+                          <Star className="w-3 h-3 fill-detail text-detail" />
                           <span>{cook.rating}</span>
-                          <span className="text-[#62625C] font-normal">({cook.reviewCount} đánh giá)</span>
+                          <span className="text-muted font-normal">({cook.reviewCount} đánh giá)</span>
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-xs text-[#62625C] line-clamp-2 mb-3">{cook.bio}</p>
+                    <p className="text-xs text-muted line-clamp-2 mb-3">{cook.bio}</p>
 
-                    <div className="text-xs space-y-1 text-[#62625C] pt-2 border-t border-[#E5E5DC]">
+                    <div className="text-xs space-y-1 text-muted pt-2 border-t border-border-soft">
                       <p>Khu vực: {cook.serviceAreas.join(', ')}</p>
                       <p>Công suất: Tối đa {cook.maxGuests} khách</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-[#E5E5DC] flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#481620]">
+                  <div className="mt-4 pt-3 border-t border-border-soft flex items-center justify-between">
+                    <span className="text-xs font-semibold text-accent">
                       {isSelected ? 'Đang chọn đầu bếp này' : 'Bấm để chọn'}
                     </span>
-                    <span className="text-xs font-bold text-[#333333]">
+                    <span className="text-xs font-bold text-ink">
                       Khởi điểm {formatVND(cook.baseLaborFee)}
                     </span>
                   </div>
@@ -1077,11 +1078,11 @@ export const MealPlannerPage: React.FC = () => {
 
       {/* STEP 7: XÁC NHẬN ĐƠN HÀNG */}
       {currentStep === 7 && (
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DC] shadow-xs space-y-6">
-          <div className="border-b border-[#E5E5DC] pb-4">
-            <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">Tổng kết đơn đặt món</span>
-            <h2 className="text-xl font-bold text-[#333333]">Xem lại thông tin trước khi gửi</h2>
-            <p className="text-xs text-[#62625C] mt-1">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-border-soft shadow-xs space-y-6">
+          <div className="border-b border-border-soft pb-4">
+            <span className="text-xs font-bold text-accent uppercase tracking-wider">Tổng kết đơn đặt món</span>
+            <h2 className="text-xl font-bold text-ink">Xem lại thông tin trước khi gửi</h2>
+            <p className="text-xs text-muted mt-1">
               Gửi yêu cầu này hoàn toàn <strong>CHƯA BỊ TRỪ TIỀN</strong>. Bạn chỉ thanh toán sau khi bữa ăn hoàn tất và nhận đủ hóa đơn đi chợ thật.
             </p>
           </div>
@@ -1089,42 +1090,42 @@ export const MealPlannerPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
             {/* Left Column: Details */}
             <div className="space-y-4">
-              <div className="bg-stone-50 p-4 rounded-xl border border-[#E5E5DC] space-y-2">
-                <h3 className="font-bold text-[#333333]">Thông tin phục vụ tại nhà:</h3>
+              <div className="bg-stone-50 p-4 rounded-xl border border-border-soft space-y-2">
+                <h3 className="font-bold text-ink">Thông tin phục vụ tại nhà:</h3>
                 <div className="flex justify-between">
-                  <span className="text-[#62625C]">Thời gian đầu bếp tới:</span>
-                  <span className="font-semibold text-[#481620]">{draftOrder.date} lúc {draftOrder.servingTime}</span>
+                  <span className="text-muted">Thời gian đầu bếp tới:</span>
+                  <span className="font-semibold text-accent">{draftOrder.date} lúc {draftOrder.servingTime}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#62625C]">Số lượng khách:</span>
-                  <span className="font-semibold text-[#333333]">{guestCount} người</span>
+                  <span className="text-muted">Số lượng khách:</span>
+                  <span className="font-semibold text-ink">{guestCount} người</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#62625C]">Hình thức dịch vụ:</span>
-                  <span className="font-semibold text-[#481620]">
+                  <span className="text-muted">Hình thức dịch vụ:</span>
+                  <span className="font-semibold text-accent">
                     Đầu bếp đến nhà nấu trực tiếp & dọn dẹp sau bữa ăn
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#62625C]">Địa chỉ phục vụ:</span>
-                  <span className="font-semibold text-[#333333] text-right line-clamp-1">{draftOrder.customerAddress}</span>
+                  <span className="text-muted">Địa chỉ phục vụ:</span>
+                  <span className="font-semibold text-ink text-right line-clamp-1">{draftOrder.customerAddress}</span>
                 </div>
                 {draftOrder.mealOccasion && (
                   <div className="flex justify-between">
-                    <span className="text-[#62625C]">Dịp bữa ăn:</span>
-                    <span className="font-semibold text-[#333333]">{draftOrder.mealOccasion}</span>
+                    <span className="text-muted">Dịp bữa ăn:</span>
+                    <span className="font-semibold text-ink">{draftOrder.mealOccasion}</span>
                   </div>
                 )}
               </div>
 
               {/* Menu items list */}
-              <div className="bg-stone-50 p-4 rounded-xl border border-[#E5E5DC] space-y-2">
-                <h3 className="font-bold text-[#333333]">Món ăn đã chọn ({selectedItems.length} món):</h3>
-                <ul className="space-y-1.5 divide-y divide-[#E5E5DC]">
+              <div className="bg-stone-50 p-4 rounded-xl border border-border-soft space-y-2">
+                <h3 className="font-bold text-ink">Món ăn đã chọn ({selectedItems.length} món):</h3>
+                <ul className="space-y-1.5 divide-y divide-border-soft">
                   {selectedItems.map((item, idx) => (
                     <li key={idx} className="pt-1.5 flex justify-between items-center text-xs">
                       <span>{item.dish.name} (x{item.quantity})</span>
-                      <span className="font-medium text-[#481620]">{formatVND(item.dish.estimatedCost * item.quantity)}</span>
+                      <span className="font-medium text-accent">{formatVND(item.dish.estimatedCost * item.quantity)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1133,30 +1134,30 @@ export const MealPlannerPage: React.FC = () => {
 
             {/* Right Column: Financial Separation */}
             <div className="space-y-4">
-              <div className="bg-[#F0FFF6] p-5 rounded-2xl border border-[#60D5AE] space-y-3">
-                <h3 className="font-bold text-[#481620] text-base">Bảng dự toán chi phí minh bạch:</h3>
+              <div className="bg-surface-alt p-5 rounded-2xl border border-brand space-y-3">
+                <h3 className="font-bold text-accent text-base">Bảng dự toán chi phí minh bạch:</h3>
                 
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-[#60D5AE]/40">
-                    <span className="text-[#333333]">1. Ngân sách tiền chợ bạn phê duyệt:</span>
-                    <span className="font-bold text-[#481620]">{formatVND(budget)}</span>
+                  <div className="flex justify-between py-1 border-b border-brand/40">
+                    <span className="text-ink">1. Ngân sách tiền chợ bạn phê duyệt:</span>
+                    <span className="font-bold text-accent">{formatVND(budget)}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[#60D5AE]/40">
-                    <span className="text-[#333333]">2. Tiền công đầu bếp đến tận nhà nấu:</span>
-                    <span className="font-bold text-[#481620]">{formatVND(feeCalc.totalLaborFee)}</span>
+                  <div className="flex justify-between py-1 border-b border-brand/40">
+                    <span className="text-ink">2. Tiền công đầu bếp đến tận nhà nấu:</span>
+                    <span className="font-bold text-accent">{formatVND(feeCalc.totalLaborFee)}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[#60D5AE]/40">
-                    <span className="text-[#333333]">3. Phí giao hàng & di chuyển:</span>
+                  <div className="flex justify-between py-1 border-b border-brand/40">
+                    <span className="text-ink">3. Phí giao hàng & di chuyển:</span>
                     <span className="font-bold text-emerald-700">Miễn phí (Nấu tại nhà bạn)</span>
                   </div>
-                  <div className="flex justify-between pt-2 text-sm font-extrabold text-[#333333]">
+                  <div className="flex justify-between pt-2 text-sm font-extrabold text-ink">
                     <span>Tổng dự kiến tối đa:</span>
-                    <span className="text-base text-[#481620]">{formatVND(budget + feeCalc.totalLaborFee)}</span>
+                    <span className="text-base text-accent">{formatVND(budget + feeCalc.totalLaborFee)}</span>
                   </div>
                 </div>
 
-                <div className="p-3 bg-white/80 rounded-xl text-[11px] text-[#62625C] space-y-1">
-                  <p className="font-semibold text-[#481620]">Chính sách thanh toán:</p>
+                <div className="p-3 bg-white/80 rounded-xl text-[11px] text-muted space-y-1">
+                  <p className="font-semibold text-accent">Chính sách thanh toán:</p>
                   <p>• Bạn chỉ thanh toán tiền chợ theo hóa đơn thực mua tại chợ, không bao giờ thu trọn gói.</p>
                   <p>• Thanh toán chỉ diễn ra SAU KHI đầu bếp đã nấu xong, dọn mâm lên bàn và bạn dùng bữa xong.</p>
                   <p>• Có quyền khiếu nại từng dòng hóa đơn nếu thấy sai khác.</p>
@@ -1168,12 +1169,12 @@ export const MealPlannerPage: React.FC = () => {
       )}
 
       {/* Wizard Action Controls */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#E5E5DC]">
+      <div className="flex items-center justify-between pt-4 border-t border-border-soft">
         {currentStep > 1 ? (
           <button
             type="button"
             onClick={handlePrev}
-            className="px-5 py-2.5 bg-white border border-[#E5E5DC] text-[#333333] font-semibold text-xs sm:text-sm rounded-xl hover:bg-stone-50 flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-white border border-border-soft text-ink font-semibold text-xs sm:text-sm rounded-xl hover:bg-stone-50 flex items-center gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại</span>
@@ -1187,7 +1188,7 @@ export const MealPlannerPage: React.FC = () => {
             className={`px-6 py-2.5 font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 shadow-sm transition-all ${
               currentStep === 1 && !timeValidation.isValid
                 ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
-                : 'bg-[#481620] hover:bg-[#361018] text-white'
+                : 'bg-accent hover:bg-accent-hover text-white'
             }`}
           >
             <span>Tiếp tục: {STEPS[currentStep]}</span>
@@ -1197,9 +1198,9 @@ export const MealPlannerPage: React.FC = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-8 py-3 bg-[#481620] hover:bg-[#361018] text-white font-bold text-sm sm:text-base rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg"
+            className="px-8 py-3 bg-accent hover:bg-accent-hover text-white font-bold text-sm sm:text-base rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg"
           >
-            <Check className="w-5 h-5 text-[#60D5AE]" />
+            <Check className="w-5 h-5 text-brand" />
             <span>Gửi yêu cầu đặt bữa (Chưa trừ tiền)</span>
           </button>
         )}

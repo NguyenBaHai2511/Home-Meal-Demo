@@ -49,20 +49,20 @@ export const OrdersPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E5E5DC]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-border-soft">
         <div>
-          <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">Lịch sử dịch vụ</span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#333333]">Đơn hàng của tôi</h1>
-          <p className="text-xs sm:text-sm text-[#62625C] mt-1">
+          <span className="text-xs font-bold text-accent uppercase tracking-wider">Lịch sử dịch vụ</span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink">Đơn hàng của tôi</h1>
+          <p className="text-xs sm:text-sm text-muted mt-1">
             Theo dõi tiến độ đi chợ, duyệt hóa đơn thực tế và thanh toán sau khi hoàn tất bữa ăn.
           </p>
         </div>
 
         <button
           onClick={() => navigateTo('/meal-planner')}
-          className="px-5 py-2.5 bg-[#481620] text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 hover:bg-[#361018] shadow-sm self-start sm:self-auto"
+          className="px-5 py-2.5 bg-accent text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 hover:bg-accent-hover shadow-sm self-start sm:self-auto"
         >
-          <ShoppingBag className="w-4 h-4 text-[#60D5AE]" />
+          <ShoppingBag className="w-4 h-4 text-brand" />
           <span>Đặt bữa ăn mới</span>
         </button>
       </div>
@@ -81,8 +81,8 @@ export const OrdersPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-3.5 py-2 rounded-xl font-semibold whitespace-nowrap transition-colors ${
               activeTab === tab.id
-                ? 'bg-[#481620] text-white shadow-xs'
-                : 'bg-white border border-[#E5E5DC] text-[#333333] hover:bg-[#F0FFF6]'
+                ? 'bg-accent text-white shadow-xs'
+                : 'bg-white border border-border-soft text-ink hover:bg-surface-alt'
             }`}
           >
             {tab.label}
@@ -110,24 +110,24 @@ export const OrdersPage: React.FC = () => {
                   ? 'border-indigo-400 ring-2 ring-indigo-400/10'
                   : isDisputed
                   ? 'border-rose-400 ring-2 ring-rose-400/10'
-                  : 'border-[#E5E5DC] hover:border-[#60D5AE]'
+                  : 'border-border-soft hover:border-brand'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E5DC]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-soft">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono font-bold text-base text-[#481620]">
+                  <span className="font-mono font-bold text-base text-accent">
                     #{order.orderCode}
                   </span>
                   <StatusBadge status={order.status} />
                 </div>
 
-                <div className="text-xs text-[#62625C] flex items-center gap-3">
+                <div className="text-xs text-muted flex items-center gap-3">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-[#481620]" /> {order.date}
+                    <Calendar className="w-3.5 h-3.5 text-accent" /> {order.date}
                   </span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[#481620]" /> {order.servingTime}
+                    <Clock className="w-3.5 h-3.5 text-accent" /> {order.servingTime}
                   </span>
                 </div>
               </div>
@@ -135,34 +135,34 @@ export const OrdersPage: React.FC = () => {
               {/* Body */}
               <div className="py-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
                 <div className="space-y-1 md:col-span-2">
-                  <h3 className="font-bold text-[#333333] text-base">{order.mealOccasion}</h3>
-                  <p className="text-xs text-[#62625C]">
+                  <h3 className="font-bold text-ink text-base">{order.mealOccasion}</h3>
+                  <p className="text-xs text-muted">
                     Quy mô: <strong>{order.guestCount} người ăn</strong> · Đầu bếp: <strong>{order.cook?.name || 'HomeMeal Chef'}</strong>
                   </p>
-                  <p className="text-xs text-[#62625C] line-clamp-1 pt-1">
+                  <p className="text-xs text-muted line-clamp-1 pt-1">
                     Thực đơn ({order.items.length} món): {order.items.map((i) => i.dish.name).join(', ')}
                   </p>
                 </div>
 
                 {/* Financial overview */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-[#E5E5DC] space-y-1.5 text-xs">
+                <div className="bg-surface p-3.5 rounded-xl border border-border-soft space-y-1.5 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-[#62625C]">Ngân sách chợ:</span>
-                    <span className="font-semibold text-[#333333]">{formatVND(order.estimatedGroceryBudget)}</span>
+                    <span className="text-muted">Ngân sách chợ:</span>
+                    <span className="font-semibold text-ink">{formatVND(order.estimatedGroceryBudget)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#62625C]">Thực chi trên hóa đơn:</span>
-                    <span className={`font-bold ${order.actualGroceryTotal > 0 ? 'text-[#481620]' : 'text-[#62625C]'}`}>
+                    <span className="text-muted">Thực chi trên hóa đơn:</span>
+                    <span className={`font-bold ${order.actualGroceryTotal > 0 ? 'text-accent' : 'text-muted'}`}>
                       {order.actualGroceryTotal > 0 ? formatVND(order.actualGroceryTotal) : 'Chưa đi chợ'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#62625C]">Tiền công nấu:</span>
-                    <span className="font-semibold text-[#481620]">{formatVND(order.totalLaborFee)}</span>
+                    <span className="text-muted">Tiền công nấu:</span>
+                    <span className="font-semibold text-accent">{formatVND(order.totalLaborFee)}</span>
                   </div>
-                  <div className="pt-1 border-t border-[#E5E5DC] flex justify-between font-bold text-xs sm:text-sm">
-                    <span className="text-[#333333]">Tổng thanh toán:</span>
-                    <span className="text-[#481620]">{formatVND(order.finalPayableAmount)}</span>
+                  <div className="pt-1 border-t border-border-soft flex justify-between font-bold text-xs sm:text-sm">
+                    <span className="text-ink">Tổng thanh toán:</span>
+                    <span className="text-accent">{formatVND(order.finalPayableAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -229,8 +229,8 @@ export const OrdersPage: React.FC = () => {
               )}
 
               {/* Bottom Footer Actions */}
-              <div className="pt-3 border-t border-[#E5E5DC] flex items-center justify-between">
-                <span className="text-xs text-[#62625C]">
+              <div className="pt-3 border-t border-border-soft flex items-center justify-between">
+                <span className="text-xs text-muted">
                   {order.shoppingList.length > 0
                     ? `Đã tải lên ${order.shoppingList.length} chứng từ nguyên liệu`
                     : 'Chưa có chứng từ đi chợ'}
@@ -239,7 +239,7 @@ export const OrdersPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigateTo(`/orders/${order.id}`)}
-                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-[#333333] font-semibold text-xs rounded-xl flex items-center gap-1"
+                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-ink font-semibold text-xs rounded-xl flex items-center gap-1"
                   >
                     <span>Chi tiết đơn & Tiến trình</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -251,10 +251,10 @@ export const OrdersPage: React.FC = () => {
         })}
 
         {filteredOrders.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-2xl border border-[#E5E5DC] space-y-3">
-            <ShoppingBag className="w-10 h-10 text-[#62625C] mx-auto opacity-50" />
-            <h3 className="font-bold text-[#333333]">Không có đơn hàng nào ở mục này</h3>
-            <p className="text-xs text-[#62625C]">Hãy thử chọn bộ lọc khác hoặc đặt một bữa ăn mới.</p>
+          <div className="text-center py-16 bg-white rounded-2xl border border-border-soft space-y-3">
+            <ShoppingBag className="w-10 h-10 text-muted mx-auto opacity-50" />
+            <h3 className="font-bold text-ink">Không có đơn hàng nào ở mục này</h3>
+            <p className="text-xs text-muted">Hãy thử chọn bộ lọc khác hoặc đặt một bữa ăn mới.</p>
           </div>
         )}
       </div>

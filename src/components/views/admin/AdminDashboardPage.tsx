@@ -79,7 +79,7 @@ export const AdminDashboardPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Banner */}
-      <div className="bg-white rounded-3xl border border-[#E5E5DC] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+      <div className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="p-1.5 rounded-lg bg-rose-50 text-rose-700">
@@ -89,8 +89,8 @@ export const AdminDashboardPage: React.FC = () => {
               Trung tâm Quản trị Nền tảng
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#333333]">Giám sát Vận hành & Giải quyết Tranh chấp</h1>
-          <p className="text-xs sm:text-sm text-[#62625C] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink">Giám sát Vận hành & Giải quyết Tranh chấp</h1>
+          <p className="text-xs sm:text-sm text-muted mt-1">
             Kiểm tra tính minh bạch của hóa đơn mua sắm, thẩm định đầu bếp và xử lý khiếu nại khách hàng.
           </p>
         </div>
@@ -105,7 +105,7 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E5E5DC] pb-2 text-xs sm:text-sm font-semibold">
+      <div className="flex items-center gap-2 border-b border-border-soft pb-2 text-xs sm:text-sm font-semibold">
         {[
           { id: 'overview', label: 'Tổng quan hệ thống' },
           { id: 'disputes', label: `Khiếu nại hóa đơn (${disputedOrders.length})` },
@@ -117,8 +117,8 @@ export const AdminDashboardPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`pb-2 px-3 transition-colors ${
               activeTab === tab.id
-                ? 'text-[#481620] border-b-2 border-[#481620]'
-                : 'text-[#62625C] hover:text-[#333333]'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-muted hover:text-ink'
             }`}
           >
             {tab.label}
@@ -129,41 +129,41 @@ export const AdminDashboardPage: React.FC = () => {
       <div className="-mt-4 flex justify-end">
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-3 py-2 rounded-lg text-xs font-semibold ${activeTab === 'users' ? 'bg-[#481620] text-white' : 'border border-[#E5E5DC] bg-white text-[#481620]'}`}
+          className={`px-3 py-2 rounded-lg text-xs font-semibold ${activeTab === 'users' ? 'bg-accent text-white' : 'border border-border-soft bg-white text-accent'}`}
         >
           Quản lý tài khoản
         </button>
       </div>
 
       {activeTab === 'users' && (
-        <section className="bg-white rounded-2xl border border-[#E5E5DC] p-5 sm:p-6 space-y-4">
+        <section className="bg-white rounded-2xl border border-border-soft p-5 sm:p-6 space-y-4">
           <div>
-            <h2 className="text-lg font-bold text-[#333333]">Phân quyền tài khoản</h2>
-            <p className="mt-1 text-xs text-[#62625C]">Đang đăng nhập: {authUser?.email}. Đăng ký công khai chỉ có quyền Khách hàng.</p>
+            <h2 className="text-lg font-bold text-ink">Phân quyền tài khoản</h2>
+            <p className="mt-1 text-xs text-muted">Đang đăng nhập: {authUser?.email}. Đăng ký công khai chỉ có quyền Khách hàng.</p>
           </div>
           {usersError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{usersError}</p>}
-          {usersLoading ? <p className="py-6 text-center text-sm text-[#62625C]">Đang tải tài khoản…</p> : (
+          {usersLoading ? <p className="py-6 text-center text-sm text-muted">Đang tải tài khoản…</p> : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[580px] text-left text-sm">
-                <thead><tr className="border-b border-[#E5E5DC] text-xs text-[#62625C]"><th className="py-3 pr-3">Tên</th><th className="py-3 pr-3">Email</th><th className="py-3 pr-3">Vai trò</th><th className="py-3">Ngày tạo</th></tr></thead>
-                <tbody className="divide-y divide-[#E5E5DC]">
+                <thead><tr className="border-b border-border-soft text-xs text-muted"><th className="py-3 pr-3">Tên</th><th className="py-3 pr-3">Email</th><th className="py-3 pr-3">Vai trò</th><th className="py-3">Ngày tạo</th></tr></thead>
+                <tbody className="divide-y divide-border-soft">
                   {managedUsers.map((user) => (
                     <tr key={user.id}>
                       <td className="py-3 pr-3 font-medium">{user.full_name}</td>
-                      <td className="py-3 pr-3 text-[#62625C]">{user.email}</td>
+                      <td className="py-3 pr-3 text-muted">{user.email}</td>
                       <td className="py-3 pr-3">
-                        <select value={user.role} onChange={(event) => void updateUserRole(user.id, event.target.value as ManagedUser['role'])} className="rounded-lg border border-[#E5E5DC] bg-white px-2 py-1.5 text-xs">
+                        <select value={user.role} onChange={(event) => void updateUserRole(user.id, event.target.value as ManagedUser['role'])} className="rounded-lg border border-border-soft bg-white px-2 py-1.5 text-xs">
                           <option value="customer">Khách hàng</option>
                           <option value="cook">Đầu bếp</option>
                           <option value="admin">Quản trị viên</option>
                         </select>
                       </td>
-                      <td className="py-3 text-xs text-[#62625C]">{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
+                      <td className="py-3 text-xs text-muted">{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {managedUsers.length === 0 && <p className="py-6 text-center text-sm text-[#62625C]">Chưa có tài khoản.</p>}
+              {managedUsers.length === 0 && <p className="py-6 text-center text-sm text-muted">Chưa có tài khoản.</p>}
             </div>
           )}
         </section>
@@ -173,25 +173,25 @@ export const AdminDashboardPage: React.FC = () => {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC]">
-              <span className="text-xs text-[#62625C]">Tổng số đơn hàng:</span>
-              <p className="text-2xl font-bold text-[#333333] mt-1">{orders.length}</p>
-              <p className="text-[11px] text-[#62625C]">Tất cả các dịch vụ</p>
+            <div className="bg-white p-5 rounded-2xl border border-border-soft">
+              <span className="text-xs text-muted">Tổng số đơn hàng:</span>
+              <p className="text-2xl font-bold text-ink mt-1">{orders.length}</p>
+              <p className="text-[11px] text-muted">Tất cả các dịch vụ</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC]">
-              <span className="text-xs text-[#62625C]">Đầu bếp đã kiểm định:</span>
-              <p className="text-2xl font-bold text-[#481620] mt-1">{cooks.length}</p>
+            <div className="bg-white p-5 rounded-2xl border border-border-soft">
+              <span className="text-xs text-muted">Đầu bếp đã kiểm định:</span>
+              <p className="text-2xl font-bold text-accent mt-1">{cooks.length}</p>
               <p className="text-[11px] text-emerald-700">100% đạt chuẩn VSATTP</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC]">
-              <span className="text-xs text-[#62625C]">Tiền chợ đã đối soát:</span>
-              <p className="text-2xl font-bold text-[#481620] mt-1">
+            <div className="bg-white p-5 rounded-2xl border border-border-soft">
+              <span className="text-xs text-muted">Tiền chợ đã đối soát:</span>
+              <p className="text-2xl font-bold text-accent mt-1">
                 {formatVND(orders.reduce((sum, o) => sum + (o.actualGroceryTotal || 0), 0))}
               </p>
-              <p className="text-[11px] text-[#62625C]">Có biên lai đầy đủ</p>
+              <p className="text-[11px] text-muted">Có biên lai đầy đủ</p>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC]">
-              <span className="text-xs text-[#62625C]">Vấn đề cần can thiệp:</span>
+            <div className="bg-white p-5 rounded-2xl border border-border-soft">
+              <span className="text-xs text-muted">Vấn đề cần can thiệp:</span>
               <p className="text-2xl font-bold text-rose-700 mt-1">{disputedOrders.length}</p>
               <p className="text-[11px] text-rose-600 font-medium">Cần Admin giải quyết</p>
             </div>
@@ -208,10 +208,10 @@ export const AdminDashboardPage: React.FC = () => {
 
           {disputedOrders.map((order) => (
             <div key={order.id} className="bg-white rounded-2xl border border-rose-300 p-6 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-[#E5E5DC]">
+              <div className="flex items-center justify-between pb-3 border-b border-border-soft">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-rose-600" />
-                  <span className="font-bold text-base text-[#333333]">Khiếu nại Đơn #{order.orderCode}</span>
+                  <span className="font-bold text-base text-ink">Khiếu nại Đơn #{order.orderCode}</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-bold">
                   {formatVND(order.dispute?.reportedAmount || 0)} tranh chấp
@@ -219,25 +219,25 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1.5 bg-[#FFFFFF] p-4 rounded-xl border border-[#E5E5DC]">
+                <div className="space-y-1.5 bg-surface p-4 rounded-xl border border-border-soft">
                   <p><strong>Khách hàng:</strong> {order.customerName} ({order.customerPhone})</p>
                   <p><strong>Đầu bếp:</strong> {order.cook?.name}</p>
                   <p><strong>Lý do khiếu nại:</strong> {order.dispute?.reason}</p>
                   <p><strong>Mô tả của khách:</strong> "{order.dispute?.description}"</p>
                 </div>
 
-                <div className="space-y-2 bg-stone-50 p-4 rounded-xl border border-[#E5E5DC]">
-                  <p className="font-semibold text-[#333333]">Quyết định giải quyết của Admin:</p>
+                <div className="space-y-2 bg-stone-50 p-4 rounded-xl border border-border-soft">
+                  <p className="font-semibold text-ink">Quyết định giải quyết của Admin:</p>
                   <textarea
                     rows={2}
                     value={resolutionText}
                     onChange={(e) => setResolutionText(e.target.value)}
-                    className="w-full px-3 py-2 bg-white rounded-lg border border-[#E5E5DC] text-xs"
+                    className="w-full px-3 py-2 bg-white rounded-lg border border-border-soft text-xs"
                   />
                   <div className="flex justify-end pt-1">
                     <button
                       onClick={() => handleResolve(order.id)}
-                      className="px-4 py-2 bg-[#481620] hover:bg-[#361018] text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm"
+                      className="px-4 py-2 bg-accent hover:bg-accent-hover text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm"
                     >
                       <Check className="w-4 h-4" />
                       <span>Xác nhận khấu trừ {formatVND(order.dispute?.reportedAmount || 0)} & Cập nhật hóa đơn</span>
@@ -249,7 +249,7 @@ export const AdminDashboardPage: React.FC = () => {
           ))}
 
           {disputedOrders.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-2xl border border-[#E5E5DC] text-xs text-[#62625C]">
+            <div className="text-center py-12 bg-white rounded-2xl border border-border-soft text-xs text-muted">
               Hiện không có khiếu nại nào đang mở. Tất cả hóa đơn đều minh bạch và đã được khách xác nhận!
             </div>
           )}
@@ -258,12 +258,12 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* TAB: ORDERS */}
       {activeTab === 'orders' && (
-        <div className="bg-white rounded-2xl border border-[#E5E5DC] p-6 space-y-4">
-          <h3 className="font-bold text-base text-[#333333]">Tất cả đơn hàng trên hệ thống</h3>
+        <div className="bg-white rounded-2xl border border-border-soft p-6 space-y-4">
+          <h3 className="font-bold text-base text-ink">Tất cả đơn hàng trên hệ thống</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-stone-50 text-[#62625C] border-b border-[#E5E5DC]">
+                <tr className="bg-stone-50 text-muted border-b border-border-soft">
                   <th className="py-2.5 px-3">Mã đơn</th>
                   <th className="py-2.5 px-3">Khách hàng</th>
                   <th className="py-2.5 px-3">Đầu bếp</th>
@@ -273,21 +273,21 @@ export const AdminDashboardPage: React.FC = () => {
                   <th className="py-2.5 px-3 text-center">Chi tiết</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5DC]">
+              <tbody className="divide-y divide-border-soft">
                 {orders.map((o) => (
                   <tr key={o.id} className="hover:bg-stone-50/50">
-                    <td className="py-2.5 px-3 font-mono font-bold text-[#481620]">#{o.orderCode}</td>
-                    <td className="py-2.5 px-3 font-medium text-[#333333]">{o.customerName}</td>
-                    <td className="py-2.5 px-3 text-[#62625C]">{o.cook?.name}</td>
+                    <td className="py-2.5 px-3 font-mono font-bold text-accent">#{o.orderCode}</td>
+                    <td className="py-2.5 px-3 font-medium text-ink">{o.customerName}</td>
+                    <td className="py-2.5 px-3 text-muted">{o.cook?.name}</td>
                     <td className="py-2.5 px-3 text-right font-medium">{formatVND(o.actualGroceryTotal)}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-[#481620]">{formatVND(o.totalLaborFee)}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-accent">{formatVND(o.totalLaborFee)}</td>
                     <td className="py-2.5 px-3 text-center">
                       <StatusBadge status={o.status} size="sm" />
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <button
                         onClick={() => navigateTo(`/orders/${o.id}`)}
-                        className="text-[#481620] hover:underline font-semibold"
+                        className="text-accent hover:underline font-semibold"
                       >
                         Xem
                       </button>
@@ -302,15 +302,15 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* TAB: COOKS */}
       {activeTab === 'cooks' && (
-        <div className="bg-white rounded-2xl border border-[#E5E5DC] p-6 space-y-4">
-          <h3 className="font-bold text-base text-[#333333]">Danh sách đầu bếp đối tác</h3>
+        <div className="bg-white rounded-2xl border border-border-soft p-6 space-y-4">
+          <h3 className="font-bold text-base text-ink">Danh sách đầu bếp đối tác</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             {cooks.map((c) => (
-              <div key={c.id} className="p-4 rounded-xl border border-[#E5E5DC] bg-[#FFFFFF] flex gap-3 items-center">
-                <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full object-cover border border-[#60D5AE]" />
+              <div key={c.id} className="p-4 rounded-xl border border-border-soft bg-surface flex gap-3 items-center">
+                <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full object-cover border border-brand" />
                 <div className="flex-1">
-                  <h4 className="font-bold text-sm text-[#333333]">{c.name}</h4>
-                  <p className="text-[11px] text-[#62625C]">{c.title}</p>
+                  <h4 className="font-bold text-sm text-ink">{c.name}</h4>
+                  <p className="text-[11px] text-muted">{c.title}</p>
                   <p className="text-[11px] text-emerald-700 font-semibold mt-1">✓ Đã kiểm tra lý lịch & VSATTP</p>
                 </div>
               </div>

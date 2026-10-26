@@ -16,52 +16,52 @@ export const CookEarningsPage: React.FC = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <button
         onClick={() => navigateTo('/cook/dashboard')}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#62625C] hover:text-[#481620]"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-accent"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Quay lại Bảng điều khiển đầu bếp</span>
       </button>
 
-      <div className="bg-white rounded-3xl border border-[#E5E5DC] p-6 sm:p-8 shadow-xs">
-        <div className="border-b border-[#E5E5DC] pb-4 mb-6">
-          <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">Tài chính minh bạch</span>
-          <h1 className="text-2xl font-bold text-[#333333]">Báo cáo thu nhập & Hoàn tiền chợ</h1>
-          <p className="text-xs text-[#62625C] mt-1">
+      <div className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 shadow-xs">
+        <div className="border-b border-border-soft pb-4 mb-6">
+          <span className="text-xs font-bold text-accent uppercase tracking-wider">Tài chính minh bạch</span>
+          <h1 className="text-2xl font-bold text-ink">Báo cáo thu nhập & Hoàn tiền chợ</h1>
+          <p className="text-xs text-muted mt-1">
             HomeMeal tách bạch hoàn toàn tiền công nấu của đầu bếp với khoản hoàn trả tiền chợ theo hóa đơn thực tế.
           </p>
         </div>
 
         {/* Big Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-          <div className="p-6 rounded-2xl bg-[#F0FFF6] border border-[#60D5AE] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#481620]">
+          <div className="p-6 rounded-2xl bg-surface-alt border border-brand space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-accent">
               <span>THU NHẬP CÔNG NẤU TẠI GIA</span>
-              <Wallet className="w-5 h-5 text-[#481620]" />
+              <Wallet className="w-5 h-5 text-accent" />
             </div>
-            <p className="text-3xl font-extrabold text-[#481620]">{formatVND(totalLaborEarnings)}</p>
-            <p className="text-[11px] text-[#481620]/80 font-medium">
+            <p className="text-3xl font-extrabold text-accent">{formatVND(totalLaborEarnings)}</p>
+            <p className="text-[11px] text-accent/80 font-medium">
               Tiền công nấu trực tiếp tại nhà khách
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E5E5DC] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#333333]">
+          <div className="p-6 rounded-2xl bg-surface border border-border-soft space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-ink">
               <span>HOÀN TRẢ TIỀN CHỢ (HÓA ĐƠN)</span>
-              <Receipt className="w-5 h-5 text-[#62625C]" />
+              <Receipt className="w-5 h-5 text-muted" />
             </div>
-            <p className="text-3xl font-extrabold text-[#333333]">{formatVND(totalReimbursedGrocery)}</p>
-            <p className="text-[11px] text-[#62625C]">
+            <p className="text-3xl font-extrabold text-ink">{formatVND(totalReimbursedGrocery)}</p>
+            <p className="text-[11px] text-muted">
               Hoàn trả 100% theo chứng từ thực tế
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E5E5DC] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#333333]">
+          <div className="p-6 rounded-2xl bg-surface border border-border-soft space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-ink">
               <span>TỔNG QUYẾT TOÁN NHẬN VỀ</span>
-              <DollarSign className="w-5 h-5 text-[#62625C]" />
+              <DollarSign className="w-5 h-5 text-muted" />
             </div>
-            <p className="text-3xl font-extrabold text-[#333333]">{formatVND(totalSettlement)}</p>
-            <p className="text-[11px] text-[#62625C]">
+            <p className="text-3xl font-extrabold text-ink">{formatVND(totalSettlement)}</p>
+            <p className="text-[11px] text-muted">
               Tiền công + 100% chi phí đi chợ
             </p>
           </div>
@@ -69,12 +69,12 @@ export const CookEarningsPage: React.FC = () => {
 
         {/* Orders Breakdown */}
         <div className="space-y-4">
-          <h3 className="font-bold text-base text-[#333333]">Bảng kê chi tiết từng đơn hàng hoàn tất:</h3>
+          <h3 className="font-bold text-base text-ink">Bảng kê chi tiết từng đơn hàng hoàn tất:</h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-stone-50 text-[#62625C] border-b border-[#E5E5DC]">
+                <tr className="bg-stone-50 text-muted border-b border-border-soft">
                   <th className="py-3 px-3">Mã đơn</th>
                   <th className="py-3 px-3">Ngày phục vụ</th>
                   <th className="py-3 px-3">Khách hàng</th>
@@ -84,15 +84,15 @@ export const CookEarningsPage: React.FC = () => {
                   <th className="py-3 px-3 text-center">Trạng thái thanh toán</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5DC]">
+              <tbody className="divide-y divide-border-soft">
                 {completedOrders.map((o) => (
                   <tr key={o.id} className="hover:bg-stone-50/50">
-                    <td className="py-3 px-3 font-mono font-bold text-[#481620]">#{o.orderCode}</td>
-                    <td className="py-3 px-3 text-[#62625C]">{o.date}</td>
-                    <td className="py-3 px-3 text-[#333333] font-medium">{o.customerName}</td>
-                    <td className="py-3 px-3 text-[#62625C]">{o.serviceType === 'party_at_home' ? 'Nấu tiệc tại gia' : o.serviceType === 'cook_and_deliver' ? 'Đơn giao theo chính sách cũ' : 'Nấu cơm tại nhà'}</td>
-                    <td className="py-3 px-3 text-right font-bold text-[#481620]">{formatVND(o.totalLaborFee)}</td>
-                    <td className="py-3 px-3 text-right font-medium text-[#333333]">{formatVND(o.actualGroceryTotal)}</td>
+                    <td className="py-3 px-3 font-mono font-bold text-accent">#{o.orderCode}</td>
+                    <td className="py-3 px-3 text-muted">{o.date}</td>
+                    <td className="py-3 px-3 text-ink font-medium">{o.customerName}</td>
+                    <td className="py-3 px-3 text-muted">{o.serviceType === 'party_at_home' ? 'Nấu tiệc tại gia' : o.serviceType === 'cook_and_deliver' ? 'Đơn giao theo chính sách cũ' : 'Nấu cơm tại nhà'}</td>
+                    <td className="py-3 px-3 text-right font-bold text-accent">{formatVND(o.totalLaborFee)}</td>
+                    <td className="py-3 px-3 text-right font-medium text-ink">{formatVND(o.actualGroceryTotal)}</td>
                     <td className="py-3 px-3 text-center">
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         <CheckCircle className="w-3 h-3 text-emerald-600" /> Đã chuyển khoản

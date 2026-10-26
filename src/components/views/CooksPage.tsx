@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Cook } from '../../types';
 import { formatVND } from '../../utils/pricing';
-import { Star, MapPin, Users, ChefHat, CheckCircle2, Search, Filter } from 'lucide-react';
+import { Star, MapPin, Users, ChefHat, CheckCircle2, Search } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
 
 export const CooksPage: React.FC = () => {
@@ -36,33 +36,35 @@ export const CooksPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5E5DC]">
-        <span className="text-xs font-bold text-[#481620] uppercase tracking-wider">Đội ngũ tay nghề</span>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#333333]">Đầu bếp gia đình & Chuyên gia nấu tiệc</h1>
-        <p className="text-xs sm:text-sm text-[#62625C] mt-1">
+      <div className="page-intro">
+        <span className="text-xs font-bold text-accent uppercase tracking-wider">Đội ngũ tay nghề</span>
+        <h1 className="editorial-title page-title mt-3 text-ink">Đầu bếp gia đình &<br className="hidden sm:block" /> Chuyên gia nấu tiệc</h1>
+        <p className="text-xs sm:text-sm text-muted mt-1">
           100% đầu bếp được kiểm tra lý lịch, chứng chỉ vệ sinh an toàn thực phẩm và cam kết minh bạch chứng từ mua sắm tại chợ.
         </p>
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E5E5DC] space-y-4">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-border-soft space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-[#62625C] absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-muted absolute left-3 top-3" />
             <input
               type="text"
+              aria-label="Tìm đầu bếp theo tên hoặc sở trường"
               placeholder="Tìm theo tên hoặc sở trường..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+              className="w-full pl-9 pr-3 py-2 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
             />
           </div>
 
           <div>
             <select
               value={selectedArea}
+              aria-label="Khu vực phục vụ"
               onChange={(e) => setSelectedArea(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3 py-2 bg-surface border border-border-soft rounded-xl text-xs font-medium focus:ring-2 focus:ring-accent"
             >
               <option value="all">Mọi khu vực phục vụ</option>
               <option value="Quận 1">Quận 1 & Trung tâm</option>
@@ -75,8 +77,9 @@ export const CooksPage: React.FC = () => {
           <div>
             <select
               value={selectedCapacity}
+              aria-label="Quy mô khách"
               onChange={(e) => setSelectedCapacity(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3 py-2 bg-surface border border-border-soft rounded-xl text-xs font-medium focus:ring-2 focus:ring-accent"
             >
               <option value="all">Mọi quy mô khách</option>
               <option value="small">Bữa ăn gia đình (dưới 15 khách)</option>
@@ -87,8 +90,9 @@ export const CooksPage: React.FC = () => {
           <div>
             <select
               value={selectedSpecialty}
+              aria-label="Sở trường ẩm thực"
               onChange={(e) => setSelectedSpecialty(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3 py-2 bg-surface border border-border-soft rounded-xl text-xs font-medium focus:ring-2 focus:ring-accent"
             >
               <option value="all">Mọi sở trường ẩm thực</option>
               <option value="canh chua">Món cơm Nam Bộ & Canh chua</option>
@@ -105,11 +109,11 @@ export const CooksPage: React.FC = () => {
         {filteredCooks.map((cook) => (
           <div
             key={cook.id}
-            className="bg-white rounded-2xl border border-[#E5E5DC] p-6 hover:shadow-lg transition-all flex flex-col justify-between"
+            className="bg-white rounded-2xl border border-border-soft p-6 hover:shadow-lg transition-all flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-18 h-18 rounded-2xl overflow-hidden border-2 border-[#60D5AE] shrink-0 bg-stone-100">
+                <div className="w-18 h-18 rounded-2xl overflow-hidden border-2 border-brand shrink-0 bg-stone-100">
                   <ImageWithFallback
                     src={cook.avatar}
                     alt={cook.name}
@@ -119,20 +123,20 @@ export const CooksPage: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <h3 className="font-bold text-lg text-[#333333]">{cook.name}</h3>
+                    <h3 className="font-bold text-lg text-ink">{cook.name}</h3>
                     {cook.verified && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Đã kiểm định
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[#62625C] font-medium mt-0.5">{cook.title}</p>
+                  <p className="text-xs text-muted font-medium mt-0.5">{cook.title}</p>
                   
-                  <div className="flex items-center gap-3 text-xs text-[#62625C] mt-1.5">
-                    <div className="flex items-center gap-1 text-[#481620] font-bold">
-                      <Star className="w-3.5 h-3.5 fill-[#735444] text-[#735444]" />
+                  <div className="flex items-center gap-3 text-xs text-muted mt-1.5">
+                    <div className="flex items-center gap-1 text-accent font-bold">
+                      <Star className="w-3.5 h-3.5 fill-detail text-detail" />
                       <span>{cook.rating}</span>
-                      <span className="text-[#62625C] font-normal">({cook.reviewCount} đánh giá)</span>
+                      <span className="text-muted font-normal">({cook.reviewCount} đánh giá)</span>
                     </div>
                     <span>·</span>
                     <span>{cook.experienceYears} năm kinh nghiệm</span>
@@ -140,42 +144,42 @@ export const CooksPage: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-[#62625C] leading-relaxed line-clamp-3 mb-4">
+              <p className="text-xs text-muted leading-relaxed line-clamp-3 mb-4">
                 "{cook.bio}"
               </p>
 
-              <div className="space-y-2 text-xs py-3 border-t border-[#E5E5DC] bg-[#FFFFFF] p-3 rounded-xl border">
-                <div className="flex items-center gap-2 text-[#333333]">
-                  <MapPin className="w-3.5 h-3.5 text-[#481620] shrink-0" />
+              <div className="space-y-2 text-xs py-3 border-t border-border-soft bg-surface p-3 rounded-xl border">
+                <div className="flex items-center gap-2 text-ink">
+                  <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
                   <span>Khu vực nhận nấu: <strong>{cook.serviceAreas.join(', ')}</strong></span>
                 </div>
-                <div className="flex items-center gap-2 text-[#333333]">
-                  <Users className="w-3.5 h-3.5 text-[#481620] shrink-0" />
+                <div className="flex items-center gap-2 text-ink">
+                  <Users className="w-3.5 h-3.5 text-accent shrink-0" />
                   <span>Quy mô tối đa: <strong>{cook.maxGuests} khách</strong> (Có hỗ trợ phụ bếp cho tiệc lớn)</span>
                 </div>
-                <div className="flex items-start gap-2 text-[#333333]">
-                  <ChefHat className="w-3.5 h-3.5 text-[#481620] shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-ink">
+                  <ChefHat className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                   <span>Sở trường: <strong>{cook.specialties.join(', ')}</strong></span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-[#E5E5DC] flex items-center justify-between">
+            <div className="mt-5 pt-4 border-t border-border-soft flex items-center justify-between">
               <div>
-                <span className="text-[11px] text-[#62625C] block">Công nấu khởi điểm:</span>
-                <span className="text-base font-bold text-[#481620]">{formatVND(cook.baseLaborFee)}</span>
+                <span className="text-[11px] text-muted block">Công nấu khởi điểm:</span>
+                <span className="text-base font-bold text-accent">{formatVND(cook.baseLaborFee)}</span>
               </div>
 
               <div className="flex gap-2">
                 <button
                   onClick={() => navigateTo(`/cooks/${cook.id}`)}
-                  className="px-4 py-2 border border-[#E5E5DC] hover:border-[#60D5AE] text-[#333333] text-xs font-semibold rounded-xl hover:bg-stone-50"
+                  className="px-4 py-2 border border-border-soft hover:border-brand text-ink text-xs font-semibold rounded-xl hover:bg-stone-50"
                 >
                   Xem chi tiết
                 </button>
                 <button
                   onClick={() => handleSelectCookForOrder(cook)}
-                  className="px-4 py-2 bg-[#481620] text-white text-xs font-semibold rounded-xl hover:bg-[#361018] shadow-sm"
+                  className="px-4 py-2 bg-accent text-white text-xs font-semibold rounded-xl hover:bg-accent-hover shadow-sm"
                 >
                   Đặt đầu bếp này
                 </button>

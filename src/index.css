@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./assets/fonts/lora.css";
 
 @font-face {
   font-family: "Plus Jakarta Sans";
@@ -113,13 +114,14 @@
 }
 
 @theme {
-  /* 60%: clean white surfaces and mint-white alternating panels. */
+  /* Shared palette for public pages, booking and operational screens. */
+  --color-canvas: #FAF8F3;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #F0FFF6;
+  --color-surface-alt: #F0F4ED;
 
   /* 30%: mint supporting surfaces, selections and highlights. */
-  --color-brand: #60D5AE;
-  --color-brand-hover: #53C39D;
+  --color-brand: #B9DDCB;
+  --color-brand-hover: #A2CEB8;
   --color-on-brand: #333333;
 
   /* 10%: warm-brown details and deep-burgundy visual anchors. */
@@ -130,9 +132,9 @@
   --color-on-accent: #FFFFFF;
 
   /* Neutral supporting colors keep text and controls accessible. */
-  --color-ink: #333333;
+  --color-ink: #302E29;
   --color-muted: #62625C;
-  --color-border-soft: #E5E5DC;
+  --color-border-soft: #DDDCD2;
   --color-control-border: #89897F;
   --color-disabled: #E9E9E1;
   --color-overlay: #000000;
@@ -145,9 +147,10 @@
   --color-text-main: var(--color-ink);
   --color-text-secondary: var(--color-muted);
   --color-error-red: #C94C4C;
-  /* One family, with distinct roles instead of competing typefaces. */
+  /* Sans for controls and data; local Lora for editorial headings only. */
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-heading: var(--font-sans);
+  --font-editorial: "Lora", Georgia, "Times New Roman", serif;
   --font-body: var(--font-sans);
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.5;
@@ -159,7 +162,7 @@ body {
   font-family: var(--font-body);
   font-weight: 400;
   line-height: 1.65;
-  background-color: var(--color-surface);
+  background-color: var(--color-canvas);
   color: var(--color-ink);
 }
 
@@ -263,7 +266,7 @@ button:is(.bg-brand, .bg-accent):disabled {
 }
 
 .site-header[data-scrolled="true"] {
-  background-color: color-mix(in srgb, var(--color-surface-alt) 78%, transparent);
+  background-color: color-mix(in srgb, var(--color-canvas) 96%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom-color: color-mix(in srgb, var(--color-detail) 12%, transparent);
@@ -277,141 +280,80 @@ button:is(.bg-brand, .bg-accent):disabled {
   }
 }
 
+/* Quiet surfaces preserve selection, focus and disabled states. */
 .interaction-card {
-  --card-selected-shadow: 0 0 transparent;
   position: relative;
-  isolation: isolate;
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
-    var(--tw-ring-shadow, 0 0 transparent),
-    var(--card-selected-shadow),
-    0 3px 8px color-mix(in srgb, var(--color-accent) 4.5%, transparent);
-  transition: translate 250ms var(--interaction-ease),
-    box-shadow 250ms var(--interaction-ease), border-color 250ms var(--interaction-ease),
-    background-color 250ms var(--interaction-ease);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
-
-.interaction-card::before {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-surface) 98%, transparent),
-    color-mix(in srgb, var(--color-surface-alt) 96%, transparent) 55%,
-    color-mix(in srgb, var(--color-brand) 16%, transparent));
-  opacity: 0;
-  transition: opacity 250ms var(--interaction-ease);
-}
-
 .interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked)) {
-  --card-selected-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-brand) 80%, transparent);
-  border-color: var(--color-brand);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
-    var(--tw-ring-shadow, 0 0 transparent),
-    var(--card-selected-shadow),
-    0 3px 8px color-mix(in srgb, var(--color-brand) 14%, transparent);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  background-color: var(--color-surface-alt);
 }
-
-.interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked), :focus-within)::before {
-  opacity: 1;
-}
-
-.interaction-card:is([aria-pressed="true"], [data-selected="true"], :has(input:checked))::before {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-surface-alt) 85%, transparent),
-    color-mix(in srgb, var(--color-brand) 24%, transparent));
-}
-
 .interaction-card:focus-within {
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
-    var(--tw-ring-shadow, 0 0 transparent), var(--card-selected-shadow),
-    0 0 0 3px color-mix(in srgb, var(--color-brand) 80%, transparent),
-    0 4px 10px color-mix(in srgb, var(--color-brand) 12%, transparent);
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
-
-button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card) {
-  /* Outlined/light buttons stay clean at rest, with a restrained mint hover glow. */
-  --button-rest-shadow: none;
-  --button-hover-shadow: 0 3px 8px color-mix(in srgb, var(--color-brand) 12%, transparent),
-    0 2px 4px color-mix(in srgb, var(--color-brand) 8%, transparent);
-  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-brand) 8%, transparent);
-  box-shadow: var(--button-rest-shadow);
-  transition: translate 200ms var(--interaction-ease),
-    box-shadow 200ms var(--interaction-ease), background-color 200ms var(--interaction-ease),
-    border-color 200ms var(--interaction-ease), color 200ms var(--interaction-ease);
-}
-
-button.bg-brand:not(.interaction-card) {
-  --button-rest-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 40%, transparent),
-    0 3px 8px color-mix(in srgb, var(--color-brand) 16%, transparent),
-    0 2px 4px color-mix(in srgb, var(--color-accent) 3.5%, transparent);
-  --button-hover-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 55%, transparent),
-    0 5px 12px color-mix(in srgb, var(--color-brand) 22%, transparent),
-    0 3px 5px color-mix(in srgb, var(--color-accent) 4.5%, transparent);
-  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-brand) 10%, transparent);
-}
-
-button.bg-accent:not(.interaction-card) {
-  --button-rest-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 15%, transparent),
-    0 2px 6px color-mix(in srgb, var(--color-accent) 8%, transparent),
-    0 1px 3px color-mix(in srgb, var(--color-accent) 4%, transparent);
-  --button-hover-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface) 20%, transparent),
-    0 3px 8px color-mix(in srgb, var(--color-accent) 10%, transparent),
-    0 2px 4px color-mix(in srgb, var(--color-accent) 5%, transparent);
-  --button-pressed-shadow: 0 1px 3px color-mix(in srgb, var(--color-accent) 6%, transparent);
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .interaction-card:not(:disabled):hover {
-    translate: 0 -4px;
-    box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent),
-      var(--tw-ring-shadow, 0 0 transparent),
-      var(--card-selected-shadow),
-      0 5px 12px color-mix(in srgb, var(--color-accent) 6%, transparent),
-      0 4px 10px color-mix(in srgb, var(--color-brand) 12%, transparent);
+  .interaction-card:not(:disabled):hover, .dish-card:hover, .menu-story:hover {
+    border-color: var(--color-detail);
+    box-shadow: 0 4px 14px rgb(48 46 41 / 5%);
   }
-
-  .interaction-card:not(:disabled):hover::before {
-    opacity: 1;
-  }
-
-  button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card):not(:disabled):hover {
-    translate: 0 -2px;
-    box-shadow: var(--button-hover-shadow);
-  }
+  .dish-card img { transition: transform 350ms ease; }
+  .dish-card:hover img { transform: scale(1.025); }
 }
-
-button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):not(.interaction-card):not(:disabled):active {
-  translate: 0 1px;
-  box-shadow: var(--button-pressed-shadow);
-}
-
-.interaction-card:not(:disabled):active {
-  translate: 0 1px;
-  box-shadow: inset 0 1px 3px color-mix(in srgb, var(--color-accent) 10%, transparent),
-    0 1px 2px color-mix(in srgb, var(--color-accent) 4%, transparent);
-}
-
-button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border):disabled {
-  translate: none;
-  box-shadow: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .site-header,
-  .interaction-card,
-  .interaction-card::before,
-  button:is(.bg-brand, .bg-accent, .bg-surface-alt, .border) {
-    transition: none !important;
-    translate: none !important;
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Solid mint footer: crop the original logo into the background, behind content. */
+.editorial-title {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+.hero-title { font-size: clamp(2.75rem, 4.8vw, 4.5rem); }
+.page-title { font-size: clamp(2.25rem, 4vw, 3.75rem); }
+.section-title { font-size: clamp(1.9rem, 3vw, 2.75rem); }
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.page-intro { padding-block: 1.5rem 2rem; border-bottom: 1px solid var(--color-border-soft); }
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 0.5rem;
+  padding: 0.75rem 1rem;
+  z-index: 100;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  transform: translateY(-150%);
+}
+.skip-link:focus { transform: translateY(0); }
+:where(section[id]) { scroll-margin-top: 6rem; }
+:where(button, summary) { cursor: pointer; }
+:where(button:disabled) { cursor: not-allowed; }
+:where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.site-footer button:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 639px) {
+  /* Prevent mobile browser zoom while editing forms. */
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 1rem; }
+  .hero-visual { max-width: 32rem; width: 100%; margin-inline: auto; }
+}
+
+/* Quiet footer: the original logo sits behind the content. */
 .site-footer {
   position: relative;
   isolation: isolate;

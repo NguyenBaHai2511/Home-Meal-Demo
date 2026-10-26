@@ -53,7 +53,7 @@ export const CookShoppingPage: React.FC = () => {
   const [bcrDifference, setBcrDifference] = useState(80000);
   const [bcrReason, setBcrReason] = useState('Giá tôm hôm nay tại vựa tăng đột xuất do nguồn hàng khan hiếm.');
 
-  if (!currentOrder) return <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-[#62625C]">Chưa có đơn đi chợ được giao cho bạn.</div>;
+  if (!currentOrder) return <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-muted">Chưa có đơn đi chợ được giao cho bạn.</div>;
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +115,7 @@ export const CookShoppingPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={() => navigateTo('/cook/dashboard')}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#62625C] hover:text-[#481620]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-accent"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại Bảng điều khiển đầu bếp</span>
@@ -123,11 +123,11 @@ export const CookShoppingPage: React.FC = () => {
 
         {/* Order Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#62625C]">Đang quản lý đơn:</span>
+          <span className="text-xs text-muted">Đang quản lý đơn:</span>
           <select
             value={selectedOrderId}
             onChange={(e) => setSelectedOrderId(e.target.value)}
-            className="px-3 py-1.5 bg-white border border-[#E5E5DC] rounded-xl text-xs font-bold text-[#481620]"
+            className="px-3 py-1.5 bg-white border border-border-soft rounded-xl text-xs font-bold text-accent"
           >
             {orders.map((o) => (
               <option key={o.id} value={o.id}>
@@ -140,35 +140,35 @@ export const CookShoppingPage: React.FC = () => {
 
       {/* Financial Health Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC] space-y-1">
-          <span className="text-xs text-[#62625C]">Ngân sách khách duyệt trần:</span>
-          <p className="text-2xl font-bold text-[#333333]">{formatVND(budget)}</p>
-          <p className="text-[11px] text-[#62625C]">Không được vượt quá nếu chưa xin phép</p>
+        <div className="bg-white p-5 rounded-2xl border border-border-soft space-y-1">
+          <span className="text-xs text-muted">Ngân sách khách duyệt trần:</span>
+          <p className="text-2xl font-bold text-ink">{formatVND(budget)}</p>
+          <p className="text-[11px] text-muted">Không được vượt quá nếu chưa xin phép</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC] space-y-1">
-          <span className="text-xs text-[#62625C]">Thực chi đã ghi nhận:</span>
-          <p className="text-2xl font-bold text-[#481620]">{formatVND(actual)}</p>
-          <p className="text-[11px] text-[#62625C]">{currentOrder.shoppingList.length} món nguyên liệu</p>
+        <div className="bg-white p-5 rounded-2xl border border-border-soft space-y-1">
+          <span className="text-xs text-muted">Thực chi đã ghi nhận:</span>
+          <p className="text-2xl font-bold text-accent">{formatVND(actual)}</p>
+          <p className="text-[11px] text-muted">{currentOrder.shoppingList.length} món nguyên liệu</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E5E5DC] space-y-1">
-          <span className="text-xs text-[#62625C]">Ngân sách còn lại:</span>
+        <div className="bg-white p-5 rounded-2xl border border-border-soft space-y-1">
+          <span className="text-xs text-muted">Ngân sách còn lại:</span>
           <p className={`text-2xl font-bold ${remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
             {formatVND(remaining)}
           </p>
-          <p className="text-[11px] text-[#62625C]">
+          <p className="text-[11px] text-muted">
             {remaining >= 0 ? 'Trong hạn mức an toàn' : 'Vượt mức! Cần gửi xin duyệt'}
           </p>
         </div>
       </div>
 
       {/* Main Checklist Container */}
-      <div className="bg-white rounded-3xl border border-[#E5E5DC] p-6 sm:p-8 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E5E5DC]">
+      <div className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-soft">
           <div>
-            <h2 className="text-xl font-bold text-[#333333]">Danh mục nguyên liệu & Hóa đơn đối soát</h2>
-            <p className="text-xs text-[#62625C]">
+            <h2 className="text-xl font-bold text-ink">Danh mục nguyên liệu & Hóa đơn đối soát</h2>
+            <p className="text-xs text-muted">
               Nhập chi tiết từng món mua tại sạp chợ hoặc siêu thị, chụp ảnh hóa đơn gửi khách kiểm tra.
             </p>
           </div>
@@ -184,7 +184,7 @@ export const CookShoppingPage: React.FC = () => {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-[#481620] text-white font-semibold text-xs rounded-xl hover:bg-[#361018] flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 bg-accent text-white font-semibold text-xs rounded-xl hover:bg-accent-hover flex items-center gap-1.5 shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Thêm món đã mua</span>
@@ -196,7 +196,7 @@ export const CookShoppingPage: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-stone-50 text-[#62625C] border-b border-[#E5E5DC]">
+              <tr className="bg-stone-50 text-muted border-b border-border-soft">
                 <th className="py-2.5 px-3">Nguyên liệu</th>
                 <th className="py-2.5 px-3">Địa điểm mua</th>
                 <th className="py-2.5 px-3">Số lượng</th>
@@ -206,19 +206,19 @@ export const CookShoppingPage: React.FC = () => {
                 <th className="py-2.5 px-3 text-center">Xóa</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5DC]">
+            <tbody className="divide-y divide-border-soft">
               {currentOrder.shoppingList.map((item) => (
                 <tr key={item.id} className="hover:bg-stone-50/50">
-                  <td className="py-3 px-3 font-semibold text-[#333333]">{item.name}</td>
-                  <td className="py-3 px-3 text-[#62625C]">{item.storeName}</td>
-                  <td className="py-3 px-3 text-[#62625C]">{item.quantity} {item.unit}</td>
-                  <td className="py-3 px-3 text-right font-bold text-[#481620]">{formatVND(item.actualPrice)}</td>
+                  <td className="py-3 px-3 font-semibold text-ink">{item.name}</td>
+                  <td className="py-3 px-3 text-muted">{item.storeName}</td>
+                  <td className="py-3 px-3 text-muted">{item.quantity} {item.unit}</td>
+                  <td className="py-3 px-3 text-right font-bold text-accent">{formatVND(item.actualPrice)}</td>
                   <td className="py-3 px-3 text-center">
                     <span className="inline-flex items-center gap-1 text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                       <Camera className="w-3 h-3 text-emerald-600" /> Có ảnh
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-[#62625C] text-[11px] max-w-xs truncate">{item.notes || '—'}</td>
+                  <td className="py-3 px-3 text-muted text-[11px] max-w-xs truncate">{item.notes || '—'}</td>
                   <td className="py-3 px-3 text-center">
                     <button
                       onClick={() => deleteShoppingEvidenceItem(currentOrder.id, item.id)}
@@ -235,16 +235,16 @@ export const CookShoppingPage: React.FC = () => {
         </div>
 
         {/* Submit to Customer button */}
-        <div className="pt-4 border-t border-[#E5E5DC] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[#62625C]">
+        <div className="pt-4 border-t border-border-soft flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-muted">
             Khi đã mua đủ nguyên liệu, bấm nút bên dưới để gửi chứng từ cho khách hàng và bắt đầu chuyển sang bước nấu món.
           </p>
 
           <button
             onClick={handleCompleteShopping}
-            className="w-full sm:w-auto px-6 py-2.5 bg-[#481620] hover:bg-[#361018] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
           >
-            <CheckCircle className="w-4 h-4 text-[#60D5AE]" />
+            <CheckCircle className="w-4 h-4 text-brand" />
             <span>Hoàn thành đi chợ & Gửi hóa đơn cho khách</span>
           </button>
         </div>
@@ -254,84 +254,84 @@ export const CookShoppingPage: React.FC = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div
-            className="bg-[#FFFFFF] rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5E5DC]"
+            className="bg-surface rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-border-soft"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-[#E5E5DC] bg-white flex justify-between items-center">
-              <h3 className="font-bold text-[#333333] text-base">Thêm nguyên liệu thực mua tại chợ</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-[#62625C] hover:text-[#333333]">✕</button>
+            <div className="p-5 border-b border-border-soft bg-white flex justify-between items-center">
+              <h3 className="font-bold text-ink text-base">Thêm nguyên liệu thực mua tại chợ</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-muted hover:text-ink">✕</button>
             </div>
 
             <form onSubmit={handleAddItem} className="p-5 space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Tên nguyên liệu:</label>
+                <label className="block font-semibold text-ink mb-1">Tên nguyên liệu:</label>
                 <input
                   type="text"
                   placeholder="Ví dụ: Tôm sú tươi, Rau thơm tổng hợp..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#333333] mb-1">Số lượng:</label>
+                  <label className="block font-semibold text-ink mb-1">Số lượng:</label>
                   <input
                     type="text"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#333333] mb-1">Đơn vị:</label>
+                  <label className="block font-semibold text-ink mb-1">Đơn vị:</label>
                   <input
                     type="text"
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#333333] mb-1">Đơn giá thực mua (VNĐ):</label>
+                  <label className="block font-semibold text-ink mb-1">Đơn giá thực mua (VNĐ):</label>
                   <input
                     type="number"
                     step="5000"
                     value={actualPrice}
                     onChange={(e) => setActualPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620] font-bold text-[#481620]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent font-bold text-accent"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#333333] mb-1">Nơi mua sắm:</label>
+                  <label className="block font-semibold text-ink mb-1">Nơi mua sắm:</label>
                   <input
                     type="text"
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
-                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Ảnh hóa đơn hoặc sạp chợ:</label>
-                <input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => setReceiptFile(event.target.files?.[0] || null)} className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] text-xs" />
-                <p className="mt-1 text-[11px] text-[#62625C]">Ảnh JPEG, PNG hoặc WebP, tối đa 5 MB. Chỉ khách của đơn, đầu bếp được giao và admin mới xem được.</p>
+                <label className="block font-semibold text-ink mb-1">Ảnh hóa đơn hoặc sạp chợ:</label>
+                <input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => setReceiptFile(event.target.files?.[0] || null)} className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft text-xs" />
+                <p className="mt-1 text-[11px] text-muted">Ảnh JPEG, PNG hoặc WebP, tối đa 5 MB. Chỉ khách của đơn, đầu bếp được giao và admin mới xem được.</p>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Ghi chú nguồn gốc:</label>
+                <label className="block font-semibold text-ink mb-1">Ghi chú nguồn gốc:</label>
                 <input
                   type="text"
                   placeholder="Ví dụ: Tôm tươi sống nhảy tanh tách tại sạp quen..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft"
                 />
               </div>
 
@@ -339,14 +339,14 @@ export const CookShoppingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-[#E5E5DC] text-xs font-semibold rounded-lg"
+                  className="px-4 py-2 border border-border-soft text-xs font-semibold rounded-lg"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={savingEvidence}
-                  className="px-5 py-2 bg-[#481620] text-white text-xs font-bold rounded-lg hover:bg-[#361018]"
+                  className="px-5 py-2 bg-accent text-white text-xs font-bold rounded-lg hover:bg-accent-hover"
                 >
                   {savingEvidence ? 'Đang tải ảnh…' : 'Lưu món vào danh sách'}
                 </button>
@@ -360,15 +360,15 @@ export const CookShoppingPage: React.FC = () => {
       {showBudgetChangeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div
-            className="bg-[#FFFFFF] rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5E5DC]"
+            className="bg-surface rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-border-soft"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-[#E5E5DC] bg-white flex justify-between items-center text-amber-900">
+            <div className="p-5 border-b border-border-soft bg-white flex justify-between items-center text-amber-900">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
                 <h3 className="font-bold text-base">Gửi yêu cầu xin duyệt tăng ngân sách</h3>
               </div>
-              <button onClick={() => setShowBudgetChangeModal(false)} className="text-[#62625C] hover:text-[#333333]">✕</button>
+              <button onClick={() => setShowBudgetChangeModal(false)} className="text-muted hover:text-ink">✕</button>
             </div>
 
             <form onSubmit={handleSendBudgetChangeRequest} className="p-5 space-y-4 text-xs sm:text-sm">
@@ -377,39 +377,39 @@ export const CookShoppingPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Món nguyên liệu bị tăng giá:</label>
+                <label className="block font-semibold text-ink mb-1">Món nguyên liệu bị tăng giá:</label>
                 <input
                   type="text"
                   value={bcrItem}
                   onChange={(e) => setBcrItem(e.target.value)}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] focus:ring-2 focus:ring-[#481620]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft focus:ring-2 focus:ring-accent"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Số tiền chênh lệch cần duyệt thêm (VNĐ):</label>
+                <label className="block font-semibold text-ink mb-1">Số tiền chênh lệch cần duyệt thêm (VNĐ):</label>
                 <input
                   type="number"
                   step="10000"
                   value={bcrDifference}
                   onChange={(e) => setBcrDifference(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC] font-bold text-amber-900 focus:ring-2 focus:ring-[#481620]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft font-bold text-amber-900 focus:ring-2 focus:ring-accent"
                   required
                 />
-                <p className="text-[11px] text-[#62625C] mt-1">
+                <p className="text-[11px] text-muted mt-1">
                   Ngân sách mới đề xuất: <strong>{formatVND(currentOrder.estimatedGroceryBudget + bcrDifference)}</strong> (cũ: {formatVND(currentOrder.estimatedGroceryBudget)})
                 </p>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333] mb-1">Giải trình lý do & phương án thay thế:</label>
+                <label className="block font-semibold text-ink mb-1">Giải trình lý do & phương án thay thế:</label>
                 <textarea
                   rows={3}
                   value={bcrReason}
                   onChange={(e) => setBcrReason(e.target.value)}
                   placeholder="Nêu lý do giá tăng tại chợ và phương án thay thế nếu khách không đồng ý tăng tiền..."
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E5E5DC]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-border-soft"
                   required
                 />
               </div>
@@ -418,7 +418,7 @@ export const CookShoppingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowBudgetChangeModal(false)}
-                  className="px-4 py-2 border border-[#E5E5DC] text-xs font-semibold rounded-lg"
+                  className="px-4 py-2 border border-border-soft text-xs font-semibold rounded-lg"
                 >
                   Hủy
                 </button>

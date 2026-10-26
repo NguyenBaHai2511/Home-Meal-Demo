@@ -78,8 +78,8 @@ export const PartyBookingPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#481620] to-[#361018] rounded-3xl p-6 sm:p-10 text-white shadow-lg space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold backdrop-blur-xs text-[#60D5AE]">
+      <div className="bg-gradient-to-r from-accent to-accent-hover rounded-3xl p-6 sm:p-10 text-white shadow-lg space-y-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold backdrop-blur-xs text-brand">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Dành cho tiệc từ 10 đến hơn 50 khách</span>
         </div>
@@ -92,10 +92,10 @@ export const PartyBookingPage: React.FC = () => {
       </div>
 
       {/* Booking Form */}
-      <form onSubmit={handleSubmitQuotationRequest} className="bg-white rounded-3xl border border-[#E5E5DC] p-6 sm:p-8 shadow-xs space-y-6">
+      <form onSubmit={handleSubmitQuotationRequest} className="bg-white rounded-3xl border border-border-soft p-6 sm:p-8 shadow-xs space-y-6">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-[#333333]">1. Thông tin quy mô sự kiện</h2>
-          <p className="text-xs text-[#62625C] mt-0.5">Thời gian, địa điểm và số lượng khách tham dự tiệc.</p>
+          <h2 className="text-lg sm:text-xl font-bold text-ink">1. Thông tin quy mô sự kiện</h2>
+          <p className="text-xs text-muted mt-0.5">Thời gian, địa điểm và số lượng khách tham dự tiệc.</p>
         </div>
 
         {/* 4-hour advance booking rule banner */}
@@ -127,11 +127,11 @@ export const PartyBookingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5">Loại hình sự kiện:</label>
+            <label className="block text-xs font-semibold text-ink mb-1.5">Loại hình sự kiện:</label>
             <select
               value={eventType}
               onChange={(e) => setEventType(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-accent"
             >
               <option value="Tiệc sinh nhật">Tiệc sinh nhật tại gia</option>
               <option value="Đám giỗ họ / Cúng gia tiên">Đám giỗ / Mâm cỗ cúng họ</option>
@@ -143,8 +143,8 @@ export const PartyBookingPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-[#481620]" /> Số lượng khách:
+            <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-accent" /> Số lượng khách:
             </label>
             <input
               type="number"
@@ -152,66 +152,66 @@ export const PartyBookingPage: React.FC = () => {
               max={150}
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm font-bold text-[#481620] focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-bold text-accent focus:ring-2 focus:ring-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-[#481620]" /> Ngày tổ chức:
+            <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-accent" /> Ngày tổ chức:
             </label>
             <input
               type="date"
               min={formatDateForInput(getNow())}
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`w-full px-3.5 py-2.5 bg-[#FFFFFF] border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] ${
-                !timeValidation.isValid ? 'border-rose-400 bg-rose-50/30' : 'border-[#E5E5DC]'
+              className={`w-full px-3.5 py-2.5 bg-surface border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent ${
+                !timeValidation.isValid ? 'border-rose-400 bg-rose-50/30' : 'border-border-soft'
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-[#481620]" /> Giờ khai tiệc:
+            <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-accent" /> Giờ khai tiệc:
             </label>
             <input
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className={`w-full px-3.5 py-2.5 bg-[#FFFFFF] border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620] ${
-                !timeValidation.isValid ? 'border-rose-400 bg-rose-50/30 text-rose-900' : 'border-[#E5E5DC]'
+              className={`w-full px-3.5 py-2.5 bg-surface border rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent ${
+                !timeValidation.isValid ? 'border-rose-400 bg-rose-50/30 text-rose-900' : 'border-border-soft'
               }`}
             />
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-[#333333] mb-1.5 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-[#481620]" /> Địa điểm tổ chức:
+            <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-accent" /> Địa điểm tổ chức:
             </label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Nhập địa chỉ nhà riêng hoặc sảnh tiệc..."
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
               required
             />
           </div>
         </div>
 
-        <div className="pt-4 border-t border-[#E5E5DC]">
-          <h2 className="text-lg sm:text-xl font-bold text-[#333333]">2. Phong cách phục vụ & Nhân sự</h2>
-          <p className="text-xs text-[#62625C] mt-0.5">Tiêu chuẩn phục vụ bàn và hỗ trợ dọn dẹp.</p>
+        <div className="pt-4 border-t border-border-soft">
+          <h2 className="text-lg sm:text-xl font-bold text-ink">2. Phong cách phục vụ & Nhân sự</h2>
+          <p className="text-xs text-muted mt-0.5">Tiêu chuẩn phục vụ bàn và hỗ trợ dọn dẹp.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
           <div>
-            <label className="block font-semibold text-[#333333] mb-1.5">Hình thức dọn tiệc:</label>
+            <label className="block font-semibold text-ink mb-1.5">Hình thức dọn tiệc:</label>
             <select
               value={servingStyle}
               onChange={(e) => setServingStyle(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
             >
               <option value="Dọn mâm tròn truyền thống">Dọn mâm tròn truyền thống (6-10 người/mâm)</option>
               <option value="Tiệc nướng BBQ trực tiếp tại bàn">Tiệc nướng BBQ trực tiếp tại bàn</option>
@@ -221,42 +221,42 @@ export const PartyBookingPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-[#333333] mb-1.5">Ngân sách đi chợ dự kiến (VNĐ):</label>
+            <label className="block font-semibold text-ink mb-1.5">Ngân sách đi chợ dự kiến (VNĐ):</label>
             <input
               type="number"
               step="500000"
               min="1000000"
               value={targetGroceryBudget}
               onChange={(e) => setTargetGroceryBudget(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm font-bold text-[#481620] focus:ring-2 focus:ring-[#481620]"
+              className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-bold text-accent focus:ring-2 focus:ring-accent"
             />
-            <p className="text-[11px] text-[#62625C] mt-1">
+            <p className="text-[11px] text-muted mt-1">
               Khoảng {formatVND(Math.round(targetGroceryBudget / guests))} / khách
             </p>
           </div>
         </div>
 
         {/* Staff & Equipment check */}
-        <div className="bg-[#FFFFFF] p-5 rounded-2xl border border-[#E5E5DC] space-y-4 text-xs sm:text-sm">
+        <div className="bg-surface p-5 rounded-2xl border border-border-soft space-y-4 text-xs sm:text-sm">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={needAssistants}
               onChange={(e) => setNeedAssistants(e.target.checked)}
-              className="w-4 h-4 text-[#481620] rounded focus:ring-[#481620]"
+              className="w-4 h-4 text-accent rounded focus:ring-accent"
             />
-            <span className="font-semibold text-[#333333]">
+            <span className="font-semibold text-ink">
               Cần nhân sự phụ bếp hỗ trợ nướng & bưng bê ({assistantCount} người)
             </span>
           </label>
 
           {needAssistants && (
             <div className="pl-7 flex items-center gap-3">
-              <span className="text-xs text-[#62625C]">Số lượng phụ bếp:</span>
+              <span className="text-xs text-muted">Số lượng phụ bếp:</span>
               <select
                 value={assistantCount}
                 onChange={(e) => setAssistantCount(Number(e.target.value))}
-                className="px-3 py-1.5 bg-white border border-[#E5E5DC] rounded-lg text-xs font-bold text-[#481620]"
+                className="px-3 py-1.5 bg-white border border-border-soft rounded-lg text-xs font-bold text-accent"
               >
                 <option value={1}>1 người (Tiệc 10-15 khách)</option>
                 <option value={2}>2 người (Tiệc 20-30 khách)</option>
@@ -271,25 +271,25 @@ export const PartyBookingPage: React.FC = () => {
               type="checkbox"
               checked={needEquipment}
               onChange={(e) => setNeedEquipment(e.target.checked)}
-              className="w-4 h-4 text-[#481620] rounded focus:ring-[#481620]"
+              className="w-4 h-4 text-accent rounded focus:ring-accent"
             />
-            <span className="font-semibold text-[#333333]">
+            <span className="font-semibold text-ink">
               Yêu cầu đầu bếp mang theo dụng cụ chuyên dụng (bếp nướng than, nồi lẩu tiệc, vỉ nướng...)
             </span>
           </label>
         </div>
 
         {/* Cook selector for party */}
-        <div className="pt-4 border-t border-[#E5E5DC]">
-          <h2 className="text-lg sm:text-xl font-bold text-[#333333] mb-2">3. Chọn đầu bếp nhận yêu cầu</h2>
+        <div className="pt-4 border-t border-border-soft">
+          <h2 className="text-lg sm:text-xl font-bold text-ink mb-2">3. Chọn đầu bếp nhận yêu cầu</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {cooks.map((c) => (
               <label
                 key={c.id}
                 className={`p-4 rounded-2xl border-2 flex items-center gap-3.5 cursor-pointer transition-all ${
                   selectedCookId === c.id
-                    ? 'border-[#481620] bg-[#F0FFF6]/40 shadow-xs'
-                    : 'border-[#E5E5DC] hover:border-[#60D5AE]'
+                    ? 'border-accent bg-surface-alt/40 shadow-xs'
+                    : 'border-border-soft hover:border-brand'
                 }`}
               >
                 <input
@@ -298,15 +298,15 @@ export const PartyBookingPage: React.FC = () => {
                   value={c.id}
                   checked={selectedCookId === c.id}
                   onChange={() => setSelectedCookId(c.id)}
-                  className="w-4 h-4 text-[#481620] focus:ring-[#481620]"
+                  className="w-4 h-4 text-accent focus:ring-accent"
                 />
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-[#60D5AE] shrink-0">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-brand shrink-0">
                   <img src={c.avatar} alt={c.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-[#333333]">{c.name}</h4>
-                  <p className="text-xs text-[#62625C] line-clamp-1">{c.title}</p>
-                  <p className="text-[11px] text-[#481620] font-medium">Sức chứa: {c.maxGuests} khách</p>
+                  <h4 className="font-bold text-sm text-ink">{c.name}</h4>
+                  <p className="text-xs text-muted line-clamp-1">{c.title}</p>
+                  <p className="text-[11px] text-accent font-medium">Sức chứa: {c.maxGuests} khách</p>
                 </div>
               </label>
             ))}
@@ -314,27 +314,27 @@ export const PartyBookingPage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[#333333] mb-1.5">
+          <label className="block text-xs font-semibold text-ink mb-1.5">
             Ghi chú thêm về yêu cầu món ăn & không gian:
           </label>
           <textarea
             rows={3}
             value={specialNotes}
             onChange={(e) => setSpecialNotes(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-[#FFFFFF] border border-[#E5E5DC] rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#481620]"
+            className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent"
           />
         </div>
 
         {/* Action Button */}
-        <div className="pt-4 border-t border-[#E5E5DC] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-[#62625C] flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#481620]" />
+        <div className="pt-4 border-t border-border-soft flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs text-muted flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-accent" />
             <span>Đầu bếp sẽ gửi báo giá cụ thể. Bạn xem và duyệt trước khi chốt đơn.</span>
           </div>
 
           <button
             type="submit"
-            className="w-full sm:w-auto px-8 py-3.5 bg-[#481620] hover:bg-[#361018] text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-3.5 bg-accent hover:bg-accent-hover text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
           >
             <span>Gửi yêu cầu & Nhận báo giá chi tiết</span>
           </button>

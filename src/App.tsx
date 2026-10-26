@@ -32,9 +32,9 @@ const SmartMenuPage = lazy(() => import('./components/views/SmartMenuPage').then
 const AppContent: React.FC = () => {
   const { currentPath, authUser, authLoading, navigateTo } = useApp();
   const pathname = currentPath.split(/[?#]/)[0] || '/';
-  const requiredRole = pathname.startsWith('/admin')
+  const requiredRole = (pathname === '/admin' || pathname.startsWith('/admin/'))
     ? 'admin'
-    : pathname.startsWith('/cook')
+    : (pathname === '/cook' || pathname.startsWith('/cook/'))
       ? 'cook'
       : pathname === '/orders' || pathname.startsWith('/orders/') || pathname === '/quotations' || pathname === '/party-booking'
         ? 'customer'
@@ -66,20 +66,20 @@ const AppContent: React.FC = () => {
   // Route matching
   const renderCurrentView = () => {
     if (requiredRole && authLoading) {
-      return <div className="px-4 py-20 text-center text-sm text-[#62625C]">Đang kiểm tra quyền truy cập…</div>;
+      return <div className="px-4 py-20 text-center text-sm text-muted">Đang kiểm tra quyền truy cập…</div>;
     }
     if (requiredRole && !authUser) {
-      return <div className="px-4 py-20 text-center text-sm text-[#62625C]">Đang chuyển đến trang đăng nhập…</div>;
+      return <div className="px-4 py-20 text-center text-sm text-muted">Đang chuyển đến trang đăng nhập…</div>;
     }
     if (requiredRole && authUser?.role !== requiredRole) {
-      return <div className="px-4 py-20 text-center text-sm text-[#62625C]">Bạn không có quyền truy cập trang này.</div>;
+      return <div className="px-4 py-20 text-center text-sm text-muted">Bạn không có quyền truy cập trang này.</div>;
     }
 
     // 1. Static Exact Routes
     if (pathname === '/') return <HomePage />;
     if (pathname === '/meal-planner') return <MealPlannerPage />;
     if (pathname === '/menu') return <MenuPage />;
-    if (pathname === '/smart-menu') return <Suspense fallback={<div role="status" className="px-4 py-16 text-center text-sm text-[#62625C]">Đang mở trợ lý thực đơn…</div>}><SmartMenuPage /></Suspense>;
+    if (pathname === '/smart-menu') return <Suspense fallback={<div role="status" className="px-4 py-16 text-center text-sm text-muted">Đang mở trợ lý thực đơn…</div>}><SmartMenuPage /></Suspense>;
     if (pathname === '/cooks') return <CooksPage />;
     if (pathname === '/party-booking') return <PartyBookingPage />;
     if (pathname === '/quotations') return <QuotationsPage />;
@@ -132,9 +132,10 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#333333]">
+    <div className="min-h-screen flex flex-col bg-canvas text-ink">
+      <a href="#main-content" className="skip-link">Bỏ qua điều hướng</a>
       <Navbar />
-      <main className="flex-1">{renderCurrentView()}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1">{renderCurrentView()}</main>
       <Footer />
       <NotificationToast />
     </div>

@@ -146,10 +146,10 @@ export const SmartMenuPage: React.FC = () => {
   const resultsStale = submitted && JSON.stringify(currentPreferences()) !== JSON.stringify(submitted);
 
   return <div className="mx-auto max-w-7xl space-y-8 break-words px-4 py-8 text-ink sm:px-6 lg:px-8">
-    <section className="relative overflow-hidden rounded-[2rem] bg-brand px-6 py-10 text-ink sm:px-10 sm:py-14">
+    <section className="relative overflow-hidden rounded-xl border border-border-soft bg-surface-alt px-6 py-10 text-ink sm:px-10 sm:py-14">
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full border-[45px] border-brand/15" />
       <span className="inline-flex items-center gap-2 rounded-full border border-brand/40 px-3 py-1.5 text-xs font-semibold text-ink"><Sparkles size={15} /> AI Smart Menu · Trợ lý dinh dưỡng thông minh</span>
-      <h1 className="relative mt-5 max-w-3xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">Ăn đúng nhu cầu –<br className="hidden sm:block" /> Sống khỏe mỗi ngày</h1>
+      <h1 className="editorial-title page-title relative mt-5 max-w-3xl">Ăn đúng nhu cầu –<br className="hidden sm:block" /> Sống khỏe mỗi ngày</h1>
       <p className="relative mt-5 max-w-2xl text-sm leading-7 text-ink sm:text-base">HomeMeal AI giúp bạn khám phá những thực đơn phù hợp với mục tiêu dinh dưỡng, sở thích và ngân sách. Chọn món yêu thích và để Home Cook chuẩn bị bữa ăn cho bạn.</p>
       <div className="mt-6 flex flex-wrap gap-3 text-xs text-ink"><span>01 · Chọn nhu cầu</span><span>02 · Khám phá thực đơn</span><span>03 · Đặt Home Cook</span></div>
     </section>

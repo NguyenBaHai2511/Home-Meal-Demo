@@ -22,17 +22,34 @@ type AdminTab = 'overview' | 'orders' | 'cooks' | 'disputes' | 'users';
 type AdminSectionTab = Exclude<AdminTab, 'users'>;
 
 export const AdminDashboardPage: React.FC = () => {
-  const { orders, cooks, resolveDispute, navigateTo, authUser } = useApp();
-  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const { orders, cooks, resolveDispute, navigateTo, authUser, currentPath } = useApp();
+  const adminPath = currentPath.split(/[?#]/)[0] || '/admin';
+  const tabForPath: Record<string, AdminTab> = {
+    '/admin': 'overview',
+    '/admin/orders': 'orders',
+    '/admin/parties': 'orders',
+    '/admin/cooks': 'cooks',
+    '/admin/disputes': 'disputes',
+    '/admin/users': 'users',
+  };
+  const [activeTab, setActiveTab] = useState<AdminTab>(() => tabForPath[adminPath] || 'overview');
   const [resolutionText, setResolutionText] = useState('Đã đối chiếu hóa đơn, đồng ý khấu trừ khoản tiền mờ chữ không rõ ràng.');
 
   const disputedOrders = orders.filter((o) => o.status === 'disputed' && o.dispute);
+  const displayedOrders = adminPath === '/admin/parties'
+    ? orders.filter((order) => order.serviceType === 'party_at_home')
+    : orders;
   const adminTabs: { id: AdminSectionTab; label: string }[] = [
     { id: 'overview', label: 'Tổng quan hệ thống' },
     { id: 'disputes', label: `Khiếu nại hóa đơn (${disputedOrders.length})` },
     { id: 'orders', label: `Quản lý đơn hàng (${orders.length})` },
     { id: 'cooks', label: `Xác thực đầu bếp (${cooks.length})` },
   ];
+
+  useEffect(() => {
+    const routeTab = tabForPath[adminPath];
+    if (routeTab) setActiveTab(routeTab);
+  }, [adminPath]);
 
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -112,7 +129,7 @@ export const AdminDashboardPage: React.FC = () => {
         {adminTabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => navigateTo(tab.id === 'overview' ? '/admin' : `/admin/${tab.id}`)}
             className={`pb-2 px-3 transition-colors ${
               activeTab === tab.id
                 ? 'text-accent border-b-2 border-accent'
@@ -126,7 +143,7 @@ export const AdminDashboardPage: React.FC = () => {
 
       <div className="-mt-4 flex justify-end">
         <button
-          onClick={() => setActiveTab('users')}
+          onClick={() => navigateTo('/admin/users')}
           className={`px-3 py-2 rounded-lg text-xs font-semibold ${activeTab === 'users' ? 'bg-accent text-white' : 'border border-border-soft bg-white text-accent'}`}
         >
           Quản lý tài khoản
@@ -272,7 +289,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-soft">
-                {orders.map((o) => (
+                {displayedOrders.map((o) => (
                   <tr key={o.id} className="hover:bg-stone-50/50">
                     <td className="py-2.5 px-3 font-mono font-bold text-accent">#{o.orderCode}</td>
                     <td className="py-2.5 px-3 font-medium text-ink">{o.customerName}</td>
@@ -284,7 +301,7 @@ export const AdminDashboardPage: React.FC = () => {
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <button
-                        onClick={() => navigateTo(`/orders/${o.id}`)}
+                        onClick={() => navigateTo(`/admin/orders/${o.id}`)}
                         className="text-accent hover:underline font-semibold"
                       >
                         Xem
@@ -294,6 +311,7 @@ export const AdminDashboardPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {displayedOrders.length === 0 && <p className="py-6 text-center text-sm text-muted">{adminPath === '/admin/parties' ? 'Chưa có đơn tiệc nào.' : 'Chưa có đơn hàng nào.'}</p>}
           </div>
         </div>
       )}

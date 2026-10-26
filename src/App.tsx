@@ -90,11 +90,18 @@ const AppContent: React.FC = () => {
     if (
       pathname === '/admin' ||
       pathname === '/admin/orders' ||
+      pathname === '/admin/parties' ||
+      pathname === '/admin/users' ||
       pathname === '/admin/cooks' ||
       pathname === '/admin/disputes' ||
       pathname === '/admin/payments'
     ) {
       return <AdminDashboardPage />;
+    }
+
+    if (pathname.startsWith('/admin/orders/')) {
+      const orderId = pathname.replace('/admin/orders/', '').split('/')[0];
+      return <OrderDetailPage orderId={orderId} />;
     }
 
     // 4. Dynamic Parameter Routes:

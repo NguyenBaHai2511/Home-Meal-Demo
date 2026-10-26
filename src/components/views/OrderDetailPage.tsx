@@ -33,7 +33,10 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
     rejectBudgetChange,
     acceptQuotation,
     rejectQuotation,
+    authUser,
   } = useApp();
+  const isCustomer = authUser?.role === 'customer';
+  const backPath = authUser?.role === 'admin' ? '/admin/orders' : authUser?.role === 'cook' ? '/cook/dashboard' : '/orders';
 
   const [selectedEvidenceItem, setSelectedEvidenceItem] = useState<ShoppingEvidenceItem | null>(null);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
@@ -47,7 +50,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
         <h2 className="text-xl font-bold text-ink">Không tìm thấy đơn hàng</h2>
         <p className="text-xs text-muted">Mã đơn hàng không hợp lệ hoặc đã bị xóa.</p>
         <button
-          onClick={() => navigateTo('/orders')}
+          onClick={() => navigateTo(backPath)}
           className="px-5 py-2.5 bg-accent text-white text-xs font-semibold rounded-xl"
         >
           Quay lại danh sách đơn hàng
@@ -64,7 +67,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
       {/* Top Breadcrumb */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => navigateTo('/orders')}
+          onClick={() => navigateTo(backPath)}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-accent"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -88,7 +91,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
           </div>
 
           {/* Quick Pay CTA if completed */}
-          {order.status === 'service_completed' && (
+          {isCustomer && order.status === 'service_completed' && (
             <button
               onClick={() => navigateTo(`/orders/${order.id}/bill`)}
               className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center gap-2"
@@ -107,7 +110,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
         </div>
 
         {/* SCENARIO B BANNER: BÁO GIÁ ĐỢI DUYỆT */}
-        {order.status === 'quotation_submitted' && quotation && (
+          {isCustomer && order.status === 'quotation_submitted' && quotation && (
           <div className="p-5 bg-indigo-50/80 rounded-2xl border border-indigo-200 space-y-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 text-indigo-900 font-bold text-base">
@@ -167,7 +170,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
         )}
 
         {/* SCENARIO C BANNER: XIN PHÉP TĂNG NGÂN SÁCH ĐI CHỢ */}
-        {order.status === 'awaiting_budget_approval' && pendingBudgetRequest && (
+          {isCustomer && order.status === 'awaiting_budget_approval' && pendingBudgetRequest && (
           <div className="p-5 bg-amber-50 rounded-2xl border border-amber-300 space-y-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 text-amber-900 font-bold text-base">
@@ -425,12 +428,12 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            {isCustomer && <button
               onClick={() => setShowDisputeModal(true)}
               className="px-3 py-1.5 border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg font-semibold"
             >
               Khiếu nại hóa đơn / Báo sai sót
-            </button>
+            </button>}
             <button
               onClick={() => navigateTo('/support')}
               className="px-3 py-1.5 border border-border-soft hover:bg-stone-50 rounded-lg text-ink"
@@ -446,7 +449,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
         <EvidenceModal item={selectedEvidenceItem} onClose={() => setSelectedEvidenceItem(null)} />
       )}
 
-      {showDisputeModal && (
+      {isCustomer && showDisputeModal && (
         <DisputeModal
           orderId={order.id}
           orderCode={order.orderCode}

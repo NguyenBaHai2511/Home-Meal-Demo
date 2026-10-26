@@ -9,6 +9,7 @@ import { sendAccountEmail } from './email.js';
 import { appPath } from './appPaths.js';
 import { createSmartMenuHandler } from './smart-menu/handler.js';
 import { matchesAllowedOrigin } from './originPolicy.js';
+import { isDatabaseSchemaError } from './dbErrors.js';
 
 type UserRole = 'customer' | 'cook' | 'admin';
 type AuthUser = {
@@ -541,6 +542,14 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('HomeMeal API request failed.');
   if (isObject(error) && error.code === '23505') { res.status(409).json({ error: 'Email is already registered.' }); return; }
   const requestId = res.getHeader('X-Request-Id');
+  if (isDatabaseSchemaError(error)) {
+    res.status(503).json({
+      error: 'Database setup is incomplete. The administrator must apply the project migrations.',
+      code: 'DATABASE_SCHEMA_NOT_READY',
+      requestId,
+    });
+    return;
+  }
   res.status(500).json({ error: 'An unexpected server error occurred.', code: 'INTERNAL_SERVER_ERROR', requestId });
 });
 

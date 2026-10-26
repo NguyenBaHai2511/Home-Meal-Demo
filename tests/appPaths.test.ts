@@ -11,7 +11,7 @@ test('normalizes the configured public base path', () => {
 });
 
 test('builds application routes under the configured base path', () => {
-  assert.equal(appPath('/verify-email', '/HomeMeal'), '/HomeMeal/verify-email');
+  assert.equal(appPath('/reset-password', '/HomeMeal'), '/HomeMeal/reset-password');
   assert.equal(appPath('/api', '/HomeMeal'), '/HomeMeal/api');
   assert.equal(appPath('/api', ''), '/api');
 });

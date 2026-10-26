@@ -78,7 +78,7 @@ const AppContent: React.FC = () => {
     if (pathname === '/party-booking') return <PartyBookingPage />;
     if (pathname === '/quotations') return <QuotationsPage />;
     if (pathname === '/orders') return <OrdersPage />;
-    if (pathname === '/account' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password' || pathname === '/reset-password' || pathname === '/verify-email') return <AccountPage />;
+    if (pathname === '/account' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password' || pathname === '/reset-password') return <AccountPage />;
     if (pathname === '/support') return <SupportPage />;
 
     // 2. Cook Routes

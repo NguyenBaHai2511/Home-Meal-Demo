@@ -12,9 +12,7 @@ export const AccountPage: React.FC = () => {
   const isRegister = pathname === '/register';
   const isForgot = pathname === '/forgot-password';
   const isReset = pathname === '/reset-password';
-  const isVerify = pathname === '/verify-email';
   const resetToken = query.get('token') || '';
-  const verifyToken = query.get('token') || '';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -42,20 +40,6 @@ export const AccountPage: React.FC = () => {
     } catch (saveError) { setError(saveError instanceof Error ? saveError.message : 'Không cập nhật được hồ sơ.'); }
     finally { setSubmitting(false); }
   };
-
-  useEffect(() => {
-    if (!isVerify || !verifyToken) return;
-    let mounted = true;
-    fetch(apiUrl('resource=auth&action=verify-email'), {
-      method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: verifyToken }),
-    }).then(async (response) => {
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Không xác minh được email.');
-      if (mounted) { setNotice('Email đã được xác minh. Bạn có thể đăng nhập.'); navigateTo('/login'); }
-    }).catch((verifyError) => { if (mounted) setError(verifyError instanceof Error ? verifyError.message : 'Liên kết xác minh không hợp lệ.'); });
-    return () => { mounted = false; };
-  }, [isVerify, verifyToken, navigateTo]);
 
   const roleHome = (role: string) => role === 'admin' ? '/admin' : role === 'cook' ? '/cook/dashboard' : '/';
 
@@ -100,24 +84,9 @@ export const AccountPage: React.FC = () => {
     }
   };
 
-  const resendVerification = async () => {
-    setError('');
-    try {
-      const response = await fetch(apiUrl('resource=auth&action=resend-verification'), {
-        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Không gửi lại được email.');
-      setNotice(result.message);
-    } catch (resendError) {
-      setError(resendError instanceof Error ? resendError.message : 'Không gửi lại được email.');
-    }
-  };
-
   if (authLoading) return <div className="max-w-lg mx-auto px-4 py-20 text-center text-sm text-muted">Đang kiểm tra phiên đăng nhập…</div>;
 
-  if (authUser && !isVerify && !isForgot && !isReset && !isRegister) {
+  if (authUser && !isForgot && !isReset && !isRegister) {
     const RoleIcon = authUser.role === 'admin' ? Shield : authUser.role === 'cook' ? ChefHat : User;
     return (
       <section className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
@@ -151,8 +120,8 @@ export const AccountPage: React.FC = () => {
     );
   }
 
-  const title = isVerify ? 'Xác minh email' : isForgot ? 'Quên mật khẩu' : isReset ? 'Đặt lại mật khẩu' : isRegister ? 'Tạo tài khoản khách hàng' : 'Đăng nhập HomeMeal';
-  const showPassword = !isForgot && !isVerify;
+  const title = isForgot ? 'Quên mật khẩu' : isReset ? 'Đặt lại mật khẩu' : isRegister ? 'Tạo tài khoản khách hàng' : 'Đăng nhập HomeMeal';
+  const showPassword = !isForgot;
   return (
     <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
       <aside className="py-4 md:py-10">
@@ -164,25 +133,22 @@ export const AccountPage: React.FC = () => {
       <div className="min-w-0 bg-white rounded-xl border border-border-soft p-6 sm:p-9">
         <h1 className="editorial-title text-3xl text-ink">{title}</h1>
         <p className="mt-2 text-sm text-muted">
-          {isRegister ? 'Tài khoản mới mặc định có quyền Khách hàng. Xác minh email trước khi đăng nhập.' : isVerify ? 'Đang kiểm tra liên kết xác minh của bạn.' : isForgot ? 'Nhập email tài khoản để nhận liên kết đặt lại mật khẩu.' : isReset ? 'Đặt mật khẩu mới từ 12 đến 128 ký tự.' : 'Đăng nhập để tiếp tục sử dụng tài khoản của bạn.'}
+          {isRegister ? 'Tài khoản mới mặc định có quyền Khách hàng. Bạn có thể đăng nhập ngay sau khi đăng ký.' : isForgot ? 'Nhập email tài khoản để nhận liên kết đặt lại mật khẩu.' : isReset ? 'Đặt mật khẩu mới từ 12 đến 128 ký tự.' : 'Đăng nhập để tiếp tục sử dụng tài khoản của bạn.'}
         </p>
-        {isVerify ? <div className="mt-6 space-y-3">{notice && <p role="status" className="rounded-xl bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800">{notice}</p>}{error && <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-3 text-sm text-red-700">{error}</p>}<button onClick={() => navigateTo('/login')} className="font-semibold text-accent">Đến trang đăng nhập</button></div> : (
-          <form onSubmit={(event) => void handleSubmit(event)} className="mt-7 space-y-4">
+        <form onSubmit={(event) => void handleSubmit(event)} className="mt-7 space-y-4">
             {isRegister && <label className="block text-sm font-medium">Họ và tên<input required minLength={2} maxLength={100} value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" className="mt-1.5 w-full rounded-xl border border-border-soft px-3.5 py-3 outline-none focus:ring-2 focus:ring-accent" /></label>}
             {!isReset && <label className="block text-sm font-medium">Email<input required type="email" maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className="mt-1.5 w-full rounded-xl border border-border-soft px-3.5 py-3 outline-none focus:ring-2 focus:ring-accent" /></label>}
             {showPassword && <label className="block text-sm font-medium">Mật khẩu<input required type="password" minLength={isRegister || isReset ? 12 : 1} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={isRegister || isReset ? 'new-password' : 'current-password'} className="mt-1.5 w-full rounded-xl border border-border-soft px-3.5 py-3 outline-none focus:ring-2 focus:ring-accent" /></label>}
             {isRegister && <p className="-mt-2 text-xs text-muted">Mật khẩu cần từ 12 đến 128 ký tự.</p>}
             {notice && <p role="status" className="rounded-xl bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800">{notice}</p>}
             {error && <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-3 text-sm text-red-700">{error}</p>}
-            {error.includes('Verify your email') && <button type="button" onClick={() => void resendVerification()} className="text-sm font-semibold text-accent">Gửi lại email xác minh</button>}
             <button disabled={submitting} className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-bold text-white hover:bg-accent-hover disabled:opacity-60">{submitting ? 'Đang xử lý…' : isRegister ? 'Đăng ký khách hàng' : isForgot ? 'Gửi liên kết' : isReset ? 'Đổi mật khẩu' : 'Đăng nhập'}</button>
           </form>
-        )}
-        {!isVerify && <p className="mt-6 text-center text-sm text-muted">
+        <p className="mt-6 text-center text-sm text-muted">
           {isRegister ? 'Đã có tài khoản?' : isForgot || isReset ? 'Nhớ mật khẩu?' : 'Chưa có tài khoản?'}{' '}
           <button onClick={() => navigateTo(isRegister ? '/login' : isForgot || isReset ? '/login' : '/register')} className="font-semibold text-accent hover:underline">{isRegister || isForgot || isReset ? 'Đăng nhập' : 'Đăng ký'}</button>
           {!isRegister && !isForgot && !isReset && <><span className="mx-2">·</span><button onClick={() => navigateTo('/forgot-password')} className="font-semibold text-accent hover:underline">Quên mật khẩu?</button></>}
-        </p>}
+        </p>
       </div>
     </section>
   );

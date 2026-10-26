@@ -8,7 +8,7 @@ HomeMeal kết nối khách hàng với đầu bếp gia đình, hỗ trợ đ�
 - Express API trên Vercel Functions
 - PostgreSQL (Neon được hỗ trợ)
 - S3-compatible private object storage cho ảnh hóa đơn
-- Resend cho xác minh email và đặt lại mật khẩu
+- Resend cho đặt lại mật khẩu
 - Sentry tùy chọn cho theo dõi lỗi
 
 ## Chạy local
@@ -33,7 +33,7 @@ npm run db:seed-admin
 
 Xóa các giá trị `INITIAL_ADMIN_*` khỏi `.env` sau khi tạo admin. Không đưa mật khẩu admin vào Vercel hoặc Git. Admin đăng nhập website bằng email và mật khẩu đã đặt ở bước này.
 
-Đăng ký công khai chỉ tạo tài khoản Khách hàng. Người dùng cần xác minh email trước khi đăng nhập. Admin có thể cấp quyền Đầu bếp trong `/admin`; đầu bếp nhận đơn bằng thao tác chấp nhận, sau đó chỉ người được giao mới cập nhật đơn.
+Đăng ký công khai chỉ tạo tài khoản Khách hàng và có thể đăng nhập ngay. Admin có thể cấp quyền Đầu bếp trong `/admin`; đầu bếp nhận đơn bằng thao tác chấp nhận, sau đó chỉ người được giao mới cập nhật đơn.
 
 ## Các biến môi trường
 
@@ -41,7 +41,7 @@ Xóa các giá trị `INITIAL_ADMIN_*` khỏi `.env` sau khi tạo admin. Không
 
 - `DATABASE_URL`: chuỗi PostgreSQL production.
 - `APP_ORIGIN`: origin production, ví dụ `https://ten-web.vercel.app`, không có đường dẫn.
-- `RESEND_API_KEY` và `EMAIL_FROM`: gửi email xác minh và đặt lại mật khẩu. `EMAIL_FROM` cần dùng domain đã xác minh với Resend.
+- `RESEND_API_KEY` và `EMAIL_FROM`: gửi email đặt lại mật khẩu. `EMAIL_FROM` cần dùng domain đã xác minh với Resend.
 - `OBJECT_STORAGE_BUCKET`, `OBJECT_STORAGE_REGION`, `OBJECT_STORAGE_ACCESS_KEY_ID`, `OBJECT_STORAGE_SECRET_ACCESS_KEY`: bucket S3-compatible riêng tư.
 - `AUTH_RATE_LIMIT_SECRET`: khóa ngẫu nhiên dùng để băm định danh trong bảng rate limit.
 
@@ -82,7 +82,7 @@ Lệnh dọn upload chưa hoàn tất là `npm run storage:cleanup`. Có thể l
 - Đơn hàng, báo giá, hóa đơn, yêu cầu đổi ngân sách, khiếu nại, đánh giá và audit event được lưu trong PostgreSQL. API kiểm tra khách sở hữu đơn, đầu bếp được giao đơn hoặc admin trước khi đọc/ghi.
 - Ảnh chứng từ được tải lên bucket riêng tư bằng URL ký số hết hạn sau 5 phút; URL đọc hết hạn sau 2 phút. Dùng CORS giới hạn đúng domain ứng dụng.
 - Rate limit đăng nhập, đăng ký và khôi phục mật khẩu được chia sẻ giữa các function qua PostgreSQL, thay vì bộ nhớ riêng từng tiến trình.
-- Email xác minh, khôi phục mật khẩu và thay đổi role được ghi audit.
+- Khôi phục mật khẩu và thay đổi role được ghi audit.
 - Migration `004_remove_totp_mfa.sql` gỡ TOTP và xóa các cột chứa thiết lập MFA cũ khỏi `app_users`.
 - Thanh toán thật chưa được tích hợp. Nút thanh toán bị khóa và API không thể đánh dấu đơn đã trả tiền từ yêu cầu trình duyệt.
 - Dữ liệu mẫu chỉ còn cho phiên khách chưa đăng nhập; không đồng bộ các đơn `localStorage` cũ sang production.

@@ -127,7 +127,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const register = async (name: string, email: string, password: string) => {
     const result = await submitAuth('register', { name, email, password });
-    return { message: result.message || 'Kiểm tra email để xác minh tài khoản.' };
+    return { message: result.message || 'Đăng ký thành công. Bạn có thể đăng nhập ngay.' };
   };
 
   const updateProfile = async (profile: Pick<UserProfile, 'name' | 'phone' | 'address'>) => {

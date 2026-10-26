@@ -125,7 +125,7 @@ async function authenticate(req: AuthRequest) {
   const result = await pool.query(
     `SELECT u.id, u.email, u.full_name, u.phone, u.address, u.role
      FROM auth_sessions s JOIN app_users u ON u.id = s.user_id
-     WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.email_verified = TRUE`,
+     WHERE s.token_hash = $1 AND s.expires_at > NOW()`,
     [tokenHash],
   );
   if (!result.rowCount) return undefined;
@@ -172,24 +172,17 @@ function appOrigin(req: Request) {
   return new URL(process.env.APP_ORIGIN || req.get('origin') || 'http://localhost:3000').origin;
 }
 
-async function issueEmailToken(userId: string, table: 'auth_email_tokens' | 'password_reset_tokens', ttlMs: number) {
+async function issuePasswordResetToken(userId: string) {
   const token = randomBytes(32).toString('hex');
   const tokenHash = hashOpaqueToken(token);
-  const expiresAt = new Date(Date.now() + ttlMs);
-  await pool.query(`DELETE FROM ${table} WHERE user_id = $1`, [userId]);
-  await pool.query(`INSERT INTO ${table}(token_hash, user_id, expires_at) VALUES ($1, $2, $3)`, [tokenHash, userId, expiresAt]);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
+  await pool.query('INSERT INTO password_reset_tokens(token_hash, user_id, expires_at) VALUES ($1, $2, $3)', [tokenHash, userId, expiresAt]);
   return token;
 }
 
-async function sendVerificationEmail(req: Request, email: string, userId: string) {
-  const token = await issueEmailToken(userId, 'auth_email_tokens', 24 * 60 * 60 * 1000);
-  const url = new URL(appPath('/verify-email'), appOrigin(req));
-  url.searchParams.set('token', token);
-  await sendAccountEmail(email, 'Xác minh email HomeMeal', `<p>Nhấn liên kết để xác minh tài khoản HomeMeal:</p><p><a href="${url.toString()}">Xác minh email</a></p>`, `Xác minh email HomeMeal: ${url.toString()}`);
-}
-
 async function sendPasswordResetEmail(req: Request, email: string, userId: string) {
-  const token = await issueEmailToken(userId, 'password_reset_tokens', 60 * 60 * 1000);
+  const token = await issuePasswordResetToken(userId);
   const url = new URL(appPath('/reset-password'), appOrigin(req));
   url.searchParams.set('token', token);
   await sendAccountEmail(email, 'Đặt lại mật khẩu HomeMeal', `<p>Liên kết đặt lại mật khẩu có hiệu lực trong 60 phút:</p><p><a href="${url.toString()}">Đặt lại mật khẩu</a></p>`, `Đặt lại mật khẩu HomeMeal: ${url.toString()}`);
@@ -277,50 +270,11 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       const passwordHash = await hashPassword(password);
       await pool.query(
         `INSERT INTO app_users(id, email, full_name, phone, address, password_hash, role, email_verified)
-         VALUES ($1, $2, $3, $4, $5, $6, 'customer', FALSE)`,
+         VALUES ($1, $2, $3, $4, $5, $6, 'customer', TRUE)`,
         [id, email, name, phone, address, passwordHash],
       );
-      try {
-        await sendVerificationEmail(req, email, id);
-      } catch (error) {
-        await Sentry.captureException(error, { extra: { requestId: req.requestId, operation: 'registration-email' } });
-        res.status(503).json({ error: 'Account created. Email delivery is not configured yet; configure it, then request a new verification link.' });
-        return;
-      }
       await writeSecurityAudit(id, 'auth.registered', id, req);
-      res.status(201).json({ message: 'Check your email for the verification link.' });
-      return;
-    }
-
-    if (resource === 'auth' && req.method === 'POST' && action === 'verify-email') {
-      const token = getString(req.body?.token, 128);
-      if (!token) { res.status(400).json({ error: 'Verification token is required.' }); return; }
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        const updated = await client.query(
-          `UPDATE app_users SET email_verified = TRUE, updated_at = NOW()
-           WHERE id = (SELECT user_id FROM auth_email_tokens WHERE token_hash = $1 AND expires_at > NOW() FOR UPDATE)
-           RETURNING id`,
-          [hashOpaqueToken(token)],
-        );
-        await client.query('DELETE FROM auth_email_tokens WHERE token_hash = $1', [hashOpaqueToken(token)]);
-        await client.query('COMMIT');
-        if (!updated.rowCount) { res.status(400).json({ error: 'This verification link is invalid or expired.' }); return; }
-        await writeSecurityAudit(updated.rows[0].id, 'auth.email_verified', updated.rows[0].id, req);
-        res.json({ ok: true });
-      } catch (error) { await client.query('ROLLBACK').catch(() => undefined); throw error; }
-      finally { client.release(); }
-      return;
-    }
-
-    if (resource === 'auth' && req.method === 'POST' && action === 'resend-verification') {
-      const email = getString(req.body?.email, 254).toLowerCase();
-      if (!(await takeRateLimit(req, 'resend-verification', email, 5, 60 * 60 * 1000))) { res.status(429).json({ error: 'Too many requests. Try again later.' }); return; }
-      if (process.env.NODE_ENV === 'production' && (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM)) { res.status(503).json({ error: 'Email delivery is not configured.' }); return; }
-      const result = await pool.query('SELECT id, email FROM app_users WHERE email = $1 AND email_verified = FALSE', [email]);
-      if (result.rowCount) await sendVerificationEmail(req, result.rows[0].email, result.rows[0].id);
-      res.json({ message: 'If the account needs verification, a link has been sent.' });
+      res.status(201).json({ message: 'Account created. You can now sign in.' });
       return;
     }
 
@@ -330,13 +284,12 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       if (password.length > 128) { res.status(400).json({ error: 'Password must be no longer than 128 characters.' }); return; }
       if (!(await takeRateLimit(req, 'login', email, 8, 15 * 60 * 1000))) { res.status(429).json({ error: 'Too many sign-in attempts. Try again later.' }); return; }
       const result = await pool.query(
-        'SELECT id, email, full_name, phone, address, role, password_hash, email_verified FROM app_users WHERE email = $1',
+        'SELECT id, email, full_name, phone, address, role, password_hash FROM app_users WHERE email = $1',
         [email],
       );
       const row = result.rows[0];
       const verified = row ? await verifyPassword(password, row.password_hash) : (await hashPassword(password || randomBytes(16).toString('hex')), false);
       if (!row || !verified) { res.status(401).json({ error: 'Email or password is incorrect.' }); return; }
-      if (!row.email_verified) { res.status(403).json({ code: 'EMAIL_VERIFICATION_REQUIRED', error: 'Verify your email before signing in.' }); return; }
       await createSession(row.id, res);
       res.json({ user: mapUser(row) });
       return;
@@ -363,12 +316,12 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       const email = getString(req.body?.email, 254).toLowerCase();
       if (!(await takeRateLimit(req, 'password-reset', email, 5, 60 * 60 * 1000))) { res.status(429).json({ error: 'Too many requests. Try again later.' }); return; }
       if (process.env.NODE_ENV === 'production' && (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM)) { res.status(503).json({ error: 'Email delivery is not configured.' }); return; }
-      const result = await pool.query('SELECT id, email FROM app_users WHERE email = $1 AND email_verified = TRUE', [email]);
+      const result = await pool.query('SELECT id, email FROM app_users WHERE email = $1', [email]);
       if (result.rowCount) {
         try { await sendPasswordResetEmail(req, result.rows[0].email, result.rows[0].id); }
         catch (error) { await Sentry.captureException(error, { extra: { requestId: req.requestId, operation: 'password-reset-email' } }); }
       }
-      res.json({ message: 'If a verified account exists for that email, a reset link has been sent.' });
+      res.json({ message: 'If an account exists for that email, a reset link has been sent.' });
       return;
     }
 

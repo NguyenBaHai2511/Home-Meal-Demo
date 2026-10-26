@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
     { label: 'Trang chủ', path: '/' },
     { label: 'Đặt bữa ăn', path: '/meal-planner' },
     { label: 'Thực đơn', path: '/menu' },
+    { label: 'AI Gợi Ý Thực Đơn', path: '/smart-menu' },
     { label: 'Đầu bếp', path: '/cooks' },
     { label: 'Tiệc & Mâm cỗ', path: '/party-booking' },
     { label: 'Đơn hàng', path: '/orders', badge: pendingActionsCount || undefined },

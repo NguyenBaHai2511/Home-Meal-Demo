@@ -5,7 +5,7 @@ import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  let configuredPath = env.APP_BASE_PATH?.trim() || '/HomeMeal';
+  let configuredPath = env.APP_BASE_PATH?.trim() || '';
   if (/^https?:\/\//i.test(configuredPath)) {
     const url = new URL(configuredPath);
     if (url.search || url.hash) {

@@ -8,6 +8,7 @@ import { deleteEvidenceObject, isObjectStorageConfigured, makeEvidenceObjectKey,
 import { sendAccountEmail } from './email.js';
 import { decryptTotpSecret, encryptTotpSecret, generateTotpSecret, verifyTotp } from './totp.js';
 import { appPath } from './appPaths.js';
+import { createSmartMenuHandler } from './smart-menu/handler.js';
 
 type UserRole = 'customer' | 'cook' | 'admin';
 type AuthUser = {
@@ -23,6 +24,7 @@ type AuthRequest = Request & { authUser?: AuthUser; requestId?: string };
 
 const SESSION_COOKIE = 'homemeal_session';
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const smartMenuHandler = createSmartMenuHandler();
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.VERCEL_ENV || process.env.NODE_ENV, tracesSampleRate: 0.05 });
@@ -208,6 +210,10 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
   const resource = getString(req.query.resource, 32);
   const action = getString(req.query.action, 40) || getString(req.body?.action, 40);
   try {
+    if (resource === 'smart-menu') {
+      await smartMenuHandler(req, res);
+      return;
+    }
     if (resource === 'health' && req.method === 'GET') {
       try {
         requireDatabaseUrl();

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
@@ -26,6 +26,8 @@ import { CookEarningsPage } from './components/views/cook/CookEarningsPage';
 
 // Admin Portal
 import { AdminDashboardPage } from './components/views/admin/AdminDashboardPage';
+
+const SmartMenuPage = lazy(() => import('./components/views/SmartMenuPage').then((module) => ({ default: module.SmartMenuPage })));
 
 const AppContent: React.FC = () => {
   const { currentPath, authUser, authLoading, navigateTo } = useApp();
@@ -77,6 +79,7 @@ const AppContent: React.FC = () => {
     if (pathname === '/') return <HomePage />;
     if (pathname === '/meal-planner') return <MealPlannerPage />;
     if (pathname === '/menu') return <MenuPage />;
+    if (pathname === '/smart-menu') return <Suspense fallback={<div role="status" className="px-4 py-16 text-center text-sm text-[#738078]">Đang mở trợ lý thực đơn…</div>}><SmartMenuPage /></Suspense>;
     if (pathname === '/cooks') return <CooksPage />;
     if (pathname === '/party-booking') return <PartyBookingPage />;
     if (pathname === '/quotations') return <QuotationsPage />;

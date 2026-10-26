@@ -1,7 +1,7 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import type { BudgetChangeRequest, Dish, DishCategory, DishComplexity, Order, OrderItem, OrderStatus, Quotation, ShoppingEvidenceItem, UserProfile } from '../src/types/index.js';
-import { MOCK_COOKS, MOCK_DISHES } from '../src/data/mockData.js';
+import { SERVER_COOKS, SERVER_DISHES } from './catalog.js';
 import { calculateLaborFee } from '../src/utils/pricing.js';
 import { canCookTransition, canReadOrder } from './orderPolicy.js';
 import { appPath } from './appPaths.js';
@@ -110,7 +110,7 @@ function catalogItem(raw: unknown): OrderItem {
   const value = object(raw);
   const requestedDish = object(value.dish);
   const dishId = string(requestedDish.id, 100);
-  const dish = MOCK_DISHES.find((candidate) => candidate.id === dishId) || customDish(requestedDish, dishId);
+  const dish = SERVER_DISHES.find((candidate) => candidate.id === dishId) || customDish(requestedDish, dishId);
   if (!dish) throw new OrderError('One or more selected dishes are unavailable.');
   const quantity = number(value.quantity);
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 30) throw new OrderError('Each dish quantity must be between 1 and 30.');
@@ -130,7 +130,7 @@ function cookSummary(order: Order, cookId: string | null, cookName: string | nul
     const { cook: _cook, cookId: _cookId, ...withoutCook } = order;
     return withoutCook;
   }
-  const base = MOCK_COOKS[0];
+  const base = SERVER_COOKS[0];
   return {
     ...order,
     cookId,

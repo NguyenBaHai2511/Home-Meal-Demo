@@ -17,12 +17,21 @@ type ManagedUser = {
   created_at: string;
 };
 
+type AdminTab = 'overview' | 'orders' | 'cooks' | 'disputes' | 'users';
+type AdminSectionTab = Exclude<AdminTab, 'users'>;
+
 export const AdminDashboardPage: React.FC = () => {
   const { orders, cooks, resolveDispute, navigateTo, authUser } = useApp();
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'cooks' | 'disputes' | 'users'>('overview');
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [resolutionText, setResolutionText] = useState('Đã đối chiếu hóa đơn, đồng ý khấu trừ khoản tiền mờ chữ không rõ ràng.');
 
   const disputedOrders = orders.filter((o) => o.status === 'disputed' && o.dispute);
+  const adminTabs: { id: AdminSectionTab; label: string }[] = [
+    { id: 'overview', label: 'Tổng quan hệ thống' },
+    { id: 'disputes', label: `Khiếu nại hóa đơn (${disputedOrders.length})` },
+    { id: 'orders', label: `Quản lý đơn hàng (${orders.length})` },
+    { id: 'cooks', label: `Xác thực đầu bếp (${cooks.length})` },
+  ];
 
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -99,15 +108,10 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-border-soft pb-2 text-xs sm:text-sm font-semibold">
-        {[
-          { id: 'overview', label: 'Tổng quan hệ thống' },
-          { id: 'disputes', label: `Khiếu nại hóa đơn (${disputedOrders.length})` },
-          { id: 'orders', label: `Quản lý đơn hàng (${orders.length})` },
-          { id: 'cooks', label: `Xác thực đầu bếp (${cooks.length})` },
-        ].map((tab) => (
+        {adminTabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`pb-2 px-3 transition-colors ${
               activeTab === tab.id
                 ? 'text-accent border-b-2 border-accent'

@@ -44,7 +44,6 @@ Xóa các giá trị `INITIAL_ADMIN_*` khỏi `.env` sau khi tạo admin. Không
 - `RESEND_API_KEY` và `EMAIL_FROM`: gửi email xác minh và đặt lại mật khẩu. `EMAIL_FROM` cần dùng domain đã xác minh với Resend.
 - `OBJECT_STORAGE_BUCKET`, `OBJECT_STORAGE_REGION`, `OBJECT_STORAGE_ACCESS_KEY_ID`, `OBJECT_STORAGE_SECRET_ACCESS_KEY`: bucket S3-compatible riêng tư.
 - `AUTH_RATE_LIMIT_SECRET`: khóa ngẫu nhiên dùng để băm định danh trong bảng rate limit.
-- `OPENAI_API_KEY`: khóa bí mật server-side để gọi GPT-6 Luna qua OpenAI Responses API; không đặt khóa trong `VITE_*` hay mã frontend.
 
 Tạo khóa base64 32 bytes bằng Node:
 
@@ -55,6 +54,8 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 `OBJECT_STORAGE_ENDPOINT` chỉ cần đặt cho provider dùng endpoint riêng, chẳng hạn R2. Cấu hình bucket ở chế độ private, chặn public access và thêm CORS cho đúng `APP_ORIGIN`, phương thức `PUT`, header `Content-Type`. Ảnh chỉ nhận JPEG/PNG/WebP tối đa 5 MB; API kiểm tra kích thước và chữ ký file rồi chỉ cấp URL đọc tạm thời sau khi xác thực quyền trên đơn.
 
 Đặt `SENTRY_DSN` để gửi lỗi API lên Sentry. Đặt `APP_TIME_ZONE` nếu lịch đặt món dùng múi giờ khác; mặc định `Asia/Ho_Chi_Minh`.
+
+`OPENAI_API_KEY` là tùy chọn, chỉ cần khi bật sinh thực đơn bằng AI. Khi chưa cấu hình, người dùng vẫn có thể dùng thực đơn mẫu. Khóa chỉ được đặt ở môi trường server; không dùng `VITE_*` hay đưa khóa vào mã frontend.
 
 ## AI thực đơn với GPT-6 Luna
 
@@ -68,7 +69,7 @@ Khóa chỉ được đọc ở backend. Khi chưa có key hợp lệ, trợ lý
 
 Ứng dụng production dùng domain https://home-meal-liart.vercel.app tại root. Route giao diện như /login được rewrite về index.html; API chạy tại /api và asset ở /assets. Đặt APP_BASE_PATH=/ trong Vercel hoặc xóa biến nếu đang còn giá trị /HomeMeal cũ.
 
-1. Trong Vercel → Project → Settings → Environment Variables, đặt DATABASE_URL, APP_ORIGIN=https://home-meal-liart.vercel.app, APP_BASE_PATH=/, OPENAI_API_KEY cùng cấu hình email, storage và Sentry cần thiết. APP_ORIGIN chỉ là origin, không thêm đường dẫn. Xóa các giá trị domain cũ còn lưu trong biến môi trường. Không thêm INITIAL_ADMIN_*.
+1. Trong Vercel → Project → Settings → Environment Variables, đặt DATABASE_URL, APP_ORIGIN=https://home-meal-liart.vercel.app, APP_BASE_PATH=/ cùng cấu hình email và storage cần thiết. Thêm OPENAI_API_KEY nếu bật sinh thực đơn bằng AI; thêm SENTRY_DSN nếu dùng Sentry. APP_ORIGIN chỉ là origin, không thêm đường dẫn. Xóa các giá trị domain cũ còn lưu trong biến môi trường. Không thêm INITIAL_ADMIN_*.
 2. Chạy `npm run db:migrate` một lần từ máy tin cậy với `DATABASE_URL` production.
 3. Chạy `npm run db:seed-admin` một lần bằng `INITIAL_ADMIN_*` tạm thời trong `.env` local rồi xóa các giá trị đó.
 4. Redeploy Production để Vercel nạp biến môi trường.

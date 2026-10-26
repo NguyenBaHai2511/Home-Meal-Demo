@@ -6,6 +6,18 @@ import { Search, Plus, Check, Utensils, ShoppingBag } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
 import menuFamily from '../../assets/food/menu-family.webp';
 
+const CATEGORY_FILTERS: { id: DishCategory | 'all'; label: string }[] = [
+  { id: 'all', label: 'Tất cả món' },
+  { id: 'meat', label: 'Món thịt' },
+  { id: 'fish', label: 'Món cá' },
+  { id: 'seafood', label: 'Hải sản' },
+  { id: 'vegetable', label: 'Rau củ' },
+  { id: 'soup', label: 'Canh' },
+  { id: 'vegetarian', label: 'Món chay' },
+  { id: 'dessert', label: 'Tráng miệng' },
+  { id: 'banquet', label: 'Món cỗ / Tiệc' },
+];
+
 export const MenuPage: React.FC = () => {
   const { dishes, draftOrder, updateDraftOrder, navigateTo } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,21 +108,11 @@ export const MenuPage: React.FC = () => {
 
         {/* Category Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          {[
-            { id: 'all', label: 'Tất cả món' },
-            { id: 'meat', label: 'Món thịt' },
-            { id: 'fish', label: 'Món cá' },
-            { id: 'seafood', label: 'Hải sản' },
-            { id: 'vegetable', label: 'Rau củ' },
-            { id: 'soup', label: 'Canh' },
-            { id: 'vegetarian', label: 'Món chay' },
-            { id: 'dessert', label: 'Tráng miệng' },
-            { id: 'banquet', label: 'Món cỗ / Tiệc' },
-          ].map((cat) => (
+          {CATEGORY_FILTERS.map((cat) => (
             <button
               key={cat.id}
               aria-pressed={selectedCategory === cat.id}
-              onClick={() => setSelectedCategory(cat.id as any)}
+              onClick={() => setSelectedCategory(cat.id)}
               className={`px-3.5 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors ${
                 selectedCategory === cat.id
                   ? 'bg-accent text-white'

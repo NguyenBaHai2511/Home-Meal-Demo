@@ -12,7 +12,7 @@
     "test": "tsx --test",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
+    "clean": "node scripts/clean.mjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

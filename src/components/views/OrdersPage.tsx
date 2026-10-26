@@ -12,9 +12,19 @@ import {
   CheckCircle
 } from 'lucide-react';
 
+type OrderTab = 'all' | 'action_needed' | 'in_progress' | 'completed' | 'disputed';
+
+const ORDER_TABS: { id: OrderTab; label: string }[] = [
+  { id: 'all', label: 'Tất cả đơn' },
+  { id: 'action_needed', label: 'Cần bạn xử lý (Duyệt / Thanh toán / Báo giá)' },
+  { id: 'in_progress', label: 'Đang nấu / Đi chợ' },
+  { id: 'completed', label: 'Đã hoàn tất & Đã thanh toán' },
+  { id: 'disputed', label: 'Đang khiếu nại' },
+];
+
 export const OrdersPage: React.FC = () => {
   const { orders, navigateTo } = useApp();
-  const [activeTab, setActiveTab] = useState<'all' | 'action_needed' | 'in_progress' | 'completed' | 'disputed'>('all');
+  const [activeTab, setActiveTab] = useState<OrderTab>('all');
 
   const filteredOrders = orders.filter((order) => {
     if (activeTab === 'action_needed') {
@@ -66,16 +76,10 @@ export const OrdersPage: React.FC = () => {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        {[
-          { id: 'all', label: 'Tất cả đơn' },
-          { id: 'action_needed', label: 'Cần bạn xử lý (Duyệt / Thanh toán / Báo giá)' },
-          { id: 'in_progress', label: 'Đang nấu / Đi chợ' },
-          { id: 'completed', label: 'Đã hoàn tất & Đã thanh toán' },
-          { id: 'disputed', label: 'Đang khiếu nại' },
-        ].map((tab) => (
+        {ORDER_TABS.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`px-3.5 py-2 rounded-xl font-semibold whitespace-nowrap transition-colors ${
               activeTab === tab.id
                 ? 'bg-accent text-white shadow-xs'

@@ -24,6 +24,8 @@ type AuthRequest = Request & { authUser?: AuthUser; requestId?: string };
 
 const SESSION_COOKIE = 'homemeal_session';
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const REQUIRED_SCHEMA_TABLES = ['schema_migrations', 'app_users', 'auth_sessions', 'auth_email_tokens', 'password_reset_tokens', 'auth_rate_limits', 'orders', 'audit_events', 'order_files'];
+const REQUIRED_SCHEMA_MIGRATIONS = ['001_auth_core.sql', '002_orders_audit_storage.sql', '003_auth_security.sql'];
 const smartMenuHandler = createSmartMenuHandler();
 
 if (process.env.SENTRY_DSN) {
@@ -220,22 +222,31 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       try {
         requireDatabaseUrl();
         await pool.query('SELECT 1');
-        const tables = await pool.query(
-          `SELECT COUNT(*)::int AS present
+        const tables = await pool.query<{ name: string }>(
+          `SELECT required.name
            FROM unnest($1::text[]) AS required(name)
-           WHERE to_regclass(format('public.%I', required.name)) IS NOT NULL`,
-          [['schema_migrations', 'app_users', 'auth_sessions', 'auth_email_tokens', 'password_reset_tokens', 'auth_rate_limits', 'orders', 'audit_events', 'order_files']],
+           WHERE to_regclass(format('public.%I', required.name)) IS NULL`,
+          [REQUIRED_SCHEMA_TABLES],
         );
-        if (tables.rows[0]?.present !== 9) {
-          res.status(503).json({ status: 'degraded', dependencies: { database: 'connected', schema: 'migrations_pending' } });
-          return;
+        const missingTables = tables.rows.map((row) => row.name);
+        let missingMigrations: string[] = [];
+        if (!missingTables.includes('schema_migrations')) {
+          const migrations = await pool.query<{ version: string }>(
+            `SELECT required.version
+             FROM unnest($1::text[]) AS required(version)
+             LEFT JOIN schema_migrations applied ON applied.version = required.version
+             WHERE applied.version IS NULL`,
+            [REQUIRED_SCHEMA_MIGRATIONS],
+          );
+          missingMigrations = migrations.rows.map((row) => row.version);
+        } else {
+          missingMigrations = [...REQUIRED_SCHEMA_MIGRATIONS];
         }
-        const migrations = await pool.query(
-          'SELECT COUNT(DISTINCT version)::int AS applied FROM schema_migrations WHERE version = ANY($1::text[])',
-          [['001_auth_core.sql', '002_orders_audit_storage.sql', '003_auth_security.sql']],
-        );
-        if (migrations.rows[0]?.applied !== 3) {
-          res.status(503).json({ status: 'degraded', dependencies: { database: 'connected', schema: 'migrations_pending' } });
+        if (missingTables.length || missingMigrations.length) {
+          res.status(503).json({
+            status: 'degraded',
+            dependencies: { database: 'connected', schema: 'migrations_pending', missingTables, missingMigrations },
+          });
           return;
         }
         res.json({ status: 'ok', timestamp: new Date().toISOString() });

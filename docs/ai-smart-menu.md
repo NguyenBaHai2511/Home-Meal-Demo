@@ -16,4 +16,4 @@ The server validates preferences and generated dishes, applies request limits, a
 
 ## Focused checks
 
-Run `npm test -- tests/smart-menu.test.ts tests/legacyOrder.test.ts`, then `npm run lint` and `npm run build`. Provider tests should mock HTTP transport; they verify request shaping and error mapping, not real account access, quota, or model availability.
+Run `npm test -- tests/smart-menu.test.ts tests/originPolicy.test.ts`, then `npm run lint` and `npm run build`. Provider tests should mock HTTP transport; they verify request shaping and error mapping, not real account access, quota, or model availability.

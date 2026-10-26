@@ -31,7 +31,9 @@ if (process.env.SENTRY_DSN) {
 
 const app = express();
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '64kb' }));
+// Compressed JSON bodies are not used by the browser client; rejecting them also
+// avoids the vulnerable request-inflation path in the current Express dependency.
+app.use(express.json({ limit: '64kb', inflate: false }));
 app.use((req: AuthRequest, res, next) => {
   req.requestId = randomUUID();
   res.set({
@@ -217,6 +219,24 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
       try {
         requireDatabaseUrl();
         await pool.query('SELECT 1');
+        const tables = await pool.query(
+          `SELECT COUNT(*)::int AS present
+           FROM unnest($1::text[]) AS required(name)
+           WHERE to_regclass(format('public.%I', required.name)) IS NOT NULL`,
+          [['schema_migrations', 'app_users', 'auth_sessions', 'auth_email_tokens', 'password_reset_tokens', 'auth_rate_limits', 'orders', 'audit_events', 'order_files']],
+        );
+        if (tables.rows[0]?.present !== 9) {
+          res.status(503).json({ status: 'degraded', dependencies: { database: 'connected', schema: 'migrations_pending' } });
+          return;
+        }
+        const migrations = await pool.query(
+          'SELECT COUNT(DISTINCT version)::int AS applied FROM schema_migrations WHERE version = ANY($1::text[])',
+          [['001_auth_core.sql', '002_orders_audit_storage.sql', '003_auth_security.sql']],
+        );
+        if (migrations.rows[0]?.applied !== 3) {
+          res.status(503).json({ status: 'degraded', dependencies: { database: 'connected', schema: 'migrations_pending' } });
+          return;
+        }
         res.json({ status: 'ok', timestamp: new Date().toISOString() });
       } catch {
         res.status(503).json({ status: 'degraded', dependencies: { database: 'unavailable' } });
@@ -520,7 +540,8 @@ app.all([...new Set(['/api', appPath('/api')])], assertSameOrigin, async (req: A
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('HomeMeal API request failed.');
   if (isObject(error) && error.code === '23505') { res.status(409).json({ error: 'Email is already registered.' }); return; }
-  res.status(500).json({ error: 'An unexpected server error occurred.' });
+  const requestId = res.getHeader('X-Request-Id');
+  res.status(500).json({ error: 'An unexpected server error occurred.', code: 'INTERNAL_SERVER_ERROR', requestId });
 });
 
 export default app;

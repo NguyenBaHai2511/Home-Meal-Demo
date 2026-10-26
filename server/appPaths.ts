@@ -1,4 +1,4 @@
-export function appBasePath(value = process.env.APP_BASE_PATH || '/HomeMeal') {
+export function appBasePath(value = process.env.APP_BASE_PATH || '/') {
   let configuredPath = value.trim();
   if (/^https?:\/\//i.test(configuredPath)) {
     const url = new URL(configuredPath);

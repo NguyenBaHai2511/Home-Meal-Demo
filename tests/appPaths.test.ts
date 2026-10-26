@@ -3,8 +3,9 @@ import test from 'node:test';
 import { appBasePath, appPath } from '../server/appPaths.js';
 
 test('normalizes the configured public base path', () => {
+  assert.equal(appBasePath(), '');
   assert.equal(appBasePath('HomeMeal/'), '/HomeMeal');
-  assert.equal(appBasePath('https://www.thomasely.id.vn/HomeMeal'), '/HomeMeal');
+  assert.equal(appBasePath('https://home-meal-liart.vercel.app/'), '');
   assert.equal(appBasePath('///'), '');
   assert.equal(appBasePath('/'), '');
 });

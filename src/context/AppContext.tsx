@@ -111,7 +111,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       body: JSON.stringify({ ...payload, action }),
     });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Unable to sign in.');
+    if (!response.ok) {
+      const requestId = response.headers.get('X-Request-Id') || result.requestId;
+      const reference = response.status >= 500 && requestId ? ` (Mã yêu cầu: ${requestId})` : '';
+      throw new Error(`${result.error || 'Unable to sign in.'}${reference}`);
+    }
     return result as { user: UserProfile; message?: string };
   };
 

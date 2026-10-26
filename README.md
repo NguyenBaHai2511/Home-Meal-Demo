@@ -66,13 +66,13 @@ Khóa chỉ được đọc ở backend. Khi chưa có key hợp lệ, trợ lý
 
 ## Triển khai Vercel
 
-Ứng dụng được phục vụ tại `https://www.thomasely.id.vn/HomeMeal`. Vercel chuyển `/` tới đường dẫn này, phục vụ các route giao diện dưới `/HomeMeal/`, chuyển asset đã build về thư mục `/assets/` và chuyển `/HomeMeal/api` tới API function. `APP_BASE_PATH` mặc định là `/HomeMeal`; nếu đổi đường dẫn, cần cập nhật cả `vercel.json`.
+Ứng dụng production dùng domain https://home-meal-liart.vercel.app tại root. Route giao diện như /login được rewrite về index.html; API chạy tại /api và asset ở /assets. Đặt APP_BASE_PATH=/ trong Vercel hoặc xóa biến nếu đang còn giá trị /HomeMeal cũ.
 
-1. Trong Project Settings → Environment Variables, thêm `DATABASE_URL`, `APP_ORIGIN=https://www.thomasely.id.vn`, `APP_BASE_PATH=/HomeMeal`, `OPENAI_API_KEY` cùng cấu hình email, storage và Sentry cần thiết. `APP_ORIGIN` chỉ là origin, không thêm `/HomeMeal` hay đường dẫn. Không thêm `INITIAL_ADMIN_*`.
+1. Trong Vercel → Project → Settings → Environment Variables, đặt DATABASE_URL, APP_ORIGIN=https://home-meal-liart.vercel.app, APP_BASE_PATH=/, OPENAI_API_KEY cùng cấu hình email, storage và Sentry cần thiết. APP_ORIGIN chỉ là origin, không thêm đường dẫn. Xóa các giá trị domain cũ còn lưu trong biến môi trường. Không thêm INITIAL_ADMIN_*.
 2. Chạy `npm run db:migrate` một lần từ máy tin cậy với `DATABASE_URL` production.
 3. Chạy `npm run db:seed-admin` một lần bằng `INITIAL_ADMIN_*` tạm thời trong `.env` local rồi xóa các giá trị đó.
 4. Redeploy Production để Vercel nạp biến môi trường.
-5. Kiểm tra `https://www.thomasely.id.vn/HomeMeal/api?resource=health`; endpoint chỉ trả tình trạng phụ thuộc, không tiết lộ thông tin kết nối.
+5. Kiểm tra https://home-meal-liart.vercel.app/api?resource=health; endpoint xác nhận kết nối database và các migration cần cho API, không tiết lộ thông tin kết nối.
 
 Lệnh dọn upload chưa hoàn tất là `npm run storage:cleanup`. Có thể lên lịch chạy định kỳ để xóa metadata và object bị bỏ dở sau hai giờ.
 
@@ -89,6 +89,6 @@ Lệnh dọn upload chưa hoàn tất là `npm run storage:cleanup`. Có thể l
 ## Vận hành production
 
 - Bật chính sách lưu giữ backup/PITR của nhà cung cấp PostgreSQL và lên lịch diễn tập khôi phục sang branch/database riêng.
-- Cấu hình cảnh báo lỗi trong Sentry; theo dõi `/HomeMeal/api?resource=health`, log JSON có `requestId`, lỗi migration, email và object storage.
+- Cấu hình cảnh báo lỗi trong Sentry; theo dõi `/api?resource=health`, log JSON có `requestId`, lỗi migration, email và object storage.
 - Giới hạn quyền credential của bucket ở đúng bucket cần thiết; không bật public read.
 - Trước khi tích hợp cổng thanh toán, xử lý webhook có xác minh chữ ký, idempotency key và audit; chỉ webhook đáng tin cậy mới được ghi trạng thái đã thanh toán.

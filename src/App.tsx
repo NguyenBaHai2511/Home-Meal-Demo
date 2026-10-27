@@ -30,7 +30,7 @@ const AppContent: React.FC = () => {
     ? 'admin'
     : (pathname === '/cook' || pathname.startsWith('/cook/'))
       ? 'cook'
-      : pathname === '/orders' || pathname.startsWith('/orders/') || pathname === '/quotations' || pathname === '/party-booking'
+      : pathname === '/meal-planner' || pathname === '/orders' || pathname.startsWith('/orders/') || pathname === '/quotations' || pathname === '/party-booking'
         ? 'customer'
         : null;
 

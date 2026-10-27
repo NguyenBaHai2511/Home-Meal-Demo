@@ -427,7 +427,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (ord.id !== orderId) return ord;
         const updatedList = [...ord.shoppingList, newItem];
         const actualGroceryTotal = updatedList.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-        const finalPayableAmount = actualGroceryTotal + ord.totalLaborFee + ord.deliveryFee + ord.additionalServiceFee;
+        const finalPayableAmount = actualGroceryTotal + ord.totalLaborFee + ord.additionalServiceFee;
 
         return {
           ...ord,
@@ -447,7 +447,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (ord.id !== orderId) return ord;
         const updatedList = ord.shoppingList.filter((item) => item.id !== itemId);
         const actualGroceryTotal = updatedList.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-        const finalPayableAmount = actualGroceryTotal + ord.totalLaborFee + ord.deliveryFee + ord.additionalServiceFee;
+        const finalPayableAmount = actualGroceryTotal + ord.totalLaborFee + ord.additionalServiceFee;
 
         return {
           ...ord,
@@ -471,7 +471,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const additionalServiceFee = acceptedQuote.assistantFee + acceptedQuote.equipmentFee;
         const totalServiceFee = totalLaborFee + additionalServiceFee;
         const finalPayableAmount =
-          ord.actualGroceryTotal + totalLaborFee + ord.deliveryFee + additionalServiceFee;
+          ord.actualGroceryTotal + totalLaborFee + additionalServiceFee;
 
         return {
           ...ord,
@@ -594,7 +594,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (ord.id !== orderId || !ord.dispute) return ord;
         const adjustedActualGrocery = Math.max(0, ord.actualGroceryTotal - (ord.dispute.reportedAmount || 0));
         const newTotal =
-          adjustedActualGrocery + ord.totalLaborFee + ord.deliveryFee + ord.additionalServiceFee;
+          adjustedActualGrocery + ord.totalLaborFee + ord.additionalServiceFee;
 
         return {
           ...ord,

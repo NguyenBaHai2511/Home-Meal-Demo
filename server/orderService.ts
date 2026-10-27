@@ -173,13 +173,8 @@ export async function createOrder(actor: OrderActor, draftValue: unknown, client
   if (actor.role !== 'customer') throw new OrderError('Only customers can place orders.', 403);
   const draft = object(draftValue);
   const guestCount = number(draft.guestCount);
-  if (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > 100) throw new OrderError('Guest count must be between 1 and 100.');
-  const serviceType = draft.serviceType === 'party_at_home'
-    ? 'party_at_home'
-    : draft.serviceType === 'cook_at_home' || draft.serviceType === 'cook_and_deliver'
-      ? 'cook_at_home'
-      : undefined;
-  if (!serviceType) throw new OrderError('Choose a valid service type.');
+  if (!Number.isInteger(guestCount) || guestCount < 3 || guestCount > 100) throw new OrderError('Guest count must be between 3 and 100.');
+  const serviceType = guestCount > 10 ? 'party_at_home' : 'cook_at_home';
   if (!Array.isArray(draft.items) || draft.items.length < 1 || draft.items.length > 20) throw new OrderError('Choose between 1 and 20 dishes.');
   const items = draft.items.map(catalogItem);
   const date = string(draft.date, 10);
@@ -218,10 +213,9 @@ export async function createOrder(actor: OrderActor, draftValue: unknown, client
     baseLaborFee: fee.baseLaborFee,
     complexityAdjustment: fee.complexityAdjustment,
     guestCountAdjustment: fee.guestAdjustment,
-    deliveryFee: fee.deliveryFee,
     additionalServiceFee: fee.additionalServiceFee,
     totalLaborFee: fee.totalLaborFee,
-    finalPayableAmount: fee.totalLaborFee + fee.deliveryFee,
+    finalPayableAmount: fee.totalLaborFee,
     status,
     statusHistory: [{ status, timestamp: new Date().toISOString(), note: requiresQuotation ? 'Đã gửi yêu cầu tiệc lớn. Đầu bếp sẽ gửi bảng báo giá chi tiết.' : 'Đã gửi yêu cầu đặt bữa. Đang chờ đầu bếp xác nhận.' }],
     createdAt: new Date().toISOString(),
@@ -360,14 +354,14 @@ export async function mutateOrder(
       if (!item.name || !item.quantity || !item.storeName) throw new OrderError('Ingredient, quantity, and store are required.');
       order.shoppingList = [...order.shoppingList, item];
       order.actualGroceryTotal = order.shoppingList.reduce((sum, current) => sum + current.subtotal, 0);
-      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.deliveryFee + order.additionalServiceFee;
+      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.additionalServiceFee;
     } else if (action === 'delete-evidence-item') {
       requireAssignedCook(actor, assignedCookId);
       if (order.status !== 'shopping_in_progress') throw new OrderError('Shopping evidence cannot be changed after submission.', 409);
       const itemId = string(payload.itemId, 100);
       order.shoppingList = order.shoppingList.filter((item) => item.id !== itemId);
       order.actualGroceryTotal = order.shoppingList.reduce((sum, current) => sum + current.subtotal, 0);
-      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.deliveryFee + order.additionalServiceFee;
+      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.additionalServiceFee;
     } else if (action === 'submit-quotation') {
       requireRole(actor, 'cook');
       if (order.status !== 'awaiting_quotation' || assignedCookId) throw new OrderError('This order is not waiting for a quotation.', 409);
@@ -401,7 +395,7 @@ export async function mutateOrder(
         quotation.status = 'accepted';
         order.totalLaborFee = quotation.laborFee;
         order.additionalServiceFee = quotation.assistantFee + quotation.equipmentFee;
-        order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.deliveryFee + order.additionalServiceFee;
+        order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.additionalServiceFee;
         appendStatus(order, 'confirmed', `Khách hàng đã đồng ý bảng báo giá (${quotation.totalLaborAndServices} đ).`);
       }
     } else if (action === 'file-dispute') {
@@ -420,7 +414,7 @@ export async function mutateOrder(
       const resolution = string(payload.resolution, 1000);
       if (!resolution) throw new OrderError('Describe the resolution.');
       order.actualGroceryTotal = Math.max(0, order.actualGroceryTotal - order.dispute.reportedAmount);
-      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.deliveryFee + order.additionalServiceFee;
+      order.finalPayableAmount = order.actualGroceryTotal + order.totalLaborFee + order.additionalServiceFee;
       order.dispute.status = 'resolved';
       appendStatus(order, 'awaiting_payment', `Admin giải quyết: ${resolution}. Mời khách thanh toán số tiền còn lại.`);
     } else if (action === 'submit-review') {

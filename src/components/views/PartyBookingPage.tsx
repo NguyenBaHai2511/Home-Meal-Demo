@@ -20,18 +20,18 @@ import {
 } from '../../utils/dateTimeValidation';
 
 export const PartyBookingPage: React.FC = () => {
-  const { updateDraftOrder, cooks, dishes, submitDraftOrder, navigateTo } = useApp();
+  const { draftOrder, updateDraftOrder, cooks, dishes, submitDraftOrder, navigateTo } = useApp();
 
   const [eventType, setEventType] = useState('Tiệc sinh nhật');
-  const [guests, setGuests] = useState(25);
-  const [date, setDate] = useState(() => new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
-  const [time, setTime] = useState('17:30');
-  const [address, setAddress] = useState('Biệt thự Palm Residence, P. An Phú, TP. Thủ Đức');
+  const [guests, setGuests] = useState(() => draftOrder.guestCount && draftOrder.guestCount > 10 ? draftOrder.guestCount : 25);
+  const [date, setDate] = useState(() => draftOrder.date || new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
+  const [time, setTime] = useState(() => draftOrder.servingTime || '17:30');
+  const [address, setAddress] = useState(() => draftOrder.customerAddress || '');
   const [servingStyle, setServingStyle] = useState('Dọn mâm tròn truyền thống');
   const [needAssistants, setNeedAssistants] = useState(true);
   const [assistantCount, setAssistantCount] = useState(2);
   const [needEquipment, setNeedEquipment] = useState(true);
-  const [targetGroceryBudget, setTargetGroceryBudget] = useState(4000000);
+  const [targetGroceryBudget, setTargetGroceryBudget] = useState(() => draftOrder.estimatedGroceryBudget || 4000000);
   const [selectedCookId, setSelectedCookId] = useState(cooks[1]?.id || cooks[0]?.id);
   const [specialNotes, setSpecialNotes] = useState('Tiệc có trẻ em và người già, cần 1 bàn nướng BBQ và chuẩn bị chén đĩa tươm tất.');
 
@@ -39,6 +39,11 @@ export const PartyBookingPage: React.FC = () => {
 
   const handleSubmitQuotationRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!Number.isInteger(guests) || guests <= 10 || guests > 100) {
+      alert('Dịch vụ tiệc mâm cỗ dành cho trên 10 đến 100 người.');
+      return;
+    }
 
     if (!timeValidation.isValid) {
       alert(`Quy định đặt món: ${timeValidation.message}`);
@@ -77,7 +82,7 @@ export const PartyBookingPage: React.FC = () => {
         <div className="space-y-4 p-6 sm:p-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Dành cho tiệc từ 10 đến hơn 50 khách</span>
+            <span>Dành cho tiệc trên 10 khách</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Đặt đầu bếp nấu tiệc & Mâm cỗ tại gia theo yêu cầu
@@ -149,8 +154,8 @@ export const PartyBookingPage: React.FC = () => {
             </label>
             <input
               type="number"
-              min={10}
-              max={150}
+              min={11}
+              max={100}
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
               className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-bold text-accent focus:ring-2 focus:ring-accent"

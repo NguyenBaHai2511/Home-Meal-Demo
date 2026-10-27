@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Cook } from '../../types';
-import { formatVND } from '../../utils/pricing';
+import { COOK_AT_HOME_PRICE_RANGE } from '../../utils/pricing';
 import { Star, MapPin, Users, ChefHat, CheckCircle2, Search } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
 
@@ -166,8 +166,8 @@ export const CooksPage: React.FC = () => {
 
             <div className="mt-5 pt-4 border-t border-border-soft flex items-center justify-between">
               <div>
-                <span className="text-[11px] text-muted block">Công nấu khởi điểm:</span>
-                <span className="text-base font-bold text-accent">{formatVND(cook.baseLaborFee)}</span>
+                <span className="text-[11px] text-muted block">Tiền công bữa gia đình:</span>
+                <span className="text-base font-bold text-accent">{COOK_AT_HOME_PRICE_RANGE} / bữa</span>
               </div>
 
               <div className="flex gap-2">

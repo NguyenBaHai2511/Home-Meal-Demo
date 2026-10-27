@@ -1,7 +1,6 @@
 export type ServiceType = 
-  | 'cook_at_home'         // Đầu bếp đến nhà khách hàng để đi chợ, nấu và dọn dẹp
-  | 'party_at_home'        // Đầu bếp đến nhà khách hàng nấu tiệc / mâm cỗ
-  | 'cook_and_deliver';    // Giá trị cũ, chỉ dùng để đọc đơn đã tạo trước khi đổi mô hình
+  | 'cook_at_home'         // Đầu bếp đến nhà khách hàng để nấu
+  | 'party_at_home';       // Đầu bếp đến nhà khách hàng nấu tiệc / mâm cỗ
 
 export type DishComplexity = 'simple' | 'moderate' | 'complex';
 
@@ -161,7 +160,6 @@ export interface Order {
   baseLaborFee: number;
   complexityAdjustment: number;
   guestCountAdjustment: number;
-  deliveryFee: number; // Luôn bằng 0 với đơn mới; giữ trường để đọc dữ liệu lịch sử
   additionalServiceFee: number; // Phụ bếp, dọn dẹp thêm
   totalLaborFee: number;
   

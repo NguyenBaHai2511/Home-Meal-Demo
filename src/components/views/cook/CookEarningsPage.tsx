@@ -90,7 +90,7 @@ export const CookEarningsPage: React.FC = () => {
                     <td className="py-3 px-3 font-mono font-bold text-accent">#{o.orderCode}</td>
                     <td className="py-3 px-3 text-muted">{o.date}</td>
                     <td className="py-3 px-3 text-ink font-medium">{o.customerName}</td>
-                    <td className="py-3 px-3 text-muted">{o.serviceType === 'party_at_home' ? 'Nấu tiệc tại gia' : o.serviceType === 'cook_and_deliver' ? 'Đơn giao theo chính sách cũ' : 'Nấu cơm tại nhà'}</td>
+                    <td className="py-3 px-3 text-muted">{o.serviceType === 'party_at_home' ? 'Nấu tiệc tại gia' : 'Nấu cơm tại nhà'}</td>
                     <td className="py-3 px-3 text-right font-bold text-accent">{formatVND(o.totalLaborFee)}</td>
                     <td className="py-3 px-3 text-right font-medium text-ink">{formatVND(o.actualGroceryTotal)}</td>
                     <td className="py-3 px-3 text-center">

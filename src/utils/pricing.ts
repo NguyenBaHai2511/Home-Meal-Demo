@@ -5,11 +5,17 @@ export function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(Math.round(amount)) + ' đ';
 }
 
+export const COOK_AT_HOME_TIERS = [
+  { label: '3–4 người', price: 200000, selectionGuestCount: 4 },
+  { label: '5–9 người', price: 340000, selectionGuestCount: 5 },
+] as const;
+
+export const COOK_AT_HOME_PRICE_RANGE = `${formatVND(COOK_AT_HOME_TIERS[0].price)}–${formatVND(COOK_AT_HOME_TIERS[1].price)}`;
+
 export interface LaborFeeCalculation {
   baseLaborFee: number;
   guestAdjustment: number;
   complexityAdjustment: number;
-  deliveryFee: number;
   additionalServiceFee: number;
   totalLaborFee: number;
   requiresQuotation: boolean;
@@ -25,21 +31,25 @@ export function calculateLaborFee(
 ): LaborFeeCalculation {
   const breakdown: string[] = [];
 
-  // 1. Base fee by service type (Đầu bếp đến tận nhà nấu)
-  let baseLaborFee = 150000;
-  if (serviceType === 'party_at_home') {
-    baseLaborFee = 450000;
-    breakdown.push(`Phí cơ bản đầu bếp nấu tiệc tại gia: ${formatVND(baseLaborFee)}`);
-  } else {
-    baseLaborFee = 150000;
-    breakdown.push(`Phí cơ bản đầu bếp tới nhà nấu cơm: ${formatVND(baseLaborFee)}`);
+  if (serviceType === 'cook_at_home') {
+    const tier = guestCount <= 4 ? COOK_AT_HOME_TIERS[0] : COOK_AT_HOME_TIERS[1];
+    const baseLaborFee = tier.price;
+    breakdown.push(`Tiền công đầu bếp (${tier.label}): ${formatVND(baseLaborFee)}`);
+    return {
+      baseLaborFee,
+      guestAdjustment: 0,
+      complexityAdjustment: 0,
+      additionalServiceFee: 0,
+      totalLaborFee: baseLaborFee,
+      requiresQuotation: false,
+      breakdownSummary: breakdown,
+    };
   }
 
-  // 2. Không thu phí ship - Đầu bếp tới tận nhà phục vụ
-  const deliveryFee = 0;
-  breakdown.push(`Phí di chuyển & giao hàng: Miễn phí (Nấu trực tiếp tại bếp của bạn)`);
+  const baseLaborFee = 450000;
+  breakdown.push(`Phí cơ bản đầu bếp nấu tiệc tại gia: ${formatVND(baseLaborFee)}`);
 
-  // 3. Guest count tier
+  // Guest count tier for party quotations.
   let guestAdjustment = 0;
   if (guestCount <= 4) {
     guestAdjustment = 20000;
@@ -103,7 +113,6 @@ export function calculateLaborFee(
     baseLaborFee,
     guestAdjustment,
     complexityAdjustment,
-    deliveryFee,
     additionalServiceFee,
     totalLaborFee,
     requiresQuotation,

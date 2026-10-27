@@ -413,7 +413,6 @@ export const MOCK_ORDERS: Order[] = [
     baseLaborFee: 180000,
     complexityAdjustment: 30000, // 2 món moderate (thịt kho, canh chua)
     guestCountAdjustment: 30000, // 4 khách
-    deliveryFee: 0, // Đầu bếp đến tận nhà nấu - Miễn phí di chuyển & không có phí ship
     additionalServiceFee: 0,
     totalLaborFee: 240000,
     finalPayableAmount: 608000, // 368.000đ (thực chi đi chợ) + 240.000đ (tiền công tại nhà)
@@ -459,7 +458,6 @@ export const MOCK_ORDERS: Order[] = [
     baseLaborFee: 650000,
     complexityAdjustment: 350000,
     guestCountAdjustment: 400000,
-    deliveryFee: 0,
     additionalServiceFee: 700000, // 2 phụ bếp hỗ trợ phục vụ tiệc
     totalLaborFee: 2100000,
     quotation: {
@@ -572,7 +570,6 @@ export const MOCK_ORDERS: Order[] = [
     baseLaborFee: 200000,
     complexityAdjustment: 50000,
     guestCountAdjustment: 40000,
-    deliveryFee: 0, // Đầu bếp đến tận nhà nấu - Miễn phí di chuyển
     additionalServiceFee: 0,
     totalLaborFee: 330000,
     finalPayableAmount: 1040000,
@@ -628,7 +625,6 @@ export const MOCK_ORDERS: Order[] = [
     baseLaborFee: 220000,
     complexityAdjustment: 30000,
     guestCountAdjustment: 30000,
-    deliveryFee: 0,
     additionalServiceFee: 0,
     totalLaborFee: 280000,
     finalPayableAmount: 860000,
@@ -658,26 +654,26 @@ export const SUGGESTED_MENUS = [
     dishes: ['Thịt kho tàu nước dừa', 'Canh chua cá bớp', 'Rau muống xào tỏi'],
     dishIds: ['dish_01', 'dish_02', 'dish_03'],
     estimatedGrocery: '290.000đ - 350.000đ',
-    estimatedLabor: '200.000đ - 250.000đ',
+    estimatedLabor: '200.000đ / bữa',
     complexity: 'moderate',
     description: 'Bữa cơm trọn vẹn vị quê nhà: có món mặn đậm đà, món canh chua ngọt thanh mát và đĩa rau xanh xào tỏi giòn thơm.',
   },
   {
     id: 'menu_weekend_6',
-    title: 'Mâm cơm cuối tuần ấm cúng (5-8 người)',
-    guestCount: '5-8 người',
+    title: 'Mâm cơm cuối tuần ấm cúng (5-9 người)',
+    guestCount: '5-9 người',
     dishCount: 4,
     dishes: ['Gà ta hấp lá chanh', 'Cá lóc đồng kho tộ', 'Canh chua cá bớp', 'Rau muống xào tỏi'],
     dishIds: ['dish_05', 'dish_04', 'dish_02', 'dish_03'],
     estimatedGrocery: '450.000đ - 550.000đ',
-    estimatedLabor: '320.000đ - 380.000đ',
+    estimatedLabor: '340.000đ / bữa',
     complexity: 'moderate',
     description: 'Thực đơn sum họp đại gia đình nhiều thế hệ với gà thả vườn giòn da, cá đồng kho tộ đậm vị mộc mạc.',
   },
   {
     id: 'menu_party_15',
-    title: 'Tiệc sinh nhật & Họp mặt thân mật (10-15 người)',
-    guestCount: '10-15 người',
+    title: 'Tiệc sinh nhật & Họp mặt thân mật (11-15 người)',
+    guestCount: '11-15 người',
     dishCount: 5,
     dishes: ['Tôm càng xanh hấp nước dừa', 'Bò Úc lúc lắc', 'Gà ta hấp lá chanh', 'Rau xào tổng hợp', 'Chè bưởi An Giang'],
     dishIds: ['dish_06', 'dish_07', 'dish_05', 'dish_03', 'dish_09'],

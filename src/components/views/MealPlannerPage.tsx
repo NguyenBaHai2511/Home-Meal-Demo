@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Dish, DishCategory } from '../../types';
-import { calculateLaborFee, formatVND } from '../../utils/pricing';
+import { calculateLaborFee, COOK_AT_HOME_TIERS, formatVND } from '../../utils/pricing';
 import { 
   validateDeliveryDateTime, 
   getEarliestDeliveryDate, 
@@ -272,6 +272,16 @@ export const MealPlannerPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (guestCount > 10) {
+      updateDraftOrder({ serviceType: 'party_at_home' });
+      navigateTo('/party-booking');
+      return;
+    }
+    if (guestCount < 3) {
+      alert('Bữa ăn tại gia phục vụ từ 3 đến 10 người. Trên 10 người, vui lòng đặt dịch vụ tiệc mâm cỗ.');
+      setCurrentStep(1);
+      return;
+    }
     if (!timeValidation.isValid) {
       alert(`Quy định đặt món: ${timeValidation.message}`);
       setCurrentStep(1);
@@ -438,10 +448,14 @@ export const MealPlannerPage: React.FC = () => {
               <div className="relative">
                 <input
                   type="number"
-                  min={1}
-                  max={100}
+                  min={3}
+                  max={10}
                   value={draftOrder.guestCount || 4}
-                  onChange={(e) => updateDraftOrder({ guestCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                  onChange={(e) => {
+                    const count = Math.max(3, parseInt(e.target.value) || 3);
+                    updateDraftOrder({ guestCount: count, serviceType: count > 10 ? 'party_at_home' : 'cook_at_home' });
+                    if (count > 10) navigateTo('/party-booking');
+                  }}
                   placeholder="Nhập số người ăn..."
                   className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent font-bold text-ink"
                 />
@@ -450,11 +464,11 @@ export const MealPlannerPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-muted mt-1">
-                Tùy ý nhập số lượng người ăn cho bữa cơm của bạn
+                Phục vụ từ 3 đến 10 người; trên 10 người sẽ chuyển sang dịch vụ tiệc mâm cỗ.
               </p>
-              {guestCount > 20 && (
+              {guestCount > 10 && (
                 <p className="text-[11px] text-amber-700 mt-1 font-medium">
-                  * Quy mô trên 20 khách sẽ có cơ chế gửi bảng báo giá cụ thể từ đầu bếp.
+                  * Đang chuyển bạn sang dịch vụ tiệc mâm cỗ.
                 </p>
               )}
             </div>
@@ -967,7 +981,7 @@ export const MealPlannerPage: React.FC = () => {
                 Bảng tính tiền công đầu bếp nấu tại gia
               </h2>
               <p className="text-xs sm:text-sm text-muted">
-                Đầu bếp đến tận nhà nấu nướng trực tiếp tại gian bếp của bạn, dọn dẹp sạch sẽ sau bữa ăn. Hoàn toàn không tốn phí ship.
+                Chọn gói theo số người ăn. Mức giá là tiền công đầu bếp đến nhà nấu; nguyên liệu thanh toán riêng theo hóa đơn thực tế.
               </p>
             </div>
             <div className="text-right">
@@ -976,15 +990,35 @@ export const MealPlannerPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Breakdown items */}
-          <div className="space-y-3 bg-surface p-5 rounded-2xl border border-border-soft text-xs sm:text-sm">
-            <h3 className="font-bold text-ink border-b border-border-soft pb-2">Chi tiết từng cấu phần tính công:</h3>
-            {feeCalc.breakdownSummary.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between py-1 border-b border-border-soft/50">
-                <span className="text-ink">{item.split(':')[0]}</span>
-                <span className="font-semibold text-accent">{item.split(':')[1] || ''}</span>
-              </div>
+          <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Chọn gói tiền công đầu bếp">
+            {COOK_AT_HOME_TIERS.map((tier, index) => (
+              <button
+                key={tier.label}
+                type="button"
+                aria-pressed={index === 0 ? guestCount <= 4 : guestCount >= 5}
+                onClick={() => updateDraftOrder({ guestCount: tier.selectionGuestCount, serviceType: 'cook_at_home' })}
+                className={`rounded-2xl border-2 p-5 text-left transition-colors ${(index === 0 ? guestCount <= 4 : guestCount >= 5) ? 'border-accent bg-surface-alt ring-2 ring-accent/15' : 'border-border-soft bg-white hover:border-brand'}`}
+              >
+                <span className="block text-sm font-semibold text-ink">{tier.label}</span>
+                <span className="mt-2 block text-2xl font-extrabold text-accent">{formatVND(tier.price)}</span>
+                <span className="text-xs text-muted">/bữa</span>
+                {(index === 0 ? guestCount <= 4 : guestCount >= 5) && <span className="mt-2 block text-xs font-semibold text-accent">Đang chọn</span>}
+              </button>
             ))}
+          </div>
+          <p className="-mt-3 text-xs text-muted">10 người áp dụng mức 340.000đ; trên 10 người sẽ chuyển sang dịch vụ tiệc mâm cỗ.</p>
+
+          <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-xs sm:text-sm">
+            <h3 className="border-b border-emerald-200 pb-2 font-bold text-ink">Chi tiết chi phí</h3>
+            <div className="flex items-center justify-between gap-4 py-1">
+              <span className="text-ink">Tiền công đầu bếp ({guestCount <= 4 ? '3–4' : guestCount === 10 ? '10' : '5–9'} người)</span>
+              <span className="font-semibold text-accent">{formatVND(feeCalc.totalLaborFee)} / bữa</span>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-emerald-200 py-2">
+              <span className="text-ink">Nguyên liệu</span>
+              <span className="text-right font-semibold text-ink">Thanh toán riêng theo hóa đơn thực tế</span>
+            </div>
+            <p className="text-xs text-muted">Tiền công chưa bao gồm chi phí nguyên liệu.</p>
           </div>
 
           {feeCalc.requiresQuotation && (
@@ -1063,7 +1097,7 @@ export const MealPlannerPage: React.FC = () => {
                       {isSelected ? 'Đang chọn đầu bếp này' : 'Bấm để chọn'}
                     </span>
                     <span className="text-xs font-bold text-ink">
-                      Khởi điểm {formatVND(cook.baseLaborFee)}
+                      Tiền công theo gói khách chọn
                     </span>
                   </div>
                 </div>
@@ -1142,10 +1176,6 @@ export const MealPlannerPage: React.FC = () => {
                   <div className="flex justify-between py-1 border-b border-brand/40">
                     <span className="text-ink">2. Tiền công đầu bếp đến tận nhà nấu:</span>
                     <span className="font-bold text-accent">{formatVND(feeCalc.totalLaborFee)}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-brand/40">
-                    <span className="text-ink">3. Phí giao hàng & di chuyển:</span>
-                    <span className="font-bold text-emerald-700">Miễn phí (Nấu tại nhà bạn)</span>
                   </div>
                   <div className="flex justify-between pt-2 text-sm font-extrabold text-ink">
                     <span>Tổng dự kiến tối đa:</span>

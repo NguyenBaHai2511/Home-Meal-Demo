@@ -11,6 +11,7 @@ import {
   Award
 } from 'lucide-react';
 import { ImageWithFallback } from '../common/ImageWithFallback';
+import { COOK_AT_HOME_PRICE_RANGE } from '../../utils/pricing';
 
 interface CookDetailPageProps {
   cookId: string;
@@ -141,8 +142,8 @@ export const CookDetailPage: React.FC<CookDetailPageProps> = ({ cookId }) => {
       {/* Floating or Bottom Booking Bar */}
       <div className="bg-surface-alt rounded-2xl p-6 border border-brand flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <span className="text-xs text-muted">Công nấu khởi điểm cho bữa gia đình:</span>
-          <p className="text-2xl font-extrabold text-accent">{formatVND(cook.baseLaborFee)}</p>
+          <span className="text-xs text-muted">Tiền công bữa gia đình theo số người:</span>
+          <p className="text-2xl font-extrabold text-accent">{COOK_AT_HOME_PRICE_RANGE} / bữa</p>
           <p className="text-[11px] text-muted mt-0.5">Tiền chợ thanh toán riêng theo hóa đơn thực tế</p>
         </div>
 

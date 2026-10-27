@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SUGGESTED_MENUS } from '../../data/mockData';
-import { formatVND } from '../../utils/pricing';
+import { COOK_AT_HOME_PRICE_RANGE } from '../../utils/pricing';
 import { 
   ShoppingBag, 
   ShieldCheck, 
@@ -62,9 +62,9 @@ export const HomePage: React.FC = () => {
       servingTime: quickTime,
       mealOccasion: quickMealType,
       estimatedGroceryBudget: quickBudget,
-      serviceType: 'cook_at_home',
+      serviceType: quickGuests > 10 ? 'party_at_home' : 'cook_at_home',
     });
-    navigateTo('/meal-planner');
+    navigateTo(quickGuests > 10 ? '/party-booking' : '/meal-planner');
   };
 
   const handleSelectSuggestedMenu = (menu: typeof SUGGESTED_MENUS[0]) => {
@@ -74,11 +74,11 @@ export const HomePage: React.FC = () => {
       guestCount: menu.id.includes('4') ? 4 : menu.id.includes('6') ? 6 : menu.id.includes('15') ? 12 : 25,
       items: matchedDishes.map((dish) => ({ dish, quantity: 1 })),
       mealOccasion: menu.title,
-      serviceType: 'cook_at_home',
+      serviceType: (menu.id.includes('15') || menu.id.includes('30')) ? 'party_at_home' : 'cook_at_home',
       date: formatDateForInput(earliest),
       servingTime: formatTimeForInput(earliest),
     });
-    navigateTo('/meal-planner');
+    navigateTo((menu.id.includes('15') || menu.id.includes('30')) ? '/party-booking' : '/meal-planner');
   };
 
   return (
@@ -133,8 +133,8 @@ export const HomePage: React.FC = () => {
                   <p className="text-xs text-muted">Hóa đơn thực tế</p>
                 </div>
                 <div className="text-left">
-                  <p className="text-lg font-bold text-accent">0 đ</p>
-                  <p className="text-xs text-muted">Phí ship / Phí ẩn</p>
+                  <p className="text-lg font-bold text-accent">Tách bạch</p>
+                  <p className="text-xs text-muted">Tiền công và nguyên liệu tách riêng</p>
                 </div>
                 <div className="text-left">
                   <p className="text-lg font-bold text-accent">Sau bữa</p>
@@ -263,11 +263,25 @@ export const HomePage: React.FC = () => {
               <div className="relative">
                 <input
                   type="number"
-                  min={1}
-                  max={100}
+                  min={3}
+                  max={10}
                   value={quickGuests}
                   id="quick-guests"
-                  onChange={(e) => setQuickGuests(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => {
+                    const guests = Math.max(3, parseInt(e.target.value) || 3);
+                    setQuickGuests(guests);
+                    if (guests > 10) {
+                      updateDraftOrder({
+                        guestCount: guests,
+                        date: quickDate,
+                        servingTime: quickTime,
+                        mealOccasion: quickMealType,
+                        estimatedGroceryBudget: quickBudget,
+                        serviceType: 'party_at_home',
+                      });
+                      navigateTo('/party-booking');
+                    }
+                  }}
                   placeholder="Nhập số..."
                   className="w-full px-3 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm font-bold text-ink focus:ring-2 focus:ring-accent"
                 />
@@ -505,8 +519,8 @@ export const HomePage: React.FC = () => {
 
               <div className="mt-4 pt-3 border-t border-border-soft flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-muted">Công nấu khởi điểm:</p>
-                  <p className="text-xs font-bold text-accent">{formatVND(cook.baseLaborFee)}</p>
+                  <p className="text-[10px] text-muted">Tiền công bữa gia đình:</p>
+                  <p className="text-xs font-bold text-accent">{COOK_AT_HOME_PRICE_RANGE} / bữa</p>
                 </div>
                 <button
                   onClick={() => navigateTo(`/cooks/${cook.id}`)}
@@ -529,7 +543,7 @@ export const HomePage: React.FC = () => {
               5 Nguyên tắc cốt lõi bảo vệ khách hàng
             </h2>
             <p className="text-xs sm:text-sm text-muted mt-2">
-              Khác biệt hoàn toàn với các app giao đồ ăn đóng gói sẵn hay các dịch vụ nấu tiệc báo giá mập mờ
+              Đầu bếp đến tận nhà nấu trực tiếp, với chi phí nguyên liệu và tiền công được tách bạch
             </p>
           </div>
 

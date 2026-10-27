@@ -263,7 +263,7 @@ export const OrderDetailPage: React.FC<OrderDetailPageProps> = ({ orderId }) => 
                 <span>{order.guestCount} người ăn</span>
               </div>
               <div className="flex items-center gap-2 font-medium text-accent">
-                <span>Hình thức: {order.serviceType === 'party_at_home' ? 'Đầu bếp nấu tiệc tại gia' : order.serviceType === 'cook_and_deliver' ? 'Giao theo đơn cũ' : 'Đầu bếp đến tận nhà nấu ăn'}</span>
+                <span>Hình thức: {order.serviceType === 'party_at_home' ? 'Đầu bếp nấu tiệc tại gia' : 'Đầu bếp đến tận nhà nấu ăn'}</span>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />

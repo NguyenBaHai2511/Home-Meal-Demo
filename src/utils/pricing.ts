@@ -31,7 +31,7 @@ export function calculateLaborFee(
 ): LaborFeeCalculation {
   const breakdown: string[] = [];
 
-  if (serviceType === 'cook_at_home') {
+  if (serviceType === 'cook_at_home' && guestCount < 10) {
     const tier = guestCount <= 4 ? COOK_AT_HOME_TIERS[0] : COOK_AT_HOME_TIERS[1];
     const baseLaborFee = tier.price;
     breakdown.push(`Tiền công đầu bếp (${tier.label}): ${formatVND(baseLaborFee)}`);
@@ -105,7 +105,7 @@ export function calculateLaborFee(
   }
 
   // Flag if quotation is advised
-  const requiresQuotation = guestCount > 20 || dishes.length > 7 || serviceType === 'party_at_home';
+  const requiresQuotation = guestCount >= 10 || dishes.length > 7 || serviceType === 'party_at_home';
 
   const totalLaborFee = baseLaborFee + guestAdjustment + complexityAdjustment + additionalServiceFee;
 

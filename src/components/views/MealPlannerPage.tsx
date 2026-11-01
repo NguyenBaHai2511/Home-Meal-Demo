@@ -272,13 +272,13 @@ export const MealPlannerPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (guestCount > 10) {
+    if (guestCount >= 10) {
       updateDraftOrder({ serviceType: 'party_at_home' });
       navigateTo('/party-booking');
       return;
     }
     if (guestCount < 3) {
-      alert('Bữa ăn tại gia phục vụ từ 3 đến 10 người. Trên 10 người, vui lòng đặt dịch vụ tiệc mâm cỗ.');
+      alert('Bữa ăn tại gia phục vụ từ 3 đến 9 người. Từ 10 người trở lên, vui lòng đặt dịch vụ tiệc mâm cỗ.');
       setCurrentStep(1);
       return;
     }
@@ -453,8 +453,8 @@ export const MealPlannerPage: React.FC = () => {
                   value={draftOrder.guestCount || 4}
                   onChange={(e) => {
                     const count = Math.max(3, parseInt(e.target.value) || 3);
-                    updateDraftOrder({ guestCount: count, serviceType: count > 10 ? 'party_at_home' : 'cook_at_home' });
-                    if (count > 10) navigateTo('/party-booking');
+                    updateDraftOrder({ guestCount: count, serviceType: count >= 10 ? 'party_at_home' : 'cook_at_home' });
+                    if (count >= 10) navigateTo('/party-booking');
                   }}
                   placeholder="Nhập số người ăn..."
                   className="w-full px-3.5 py-2.5 bg-surface border border-border-soft rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-accent font-bold text-ink"
@@ -464,9 +464,9 @@ export const MealPlannerPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-muted mt-1">
-                Phục vụ từ 3 đến 10 người; trên 10 người sẽ chuyển sang dịch vụ tiệc mâm cỗ.
+                Phục vụ từ 3 đến 9 người; từ 10 người trở lên sẽ tự động chuyển sang dịch vụ tiệc mâm cỗ.
               </p>
-              {guestCount > 10 && (
+              {guestCount >= 10 && (
                 <p className="text-[11px] text-amber-700 mt-1 font-medium">
                   * Đang chuyển bạn sang dịch vụ tiệc mâm cỗ.
                 </p>
@@ -1006,12 +1006,12 @@ export const MealPlannerPage: React.FC = () => {
               </button>
             ))}
           </div>
-          <p className="-mt-3 text-xs text-muted">10 người áp dụng mức 340.000đ; trên 10 người sẽ chuyển sang dịch vụ tiệc mâm cỗ.</p>
+          <p className="-mt-3 text-xs text-muted">Từ 10 người trở lên sẽ tự động chuyển sang dịch vụ tiệc mâm cỗ và nhận báo giá riêng từ đầu bếp.</p>
 
           <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-xs sm:text-sm">
             <h3 className="border-b border-emerald-200 pb-2 font-bold text-ink">Chi tiết chi phí</h3>
             <div className="flex items-center justify-between gap-4 py-1">
-              <span className="text-ink">Tiền công đầu bếp ({guestCount <= 4 ? '3–4' : guestCount === 10 ? '10' : '5–9'} người)</span>
+              <span className="text-ink">Tiền công đầu bếp ({guestCount <= 4 ? '3–4' : '5–9'} người)</span>
               <span className="font-semibold text-accent">{formatVND(feeCalc.totalLaborFee)} / bữa</span>
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-emerald-200 py-2">

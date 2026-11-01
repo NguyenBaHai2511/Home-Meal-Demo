@@ -62,9 +62,9 @@ export const HomePage: React.FC = () => {
       servingTime: quickTime,
       mealOccasion: quickMealType,
       estimatedGroceryBudget: quickBudget,
-      serviceType: quickGuests > 10 ? 'party_at_home' : 'cook_at_home',
+      serviceType: quickGuests >= 10 ? 'party_at_home' : 'cook_at_home',
     });
-    navigateTo(quickGuests > 10 ? '/party-booking' : '/meal-planner');
+    navigateTo(quickGuests >= 10 ? '/party-booking' : '/meal-planner');
   };
 
   const handleSelectSuggestedMenu = (menu: typeof SUGGESTED_MENUS[0]) => {
@@ -270,7 +270,7 @@ export const HomePage: React.FC = () => {
                   onChange={(e) => {
                     const guests = Math.max(3, parseInt(e.target.value) || 3);
                     setQuickGuests(guests);
-                    if (guests > 10) {
+                    if (guests >= 10) {
                       updateDraftOrder({
                         guestCount: guests,
                         date: quickDate,
@@ -289,6 +289,7 @@ export const HomePage: React.FC = () => {
                   người
                 </span>
               </div>
+              <p className="mt-1 text-xs text-muted">Từ 10 người trở lên tự động chuyển sang đặt tiệc.</p>
             </div>
 
             <div>

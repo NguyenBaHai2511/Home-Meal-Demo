@@ -23,7 +23,7 @@ export const PartyBookingPage: React.FC = () => {
   const { draftOrder, updateDraftOrder, cooks, dishes, submitDraftOrder, navigateTo } = useApp();
 
   const [eventType, setEventType] = useState('Tiệc sinh nhật');
-  const [guests, setGuests] = useState(() => draftOrder.guestCount && draftOrder.guestCount > 10 ? draftOrder.guestCount : 25);
+  const [guests, setGuests] = useState(() => draftOrder.guestCount && draftOrder.guestCount >= 10 ? draftOrder.guestCount : 25);
   const [date, setDate] = useState(() => draftOrder.date || new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
   const [time, setTime] = useState(() => draftOrder.servingTime || '17:30');
   const [address, setAddress] = useState(() => draftOrder.customerAddress || '');
@@ -40,8 +40,8 @@ export const PartyBookingPage: React.FC = () => {
   const handleSubmitQuotationRequest = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!Number.isInteger(guests) || guests <= 10 || guests > 100) {
-      alert('Dịch vụ tiệc mâm cỗ dành cho trên 10 đến 100 người.');
+    if (!Number.isInteger(guests) || guests < 10 || guests > 100) {
+      alert('Dịch vụ tiệc mâm cỗ dành cho từ 10 đến 100 người.');
       return;
     }
 
@@ -82,7 +82,7 @@ export const PartyBookingPage: React.FC = () => {
         <div className="space-y-4 p-6 sm:p-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-brand">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Dành cho tiệc trên 10 khách</span>
+            <span>Dành cho tiệc từ 10 khách trở lên</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Đặt đầu bếp nấu tiệc & Mâm cỗ tại gia theo yêu cầu
@@ -154,7 +154,7 @@ export const PartyBookingPage: React.FC = () => {
             </label>
             <input
               type="number"
-              min={11}
+              min={10}
               max={100}
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}

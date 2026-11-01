@@ -174,7 +174,7 @@ export async function createOrder(actor: OrderActor, draftValue: unknown, client
   const draft = object(draftValue);
   const guestCount = number(draft.guestCount);
   if (!Number.isInteger(guestCount) || guestCount < 3 || guestCount > 100) throw new OrderError('Guest count must be between 3 and 100.');
-  const serviceType = guestCount > 10 ? 'party_at_home' : 'cook_at_home';
+  const serviceType = guestCount >= 10 ? 'party_at_home' : 'cook_at_home';
   if (!Array.isArray(draft.items) || draft.items.length < 1 || draft.items.length > 20) throw new OrderError('Choose between 1 and 20 dishes.');
   const items = draft.items.map(catalogItem);
   const date = string(draft.date, 10);
